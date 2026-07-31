@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 660" role="img" aria-label="ოთხფენიანი იზომეტრიული სტეკი: ფიზიკური, ქსელური, სისტემების და მართვის ფენა">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs>
+          <linearGradient id="pl4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3183F8"/><stop offset="100%" stop-color="#1147A8"/></linearGradient>
+          <linearGradient id="pl3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22579E"/><stop offset="100%" stop-color="#153769"/></linearGradient>
+          <linearGradient id="pl2b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1C3F74"/><stop offset="100%" stop-color="#12294B"/></linearGradient>
+          <linearGradient id="pl1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#182C46"/><stop offset="100%" stop-color="#0D1A2E"/></linearGradient>
+          <radialGradient id="topglow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22D3EE" stop-opacity=".24"/><stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/></radialGradient>
+          <linearGradient id="flowg" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#1D6FF2" stop-opacity=".15"/><stop offset="100%" stop-color="#22D3EE" stop-opacity=".9"/></linearGradient>
+        </defs>
+        <rect width="980" height="660" fill="#060B18"/>
+        <ellipse cx="470" cy="150" rx="360" ry="150" fill="url(#topglow)"/>
+
+        <path d="M230 536 L470 602 L470 618 L230 552 Z" fill="#0A1526"/>
+        <path d="M470 602 L710 536 L710 552 L470 618 Z" fill="#060F1D"/>
+        <path d="M470 470 L710 536 L470 602 L230 536 Z" fill="url(#pl1)" stroke="#7FA8FF" stroke-opacity=".3"/>
+
+        <path d="M230 404 L470 470 L470 486 L230 420 Z" fill="#122340"/>
+        <path d="M470 470 L710 404 L710 420 L470 486 Z" fill="#0C1A31"/>
+        <path d="M470 338 L710 404 L470 470 L230 404 Z" fill="url(#pl2b)" stroke="#7FA8FF" stroke-opacity=".38"/>
+
+        <path d="M230 272 L470 338 L470 354 L230 288 Z" fill="#164079"/>
+        <path d="M470 338 L710 272 L710 288 L470 354 Z" fill="#0F2A54"/>
+        <path d="M470 206 L710 272 L470 338 L230 272 Z" fill="url(#pl3)" stroke="#7FA8FF" stroke-opacity=".45"/>
+
+        <path d="M230 140 L470 206 L470 222 L230 156 Z" fill="#1D5FCF"/>
+        <path d="M470 206 L710 140 L710 156 L470 222 Z" fill="#12408F"/>
+        <path d="M470 74 L710 140 L470 206 L230 140 Z" fill="url(#pl4)" stroke="#67E8F9" stroke-opacity=".65"/>
+
+        <g class="pulse">
+          <path d="M470 600 V92" stroke="url(#flowg)" stroke-width="2" stroke-dasharray="5 7" fill="none" opacity=".85"/>
+          <circle r="4" cx="470" fill="#67E8F9">
+            <animate attributeName="cy" values="598;94" dur="3.4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;1;1;0" dur="3.4s" repeatCount="indefinite"/></circle>
+          <circle r="4" cx="470" fill="#67E8F9">
+            <animate attributeName="cy" values="598;94" dur="3.4s" begin="-1.7s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;1;1;0" dur="3.4s" begin="-1.7s" repeatCount="indefinite"/></circle>
+        </g>
+
+        <g text-anchor="end">
+          <text x="212" y="136" font-size="17" font-weight="700" fill="#F2F6FF">მართვის ფენა</text>
+          <text x="212" y="156" font-size="12.5" fill="#67E8F9">ერთი ინტერფეისი ყველაფერზე</text>
+          <text x="212" y="268" font-size="17" font-weight="700" fill="#F2F6FF">სისტემების ფენა</text>
+          <text x="212" y="288" font-size="12.5" fill="#8394B2">ვიდეო, დაშვება, კლიმატი, ხმა</text>
+          <text x="212" y="400" font-size="17" font-weight="700" fill="#F2F6FF">ქსელური ფენა</text>
+          <text x="212" y="420" font-size="12.5" fill="#8394B2">ტრანსპორტი ყველა სისტემას</text>
+          <text x="212" y="532" font-size="17" font-weight="700" fill="#F2F6FF">ფიზიკური ფენა</text>
+          <text x="212" y="552" font-size="12.5" fill="#8394B2">საძირკველი — კაბელი და კვება</text>
+        </g>
+
+        <g font-size="12" text-anchor="middle">
+          <g fill="#0A1223" fill-opacity=".6" stroke="#67E8F9" stroke-opacity=".55">
+            <rect x="283" y="128" width="108" height="24" rx="6"/><rect x="401" y="128" width="74" height="24" rx="6"/>
+            <rect x="485" y="128" width="88" height="24" rx="6"/><rect x="583" y="128" width="74" height="24" rx="6"/></g>
+          <g fill="#E3F2FF">
+            <text x="337" y="144">ერთიანი მართვა</text><text x="438" y="144">სცენარები</text>
+            <text x="529" y="144">მონიტორინგი</text><text x="620" y="144">რეპორტები</text></g>
+
+          <g fill="#0A1223" fill-opacity=".5" stroke="#7FA8FF" stroke-opacity=".45">
+            <rect x="305" y="260" width="48" height="24" rx="6"/><rect x="363" y="260" width="62" height="24" rx="6"/>
+            <rect x="435" y="260" width="62" height="24" rx="6"/><rect x="507" y="260" width="68" height="24" rx="6"/>
+            <rect x="585" y="260" width="54" height="24" rx="6"/></g>
+          <g fill="#CFE0F7">
+            <text x="329" y="276">ვიდეო</text><text x="394" y="276">დაშვება</text><text x="466" y="276">კლიმატი</text>
+            <text x="541" y="276">განათება</text><text x="612" y="276">აუდიო</text></g>
+
+          <g fill="#0A1223" fill-opacity=".5" stroke="#7FA8FF" stroke-opacity=".38">
+            <rect x="302" y="392" width="74" height="24" rx="6"/><rect x="386" y="392" width="44" height="24" rx="6"/>
+            <rect x="440" y="392" width="88" height="24" rx="6"/><rect x="538" y="392" width="100" height="24" rx="6"/></g>
+          <g fill="#B4C6E2">
+            <text x="339" y="408">კომუტაცია</text><text x="408" y="408">Wi-Fi</text>
+            <text x="484" y="408">სეგმენტაცია</text><text x="588" y="408">მარშრუტიზაცია</text></g>
+
+          <g fill="#0A1223" fill-opacity=".5" stroke="#7FA8FF" stroke-opacity=".3">
+            <rect x="316" y="524" width="120" height="24" rx="6"/><rect x="446" y="524" width="74" height="24" rx="6"/>
+            <rect x="530" y="524" width="94" height="24" rx="6"/></g>
+          <g fill="#9BB0D0">
+            <text x="376" y="540">კაბელგაყვანილობა</text><text x="483" y="540">სერვერული</text><text x="577" y="540">კვება და UPS</text></g>
+        </g>
+
+        <g>
+          <path d="M734 140 h38" stroke="#67E8F9" stroke-opacity=".55"/>
+          <text x="780" y="136" font-size="12.5" fill="#67E8F9">მართვა ქვევით</text>
+          <text x="780" y="154" font-size="11.5" fill="#8394B2">სცენარი ერთ ღილაკზე</text>
+          <path d="M734 536 h38" stroke="#7FA8FF" stroke-opacity=".45"/>
+          <text x="780" y="532" font-size="12.5" fill="#AEBBD1">მონაცემი ზევით</text>
+          <text x="780" y="550" font-size="11.5" fill="#8394B2">სენსორიდან რეპორტამდე</text>
+        </g>
+        <text x="470" y="40" class="m" font-size="11" fill="#22D3EE" text-anchor="middle">ერთი არქიტექტურა — ოთხი ფენა</text>
+      </svg>

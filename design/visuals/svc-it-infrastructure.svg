@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160" role="img" aria-label="სერვერული რეკის ილუსტრაცია">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs><radialGradient id="g1" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#1D6FF2" stop-opacity=".26"/><stop offset="100%" stop-color="#1D6FF2" stop-opacity="0"/></radialGradient></defs>
+        <rect width="300" height="160" fill="#0A1223"/><rect width="300" height="160" fill="url(#g1)"/>
+        <rect x="96" y="20" width="108" height="122" rx="5" fill="#101E38" stroke="#7FA8FF" stroke-opacity=".34"/>
+        <g fill="#16294A" stroke="#7FA8FF" stroke-opacity=".22">
+          <rect x="104" y="28" width="92" height="17" rx="2"/><rect x="104" y="49" width="92" height="17" rx="2"/>
+          <rect x="104" y="70" width="92" height="17" rx="2"/><rect x="104" y="91" width="92" height="17" rx="2"/>
+          <rect x="104" y="112" width="92" height="22" rx="2"/>
+        </g>
+        <g fill="#22C55E"><circle cx="112" cy="36.5" r="2.6"/><circle cx="112" cy="57.5" r="2.6"/><circle cx="112" cy="78.5" r="2.6"/></g>
+        <circle cx="112" cy="99.5" r="2.6" fill="#22D3EE" class="blink"><animate attributeName="opacity" values="1;.2;1" dur="1.5s" repeatCount="indefinite"/></circle>
+        <g stroke="#7FA8FF" stroke-opacity=".3"><path d="M126 36.5h58M126 57.5h58M126 78.5h58M126 99.5h58"/></g>
+        <g fill="#7FA8FF" fill-opacity=".3"><rect x="112" y="118" width="14" height="10" rx="1.5"/><rect x="130" y="118" width="14" height="10" rx="1.5"/><rect x="148" y="118" width="14" height="10" rx="1.5"/></g>
+        <g stroke="#22D3EE" stroke-opacity=".4" fill="none" stroke-dasharray="3 4"><path d="M204 60 h44 M204 100 h44 M52 60 h44 M52 100 h44"/></g>
+        <g fill="#22D3EE" fill-opacity=".55"><circle cx="252" cy="60" r="3.5"/><circle cx="252" cy="100" r="3.5"/><circle cx="48" cy="60" r="3.5"/><circle cx="48" cy="100" r="3.5"/></g>
+      </svg>

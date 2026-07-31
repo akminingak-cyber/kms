@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 380" role="img" aria-label="ამჟამინდელი ჰერო-გრაფიკა: ძლიერ გამჭვირვალე შენობების კონტური">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+          <defs>
+            <pattern id="og" width="34" height="34" patternUnits="userSpaceOnUse">
+              <path d="M34 0 L0 0 0 34" fill="none" stroke="#fff" stroke-opacity=".05" stroke-width="1"/>
+            </pattern>
+            <radialGradient id="oglow" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#1D6FF2" stop-opacity=".16"/>
+              <stop offset="100%" stop-color="#060B18" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="420" height="380" fill="#060B18"/>
+          <rect width="420" height="380" fill="url(#og)"/>
+          <circle cx="214" cy="176" r="172" fill="url(#oglow)"/>
+          <g stroke="#fff" stroke-opacity=".14" fill="none" stroke-width="1.5">
+            <path d="M45 326 L45 251 L105 251 L105 326"/>
+            <path d="M59 251 L59 233 L92 233 L92 251"/>
+            <path d="M315 334 L315 228 L390 228 L390 334"/>
+            <path d="M160 330 L160 210 L250 210 L250 330"/>
+            <path d="M182 210 L182 188 L228 188 L228 210"/>
+          </g>
+          <g fill="#22D3EE" fill-opacity=".5">
+            <circle cx="118" cy="150" r="4"/><circle cx="218" cy="118" r="4"/>
+            <circle cx="308" cy="160" r="4"/><circle cx="152" cy="245" r="4"/>
+            <circle cx="272" cy="262" r="4"/><circle cx="345" cy="212" r="4"/>
+            <circle cx="214" cy="176" r="6"/>
+          </g>
+          <g stroke="#22D3EE" stroke-opacity=".18" stroke-dasharray="3 4" fill="none">
+            <path d="M118 150 L214 176 L308 160 M214 176 L152 245 M214 176 L272 262 M214 176 L218 118 M214 176 L345 212"/>
+          </g>
+        </svg>

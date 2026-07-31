@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 540" role="img" aria-label="ახალი ჰერო-გრაფიკა: განათებული კამპუსი ქსელური კავშირებით">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+          <defs>
+            <radialGradient id="hglow" cx="50%" cy="38%" r="58%">
+              <stop offset="0%" stop-color="#1D6FF2" stop-opacity=".42"/>
+              <stop offset="55%" stop-color="#0D45A3" stop-opacity=".14"/>
+              <stop offset="100%" stop-color="#060B18" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="hglow2" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#22D3EE" stop-opacity=".3"/>
+              <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="hline" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#22D3EE" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#1D6FF2" stop-opacity=".25"/>
+            </linearGradient>
+            <linearGradient id="bnear" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1E2F4F"/><stop offset="100%" stop-color="#0A1223"/>
+            </linearGradient>
+            <linearGradient id="bmid" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#16243F"/><stop offset="100%" stop-color="#080F1F"/>
+            </linearGradient>
+            <linearGradient id="bfar" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0F1A30"/><stop offset="100%" stop-color="#070C1B"/>
+            </linearGradient>
+            <pattern id="win" width="17" height="21" patternUnits="userSpaceOnUse">
+              <rect x="3.5" y="5" width="10" height="11" rx="1" fill="#7FA8FF" fill-opacity=".14"/>
+            </pattern>
+            <pattern id="winf" width="15" height="19" patternUnits="userSpaceOnUse">
+              <rect x="3" y="4" width="9" height="10" rx="1" fill="#7FA8FF" fill-opacity=".08"/>
+            </pattern>
+            <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+              <stop offset="72%" stop-color="#fff" stop-opacity=".92"/>
+              <stop offset="100%" stop-color="#fff" stop-opacity=".1"/>
+            </linearGradient>
+            <mask id="fademask"><rect width="640" height="540" fill="url(#fade)"/></mask>
+            <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#22D3EE" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#22D3EE" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <rect width="640" height="540" fill="#060B18"/>
+          <ellipse cx="320" cy="200" rx="330" ry="250" fill="url(#hglow)"/>
+
+          <!-- perspective floor -->
+          <g stroke="#7FA8FF" stroke-opacity=".13" stroke-width="1">
+            <path d="M-160 540 L318 330 M-30 540 L318 330 M100 540 L318 330 M230 540 L318 330 M320 540 L318 330 M410 540 L318 330 M540 540 L318 330 M670 540 L318 330 M800 540 L318 330"/>
+          </g>
+          <g stroke="#7FA8FF" stroke-opacity=".1" fill="none">
+            <path d="M0 466 H640 M0 478 H640 M0 494 H640 M0 514 H640 M0 538 H640"/>
+          </g>
+
+          <g mask="url(#fademask)">
+            <!-- far tier -->
+            <g opacity=".55">
+              <rect x="52" y="214" width="68" height="252" fill="url(#bfar)"/>
+              <rect x="52" y="214" width="68" height="252" fill="url(#winf)"/>
+              <rect x="52" y="214" width="68" height="252" fill="none" stroke="#7FA8FF" stroke-opacity=".18"/>
+              <rect x="502" y="206" width="72" height="260" fill="url(#bfar)"/>
+              <rect x="502" y="206" width="72" height="260" fill="url(#winf)"/>
+              <rect x="502" y="206" width="72" height="260" fill="none" stroke="#7FA8FF" stroke-opacity=".18"/>
+            </g>
+            <!-- mid tier -->
+            <g opacity=".82">
+              <rect x="136" y="268" width="86" height="198" fill="url(#bmid)"/>
+              <rect x="136" y="268" width="86" height="198" fill="url(#win)"/>
+              <rect x="136" y="268" width="86" height="198" fill="none" stroke="#7FA8FF" stroke-opacity=".26"/>
+              <rect x="398" y="246" width="90" height="220" fill="url(#bmid)"/>
+              <rect x="398" y="246" width="90" height="220" fill="url(#win)"/>
+              <rect x="398" y="246" width="90" height="220" fill="none" stroke="#7FA8FF" stroke-opacity=".26"/>
+              <rect x="416" y="228" width="54" height="18" fill="#16243F" stroke="#7FA8FF" stroke-opacity=".26"/>
+            </g>
+            <!-- near tier -->
+            <g>
+              <rect x="238" y="158" width="144" height="308" fill="url(#bnear)"/>
+              <rect x="238" y="158" width="144" height="308" fill="url(#win)"/>
+              <rect x="238" y="158" width="144" height="308" fill="none" stroke="#7FA8FF" stroke-opacity=".4"/>
+              <rect x="266" y="132" width="88" height="26" fill="#1E2F4F" stroke="#7FA8FF" stroke-opacity=".4"/>
+              <path d="M238 200 H382 M238 268 H382 M238 336 H382 M238 404 H382" stroke="#7FA8FF" stroke-opacity=".12"/>
+              <!-- lit windows -->
+              <g fill="#67E8F9">
+                <rect class="blink" x="258" y="180" width="10" height="11" rx="1" opacity=".85">
+                  <animate attributeName="opacity" values=".85;.28;.85" dur="4.2s" repeatCount="indefinite"/></rect>
+                <rect x="309" y="222" width="10" height="11" rx="1" opacity=".6"/>
+                <rect class="blink" x="343" y="285" width="10" height="11" rx="1" opacity=".75">
+                  <animate attributeName="opacity" values=".3;.9;.3" dur="5.6s" repeatCount="indefinite"/></rect>
+                <rect x="275" y="348" width="10" height="11" rx="1" opacity=".55"/>
+                <rect x="326" y="390" width="10" height="11" rx="1" opacity=".7"/>
+                <rect class="blink" x="292" y="432" width="10" height="11" rx="1" opacity=".5">
+                  <animate attributeName="opacity" values=".5;.15;.5" dur="6.4s" repeatCount="indefinite"/></rect>
+              </g>
+              <g fill="#7FA8FF" opacity=".5">
+                <rect x="156" y="292" width="10" height="11" rx="1"/>
+                <rect x="190" y="356" width="10" height="11" rx="1"/>
+                <rect x="428" y="272" width="10" height="11" rx="1"/>
+                <rect x="462" y="358" width="10" height="11" rx="1"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- network arcs -->
+          <g fill="none" stroke="url(#hline)" stroke-width="1.4" stroke-linecap="round">
+            <path id="a1" d="M86 214 Q 190 96 310 132"/>
+            <path id="a2" d="M310 132 Q 438 92 538 206"/>
+            <path id="a3" d="M179 268 Q 232 186 310 132"/>
+            <path id="a4" d="M443 246 Q 388 174 310 132"/>
+            <path id="a5" d="M310 132 L310 64"/>
+          </g>
+          <g stroke="#22D3EE" stroke-opacity=".22" stroke-width="1" stroke-dasharray="2 5" fill="none">
+            <path d="M86 214 Q 128 232 179 268 M538 206 Q 500 224 443 246"/>
+          </g>
+
+          <!-- travelling pulses -->
+          <g class="pulse" fill="#67E8F9">
+            <circle r="3"><animateMotion dur="3.6s" repeatCount="indefinite"><mpath href="#a1"/></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="3.6s" repeatCount="indefinite"/></circle>
+            <circle r="3"><animateMotion dur="4.4s" begin="-1.2s" repeatCount="indefinite"><mpath href="#a2"/></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="4.4s" begin="-1.2s" repeatCount="indefinite"/></circle>
+            <circle r="2.6"><animateMotion dur="3.1s" begin="-.7s" repeatCount="indefinite"><mpath href="#a3"/></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="3.1s" begin="-.7s" repeatCount="indefinite"/></circle>
+            <circle r="2.6"><animateMotion dur="3.4s" begin="-2s" repeatCount="indefinite"><mpath href="#a4"/></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="3.4s" begin="-2s" repeatCount="indefinite"/></circle>
+          </g>
+
+          <!-- top management node -->
+          <circle cx="310" cy="64" r="34" fill="url(#hglow2)"/>
+          <circle cx="310" cy="64" r="17" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".7" stroke-width="1.4"/>
+          <g transform="translate(300.5,54.5) scale(.8)" fill="none" stroke="#67E8F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19a4.5 4.5 0 0 0 0-9h-1.2A7 7 0 1 0 4 16.5"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/>
+          </g>
+
+          <!-- system nodes -->
+          <g>
+            <circle cx="86" cy="214" r="24" fill="url(#hglow2)" opacity=".7"/>
+            <circle cx="86" cy="214" r="15" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".65" stroke-width="1.3"/>
+            <g transform="translate(77.5,205.5) scale(.72)" fill="none" stroke="#67E8F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>
+            </g>
+          </g>
+          <g>
+            <circle cx="538" cy="206" r="24" fill="url(#hglow2)" opacity=".7"/>
+            <circle cx="538" cy="206" r="15" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".65" stroke-width="1.3"/>
+            <g transform="translate(529.5,197.5) scale(.72)" fill="none" stroke="#67E8F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M12 20h.01"/>
+            </g>
+          </g>
+          <g>
+            <circle cx="179" cy="268" r="22" fill="url(#hglow2)" opacity=".6"/>
+            <circle cx="179" cy="268" r="14" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".6" stroke-width="1.3"/>
+            <g transform="translate(170.5,259.5) scale(.72)" fill="none" stroke="#67E8F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </g>
+          </g>
+          <g>
+            <circle cx="443" cy="246" r="22" fill="url(#hglow2)" opacity=".6"/>
+            <circle cx="443" cy="246" r="14" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".6" stroke-width="1.3"/>
+            <g transform="translate(434.5,237.5) scale(.72)" fill="none" stroke="#67E8F9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>
+            </g>
+          </g>
+          <circle cx="310" cy="132" r="6" fill="#67E8F9"/>
+          <circle cx="310" cy="132" r="6" fill="none" stroke="#67E8F9" stroke-opacity=".5" class="pulse">
+            <animate attributeName="r" values="6;20;6" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-opacity" values=".55;0;.55" dur="3s" repeatCount="indefinite"/>
+          </circle>
+
+          <rect class="pulse" x="0" y="0" width="640" height="2" fill="url(#sweep)" opacity=".5">
+            <animate attributeName="y" values="120;470;120" dur="9s" repeatCount="indefinite"/>
+          </rect>
+        </svg>

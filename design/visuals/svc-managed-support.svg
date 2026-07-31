@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160" role="img" aria-label="მონიტორინგის დაფა სტატუსებით">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs><radialGradient id="g8" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#22C55E" stop-opacity=".13"/><stop offset="100%" stop-color="#22C55E" stop-opacity="0"/></radialGradient>
+          <linearGradient id="spk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22D3EE" stop-opacity=".3"/><stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/></linearGradient></defs>
+        <rect width="300" height="160" fill="#0A1223"/><rect width="300" height="160" fill="url(#g8)"/>
+        <rect x="26" y="20" width="248" height="120" rx="6" fill="#0F1C33" stroke="#7FA8FF" stroke-opacity=".28"/>
+        <path d="M38 96 L62 84 L86 90 L110 68 L134 74 L158 54 L182 62 L206 46 L230 52 L262 38"
+              fill="none" stroke="#22D3EE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M38 96 L62 84 L86 90 L110 68 L134 74 L158 54 L182 62 L206 46 L230 52 L262 38 V104 H38 Z" fill="url(#spk)"/>
+        <circle cx="262" cy="38" r="4" fill="#67E8F9"/><circle cx="262" cy="38" r="4" fill="none" stroke="#67E8F9" stroke-opacity=".5" class="pulse">
+          <animate attributeName="r" values="4;13;4" dur="2.6s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-opacity" values=".55;0;.55" dur="2.6s" repeatCount="indefinite"/></circle>
+        <g stroke="#7FA8FF" stroke-opacity=".1"><path d="M38 104 H262 M38 76 H262 M38 48 H262"/></g>
+        <g>
+          <rect x="38" y="112" width="70" height="20" rx="10" fill="#22C55E" fill-opacity=".14" stroke="#22C55E" stroke-opacity=".4"/>
+          <circle cx="52" cy="122" r="3.5" fill="#22C55E"/><text x="62" y="126" font-size="9.5" fill="#7BE0A0">ქსელი</text>
+          <rect x="114" y="112" width="70" height="20" rx="10" fill="#22C55E" fill-opacity=".14" stroke="#22C55E" stroke-opacity=".4"/>
+          <circle cx="128" cy="122" r="3.5" fill="#22C55E"/><text x="138" y="126" font-size="9.5" fill="#7BE0A0">ვიდეო</text>
+          <rect x="190" y="112" width="72" height="20" rx="10" fill="#F59E0B" fill-opacity=".14" stroke="#F59E0B" stroke-opacity=".45"/>
+          <circle cx="204" cy="122" r="3.5" fill="#F59E0B" class="blink"><animate attributeName="opacity" values="1;.25;1" dur="1.8s" repeatCount="indefinite"/></circle>
+          <text x="214" y="126" font-size="9.5" fill="#F0C070">UPS 78%</text>
+        </g>
+        <text x="38" y="36" class="m" font-size="8.5" fill="#5C6E8C">24/7 მონიტორინგი</text>
+      </svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160" role="img" aria-label="კამერა ხედვის კონუსით და მონიტორინგის ეკრანები">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs><radialGradient id="g3" cx="25%" cy="40%" r="70%"><stop offset="0%" stop-color="#1D6FF2" stop-opacity=".24"/><stop offset="100%" stop-color="#1D6FF2" stop-opacity="0"/></radialGradient></defs>
+        <rect width="300" height="160" fill="#0A1223"/><rect width="300" height="160" fill="url(#g3)"/>
+        <path d="M62 56 L152 22 L152 130 L62 96 Z" fill="#22D3EE" fill-opacity=".08"/>
+        <path d="M62 56 L152 22 M62 96 L152 130" stroke="#22D3EE" stroke-opacity=".3" stroke-dasharray="4 4"/>
+        <g><rect x="28" y="52" width="36" height="24" rx="4" fill="#16294A" stroke="#7FA8FF" stroke-opacity=".45"/>
+          <circle cx="60" cy="64" r="7" fill="#0A1223" stroke="#22D3EE" stroke-opacity=".7"/><circle cx="60" cy="64" r="3" fill="#67E8F9"/>
+          <path d="M40 76 v12 h-8" stroke="#7FA8FF" stroke-opacity=".4" fill="none"/>
+          <circle cx="33" cy="57" r="2" fill="#EF4444" class="blink"><animate attributeName="opacity" values="1;.15;1" dur="2s" repeatCount="indefinite"/></circle>
+        </g>
+        <g><rect x="168" y="30" width="112" height="100" rx="5" fill="#101E38" stroke="#7FA8FF" stroke-opacity=".34"/>
+          <g fill="#0A1223" stroke="#22D3EE" stroke-opacity=".28">
+            <rect x="176" y="38" width="48" height="40" rx="2"/><rect x="228" y="38" width="44" height="40" rx="2"/>
+            <rect x="176" y="82" width="48" height="40" rx="2"/><rect x="228" y="82" width="44" height="40" rx="2"/>
+          </g>
+          <g fill="#22D3EE" fill-opacity=".22">
+            <path d="M186 70 l10-14 8 10 6-6 8 10z"/><path d="M238 70 l8-12 7 8 6-5 7 9z"/>
+            <path d="M186 114 l9-13 8 9 7-6 7 10z"/><path d="M238 114 l8-11 7 8 6-6 7 9z"/>
+          </g>
+          <g fill="#22C55E"><circle cx="220" cy="43" r="1.8"/><circle cx="268" cy="43" r="1.8"/><circle cx="220" cy="87" r="1.8"/></g>
+          <circle cx="268" cy="87" r="1.8" fill="#F59E0B"/>
+        </g>
+      </svg>

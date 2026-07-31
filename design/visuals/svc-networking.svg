@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160" role="img" aria-label="კომუტაციური პანელი და კაბელები">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs><radialGradient id="g2" cx="50%" cy="30%" r="65%"><stop offset="0%" stop-color="#22D3EE" stop-opacity=".2"/><stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/></radialGradient></defs>
+        <rect width="300" height="160" fill="#0A1223"/><rect width="300" height="160" fill="url(#g2)"/>
+        <rect x="36" y="22" width="228" height="26" rx="4" fill="#101E38" stroke="#7FA8FF" stroke-opacity=".34"/>
+        <g fill="#0A1223" stroke="#7FA8FF" stroke-opacity=".3">
+          <rect x="46" y="29" width="14" height="12" rx="1.5"/><rect x="66" y="29" width="14" height="12" rx="1.5"/>
+          <rect x="86" y="29" width="14" height="12" rx="1.5"/><rect x="106" y="29" width="14" height="12" rx="1.5"/>
+          <rect x="126" y="29" width="14" height="12" rx="1.5"/><rect x="146" y="29" width="14" height="12" rx="1.5"/>
+          <rect x="166" y="29" width="14" height="12" rx="1.5"/><rect x="186" y="29" width="14" height="12" rx="1.5"/>
+          <rect x="206" y="29" width="14" height="12" rx="1.5"/><rect x="226" y="29" width="14" height="12" rx="1.5"/>
+        </g>
+        <g fill="none" stroke-width="2.2" stroke-linecap="round" opacity=".85">
+          <path d="M53 48 C 53 84 92 92 118 112" stroke="#22D3EE" stroke-opacity=".65"/>
+          <path d="M93 48 C 93 80 124 96 140 112" stroke="#7FA8FF" stroke-opacity=".6"/>
+          <path d="M133 48 C 133 82 152 98 162 112" stroke="#22C55E" stroke-opacity=".5"/>
+          <path d="M193 48 C 193 84 190 98 184 112" stroke="#F59E0B" stroke-opacity=".45"/>
+          <path d="M233 48 C 233 90 214 98 206 112" stroke="#22D3EE" stroke-opacity=".4"/>
+        </g>
+        <rect x="100" y="112" width="124" height="26" rx="4" fill="#16294A" stroke="#7FA8FF" stroke-opacity=".4"/>
+        <g fill="#22D3EE" fill-opacity=".6"><circle cx="112" cy="125" r="2.4"/><circle cx="126" cy="125" r="2.4"/><circle cx="140" cy="125" r="2.4"/></g>
+        <text x="196" y="129" font-size="9" fill="#5C6E8C" text-anchor="middle">SWITCH</text>
+      </svg>

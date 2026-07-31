@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160" role="img" aria-label="შენობის მართვის მაჩვენებლები">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+        <defs><radialGradient id="g6" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#22D3EE" stop-opacity=".18"/><stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/></radialGradient></defs>
+        <rect width="300" height="160" fill="#0A1223"/><rect width="300" height="160" fill="url(#g6)"/>
+        <g fill="none" stroke-width="7" stroke-linecap="round">
+          <path d="M42 96 a34 34 0 0 1 56 -27" stroke="#1E3A66"/>
+          <path d="M42 96 a34 34 0 0 1 32 -33" stroke="#22D3EE" stroke-opacity=".9"/>
+          <path d="M122 96 a34 34 0 0 1 56 -27" stroke="#1E3A66"/>
+          <path d="M122 96 a34 34 0 0 1 46 -32" stroke="#1D6FF2"/>
+          <path d="M202 96 a34 34 0 0 1 56 -27" stroke="#1E3A66"/>
+          <path d="M202 96 a34 34 0 0 1 21 -31" stroke="#F59E0B" stroke-opacity=".9"/>
+        </g>
+        <g text-anchor="middle" fill="#F2F6FF" font-size="15" font-weight="700">
+          <text x="76" y="94">21°</text><text x="156" y="94">42%</text><text x="236" y="94">78%</text>
+        </g>
+        <g text-anchor="middle" fill="#5C6E8C" font-size="9.5">
+          <text x="76" y="112">კლიმატი</text><text x="156" y="112">ტენიანობა</text><text x="236" y="112">დატვირთვა</text>
+        </g>
+        <g><rect x="42" y="126" width="216" height="20" rx="4" fill="#101E38" stroke="#7FA8FF" stroke-opacity=".2"/>
+          <g fill="#22D3EE" fill-opacity=".55"><rect x="50" y="132" width="6" height="8" rx="1"/><rect x="60" y="129" width="6" height="11" rx="1"/>
+            <rect x="70" y="134" width="6" height="6" rx="1"/><rect x="80" y="130" width="6" height="10" rx="1"/>
+            <rect x="90" y="133" width="6" height="7" rx="1"/><rect x="100" y="128" width="6" height="12" rx="1"/>
+            <rect x="110" y="131" width="6" height="9" rx="1"/><rect x="120" y="134" width="6" height="6" rx="1"/></g>
+          <text x="248" y="140" font-size="9" fill="#5C6E8C" text-anchor="end">24 სთ</text>
+        </g>
+        <g fill="#22C55E"><circle cx="46" cy="26" r="3"/></g>
+        <text x="56" y="29" font-size="9.5" fill="#8394B2">ყველა სისტემა ნორმაშია</text>
+      </svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 262" role="img" aria-label="ოთხი სეგმენტირებული რგოლი: 8 მომსახურება, 8 ინდუსტრია, 4 ტექნოლოგიური დომენი, 6 ეტაპი">
+<style>text{font-family:"Inter Variable","Noto Sans Georgian Variable",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.005em}text.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Georgian Variable",monospace;letter-spacing:.1em;text-transform:uppercase}</style>
+      <rect width="960" height="262" fill="#060B18"/>
+      <g fill="none" stroke-width="9" stroke-linecap="butt" transform="rotate(-90 0 0)">
+        <circle cx="-110" cy="120" r="46" stroke="#1E2F4F" stroke-dasharray="30.13 6"/>
+        <circle cx="-110" cy="360" r="46" stroke="#1E2F4F" stroke-dasharray="30.13 6"/>
+        <circle cx="-110" cy="600" r="46" stroke="#1E2F4F" stroke-dasharray="66.26 6"/>
+        <circle cx="-110" cy="840" r="46" stroke="#1E2F4F" stroke-dasharray="42.17 6"/>
+        <circle cx="-110" cy="120" r="46" stroke="#1D6FF2" stroke-dasharray="30.13 6"/>
+        <circle cx="-110" cy="360" r="46" stroke="#22D3EE" stroke-dasharray="30.13 6"/>
+        <circle cx="-110" cy="600" r="46" stroke="#7FA8FF" stroke-dasharray="66.26 6"/>
+        <circle cx="-110" cy="840" r="46" stroke="#67E8F9" stroke-dasharray="42.17 6"/>
+      </g>
+      <g text-anchor="middle" fill="#F2F6FF" font-size="38" font-weight="700" style="font-variant-numeric:tabular-nums">
+        <text x="120" y="124">8</text><text x="360" y="124">8</text><text x="600" y="124">4</text><text x="840" y="124">6</text>
+      </g>
+      <g text-anchor="middle" fill="#F2F6FF" font-size="14.5" font-weight="600">
+        <text x="120" y="196">მომსახურების მიმართულება</text><text x="360" y="196">ინდუსტრიული სეგმენტი</text>
+        <text x="600" y="196">ტექნოლოგიური დომენი</text><text x="840" y="196">პროექტის ეტაპი</text>
+      </g>
+      <g text-anchor="middle" fill="#8394B2" font-size="12">
+        <text x="120" y="216">ინფრასტრუქტურიდან</text><text x="120" y="232">მხარდაჭერამდე</text>
+        <text x="360" y="216">კლინიკა, ოფისი,</text><text x="360" y="232">სასტუმრო, საწარმო</text>
+        <text x="600" y="216">ქსელი, უსაფრთხოება,</text><text x="600" y="232">ჭკვიანი, მართვა</text>
+        <text x="840" y="216">კონსულტაციიდან</text><text x="840" y="232">განვითარებამდე</text>
+      </g>
+      <g stroke="#7FA8FF" stroke-opacity=".12"><path d="M240 44 V238 M480 44 V238 M720 44 V238"/></g>
+    </svg>

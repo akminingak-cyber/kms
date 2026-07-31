@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Web3Forms access key checker — KMS</title>
+<style>
+  :root { color-scheme: light dark; --line:#8883; --muted:#8a8a99; }
+  body { font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; max-width:760px;
+         margin:0 auto; padding:32px 20px 64px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  p.lede { color:var(--muted); margin:0 0 28px; }
+  label { display:block; font-weight:600; margin:16px 0 6px; }
+  input, textarea { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--line);
+                    border-radius:8px; background:transparent; color:inherit; font:inherit; }
+  button { margin-top:20px; padding:11px 20px; border:0; border-radius:8px; background:#2b6cb0;
+           color:#fff; font:600 15px/1 inherit; cursor:pointer; }
+  button[disabled] { opacity:.55; cursor:progress; }
+  pre { margin-top:20px; padding:14px 16px; border:1px solid var(--line); border-radius:8px;
+        background:#8881; white-space:pre-wrap; word-break:break-word; font-size:13px; }
+  .verdict { margin-top:20px; padding:14px 16px; border-radius:8px; font-weight:600; }
+  .ok   { background:#16a34a22; border:1px solid #16a34a66; }
+  .bad  { background:#dc262622; border:1px solid #dc262666; }
+  .note { margin-top:28px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+  code { background:#8882; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+  <h1>Web3Forms access key checker</h1>
+  <p class="lede">
+    Sends one real test submission straight to the Web3Forms API and prints the raw
+    answer — bypassing the site entirely, so it isolates whether the key itself works.
+    If it reports success, a genuine email was delivered to the inbox the key is registered to.
+  </p>
+
+  <label for="key">Access key</label>
+  <input id="key" value="2720eb8f-e4a1-40ca-837b-c41d3e5a2d9f" spellcheck="false" />
+
+  <label for="msg">Test message</label>
+  <textarea id="msg" rows="3">Test submission from the Web3Forms key checker. If this arrives, the access key is working.</textarea>
+
+  <button id="go">Send test submission</button>
+
+  <div id="verdict"></div>
+  <pre id="out">Awaiting a run…</pre>
+
+  <div class="note">
+    <p><strong>Reading the result</strong></p>
+    <p>
+      <code>success: true</code> — the key is valid and Web3Forms accepted the message.
+      If no email lands within a few minutes, check the spam folder and confirm which
+      inbox the key is registered to at <code>web3forms.com</code>; the problem is
+      delivery, not the website.
+    </p>
+    <p>
+      <code>Invalid Access Key</code> — the key is wrong, was revoked, or belongs to a
+      deleted account. Generate a new one and rebuild the site with it.
+    </p>
+    <p>
+      <code>network/CORS error</code> — the request never reached Web3Forms at all
+      (offline, DNS, or a firewall blocking <code>api.web3forms.com</code>).
+    </p>
+    <p>This file is a local diagnostic tool. It is not part of <code>dist/</code> and must not be uploaded to the live server.</p>
+  </div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+$('go').addEventListener('click', async () => {
+  const key = $('key').value.trim();
+  const btn = $('go');
+  const out = $('out');
+  const verdict = $('verdict');
+
+  verdict.className = '';
+  verdict.textContent = '';
+  if (!key) { out.textContent = 'Enter an access key first.'; return; }
+
+  btn.disabled = true;
+  out.textContent = 'Sending…';
+  const started = Date.now();
+
+  let res, raw;
+  try {
+    res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        access_key: key,
+        subject: 'KMS — access key checker test',
+        from_name: 'KMS key checker',
+        name: 'KMS key checker',
+        email: 'checker@kms.ge',
+        message: $('msg').value,
+      }),
+    });
+    raw = await res.text();
+  } catch (err) {
+    verdict.className = 'verdict bad';
+    verdict.textContent = 'The request never reached Web3Forms.';
+    out.textContent = 'network/CORS error: ' + (err && err.message || err);
+    btn.disabled = false;
+    return;
+  }
+
+  let json = null;
+  try { json = JSON.parse(raw); } catch {}
+
+  const ok = res.ok && json && json.success === true;
+  verdict.className = 'verdict ' + (ok ? 'ok' : 'bad');
+  verdict.textContent = ok
+    ? 'Key accepted — an email was sent to the registered inbox. Check it (including spam).'
+    : 'Key rejected — see the message below.';
+
+  out.textContent =
+    'HTTP ' + res.status + ' ' + res.statusText + '   (' + (Date.now() - started) + ' ms)\n\n' +
+    (json ? JSON.stringify(json, null, 2) : raw);
+
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>

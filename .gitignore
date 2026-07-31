@@ -7,7 +7,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist/ is tracked on purpose: this repository holds no src/, so the built site
+# is the only deployable artifact here. Upload its contents to public_html.
 dist-ssr
 *.local
 

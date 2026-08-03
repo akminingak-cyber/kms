@@ -7,7 +7,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist/ is tracked on purpose: the deployed site lives here as a prerendered
+# build, and design/apply.mjs patches it in place.
 dist-ssr
 *.local
 

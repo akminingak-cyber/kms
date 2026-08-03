@@ -1,0 +1,1262 @@
+/* ============================================================================
+   KMS — "Atelier" visual layer
+   A cinematic, single-canvas dark design system layered on top of the base
+   build. Loaded after index-*.css so it wins on equal specificity.
+
+   Sections
+   01  Design tokens
+   02  Canvas & atmosphere
+   03  Typography
+   04  Section rhythm
+   05  Hero
+   06  Header & navigation
+   07  Surfaces — panels, cards, spotlight
+   08  Icon badges
+   09  Buttons
+   10  Eyebrows, rules, links
+   11  Chips & tags
+   12  Process steps
+   13  Stat figures
+   14  Blueprint frames
+   15  Accordion
+   16  Forms
+   17  Footer
+   18  Chrome — scrollbar, selection, focus
+   19  Motion & reveal
+   ========================================================================= */
+
+/* -- 01  Design tokens ---------------------------------------------------- */
+
+:root {
+  /* Deeper, cooler canvas — more contrast headroom for glass and glow */
+  --c-surface-base: 4 6 14;
+  --c-surface-1: 8 12 25;
+  --c-surface-2: 13 20 39;
+  --c-surface-3: 20 29 55;
+  --c-surface-4: 29 41 75;
+
+  /* Brand: electric azure → cyan, with a violet used only inside gradients */
+  --c-primary-300: 141 180 255;
+  --c-primary-400: 96 156 255;
+  --c-primary-500: 29 111 242;
+  --c-primary-600: 15 88 208;
+  --c-accent-300: 125 236 250;
+  --c-accent-400: 45 216 236;
+  --c-accent-500: 34 211 238;
+  --c-violet: 124 92 255;
+  --c-violet-soft: 149 124 255;
+
+  --c-text-primary: 238 244 255;
+  --c-text-secondary: 168 183 209;
+  --c-text-tertiary: 124 141 172;
+
+  --border-subtle: rgb(255 255 255 / 0.06);
+  --border-default: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.18);
+
+  /* Softer, larger radii read as more considered */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 2rem;
+
+  /* Deep, blue-biased shadow stack */
+  --shadow-sm: 0 1px 2px rgb(2 5 12 / 0.55);
+  --shadow-md: 0 12px 32px -14px rgb(2 5 12 / 0.8), 0 2px 8px -4px rgb(2 5 12 / 0.55);
+  --shadow-lg: 0 36px 80px -28px rgb(2 5 12 / 0.9), 0 10px 28px -14px rgb(2 5 12 / 0.6);
+  --shadow-glow: 0 0 0 1px rgb(96 156 255 / 0.32), 0 24px 64px -20px rgb(29 111 242 / 0.45);
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-base: 0.32s;
+  --dur-slow: 0.72s;
+
+  /* Reusable decorative recipes */
+  --edge-highlight: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  --glass-sheen: linear-gradient(
+    155deg,
+    rgb(255 255 255 / 0.055) 0%,
+    rgb(255 255 255 / 0.018) 34%,
+    rgb(255 255 255 / 0) 62%
+  );
+  --hairline: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--c-primary-400) / 0.28) 22%,
+    rgb(var(--c-accent-400) / 0.36) 50%,
+    rgb(var(--c-primary-400) / 0.28) 78%,
+    transparent
+  );
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grid-image: linear-gradient(rgb(255 255 255 / 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.028) 1px, transparent 1px);
+}
+
+/* The build ships alternating light bands. They are re-mapped to luminance
+   tiers of the same dark canvas so the page reads as one continuous surface
+   instead of a stack of unrelated slabs. */
+[data-scheme='light'] {
+  --c-surface-base: 4 6 14;
+  --c-surface-1: 12 18 34;
+  --c-surface-2: 18 26 48;
+  --c-surface-3: 25 36 64;
+  --c-surface-4: 35 48 86;
+
+  --c-text-primary: 238 244 255;
+  --c-text-secondary: 168 183 209;
+  --c-text-tertiary: 124 141 172;
+  --c-text-inverse: 6 11 24;
+
+  --c-accent-300: 125 236 250;
+  --c-accent-400: 45 216 236;
+  --c-accent-500: 34 211 238;
+  --c-accent-600: 14 165 192;
+
+  --c-link: var(--c-primary-300);
+  --c-link-hover: var(--c-accent-300);
+  --c-line: 255 255 255;
+
+  --border-subtle: rgb(255 255 255 / 0.07);
+  --border-default: rgb(255 255 255 / 0.11);
+  --border-strong: rgb(255 255 255 / 0.2);
+
+  --grid-image: linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+
+  --shadow-sm: 0 1px 2px rgb(2 5 12 / 0.5);
+  --shadow-md: 0 12px 32px -14px rgb(2 5 12 / 0.75), 0 2px 8px -4px rgb(2 5 12 / 0.5);
+  --shadow-lg: 0 36px 80px -28px rgb(2 5 12 / 0.85), 0 10px 28px -14px rgb(2 5 12 / 0.55);
+  --shadow-glow: 0 0 0 1px rgb(96 156 255 / 0.3), 0 24px 64px -20px rgb(29 111 242 / 0.4);
+}
+
+/* -- 02  Canvas & atmosphere ---------------------------------------------- */
+
+html {
+  background-color: rgb(var(--c-surface-base));
+}
+
+body {
+  background-color: rgb(var(--c-surface-base));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Let the fixed atmosphere read through the app shell */
+#root > .bg-surface-base {
+  background-color: transparent;
+}
+
+/* Aurora field — slow, low-amplitude drift behind everything. The grain rides
+   the same layer: one composited surface, so scrolling stays free. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20vmax;
+  z-index: -2;
+  pointer-events: none;
+  background-image: var(--noise),
+    radial-gradient(38vmax 30vmax at 78% 6%, rgb(var(--c-primary-500) / 0.3), transparent 62%),
+    radial-gradient(34vmax 28vmax at 12% 22%, rgb(var(--c-violet) / 0.2), transparent 64%),
+    radial-gradient(42vmax 32vmax at 88% 58%, rgb(var(--c-accent-500) / 0.12), transparent 60%),
+    radial-gradient(46vmax 36vmax at 8% 82%, rgb(var(--c-primary-600) / 0.22), transparent 62%);
+  background-size: 180px 180px, cover, cover, cover, cover;
+  animation: kms-aurora 34s var(--ease-in-out-soft, ease-in-out) infinite alternate;
+  will-change: transform;
+}
+
+@keyframes kms-aurora {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.5%, -2%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-2%, 2.5%, 0) scale(1.02);
+  }
+}
+
+/* Vignette above content. Deliberately no blend mode: a blended full-screen
+   overlay forces a backdrop read on every scrolled frame. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: radial-gradient(126% 104% at 50% 48%, transparent 54%, rgb(1 2 8 / 0.55) 100%);
+}
+
+.bg-grid-faint {
+  background-image: var(--grid-image);
+}
+
+/* -- 03  Typography ------------------------------------------------------- */
+
+:where(h1, h2, h3, h4, h5, h6) {
+  text-wrap: balance;
+}
+
+.text-display-xl,
+.text-display-lg,
+.text-h1,
+.text-h2 {
+  letter-spacing: -0.022em;
+  line-height: 1.06;
+}
+
+.text-h3,
+.text-h4 {
+  letter-spacing: -0.015em;
+}
+
+.text-h5,
+.text-h6 {
+  letter-spacing: -0.008em;
+}
+
+/* Georgian glyphs carry more visual weight — relax the negative tracking */
+:lang(ka) .text-display-xl,
+:lang(ka) .text-display-lg,
+:lang(ka) .text-h1,
+:lang(ka) .text-h2 {
+  letter-spacing: -0.012em;
+  line-height: 1.14;
+}
+
+p.text-body-lg,
+p.text-body-md {
+  line-height: 1.72;
+}
+
+p.text-body-sm {
+  line-height: 1.68;
+}
+
+/* Long-form paragraphs stay inside a comfortable measure */
+main p.text-body-lg {
+  max-width: 68ch;
+}
+
+.text-gradient {
+  background: linear-gradient(
+    104deg,
+    rgb(var(--c-text-primary)) 4%,
+    rgb(var(--c-primary-300)) 42%,
+    rgb(var(--c-accent-300)) 74%,
+    rgb(var(--c-violet-soft)) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: kms-shimmer 12s var(--ease-in-out-soft, ease-in-out) infinite;
+}
+
+/* A gradient span inside a heading must not fall back to the body leading */
+:is(h1, h2, h3, h4) > .text-gradient {
+  line-height: inherit;
+}
+
+[data-scheme='light'] .text-gradient {
+  background: linear-gradient(
+    104deg,
+    rgb(var(--c-text-primary)) 4%,
+    rgb(var(--c-primary-300)) 42%,
+    rgb(var(--c-accent-300)) 74%,
+    rgb(var(--c-violet-soft)) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes kms-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* -- 04  Section rhythm --------------------------------------------------- */
+
+.py-section {
+  padding-block: clamp(4.25rem, 2.8rem + 5.4vw, 7.5rem);
+}
+
+section[data-scheme] {
+  position: relative;
+  background-repeat: no-repeat;
+}
+
+/* Every band carries its own bloom, drawn as background layers so it sits
+   under the content without an extra stacking context. Hue and origin rotate
+   down the page, so no two neighbours read the same. */
+.section-base,
+[data-scheme='light'].section-base {
+  background-color: transparent;
+  background-image: radial-gradient(
+      52% 46% at 82% 4%,
+      rgb(var(--c-primary-500) / 0.14),
+      transparent 70%
+    ),
+    radial-gradient(46% 42% at 10% 96%, rgb(var(--c-violet) / 0.11), transparent 72%);
+}
+
+.section-raised,
+[data-scheme='light'].section-raised {
+  background-color: rgb(var(--c-surface-1) / 0.66);
+  background-image:
+    /* top hairline */ var(--hairline),
+    /* bottom hairline */ var(--hairline),
+    radial-gradient(58% 52% at 14% 0%, rgb(var(--c-primary-500) / 0.17), transparent 72%),
+    radial-gradient(54% 56% at 90% 100%, rgb(var(--c-violet) / 0.14), transparent 72%);
+  background-size: 100% 1px, 100% 1px, 100% 100%, 100% 100%;
+  background-position: 0 0, 0 100%, 0 0, 0 0;
+}
+
+.section-accent,
+[data-scheme='light'].section-accent {
+  background-image: var(--hairline),
+    radial-gradient(64% 58% at 50% 0%, rgb(var(--c-primary-500) / 0.26), transparent 72%),
+    radial-gradient(50% 44% at 88% 82%, rgb(var(--c-accent-500) / 0.1), transparent 70%),
+    linear-gradient(
+      180deg,
+      rgb(var(--c-primary-900) / 0.5) 0%,
+      rgb(var(--c-surface-base) / 0.4) 58%,
+      transparent 100%
+    );
+  background-size: 100% 1px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0;
+}
+
+/* Alternate the bloom so the rhythm never repeats twice in a row */
+section[data-scheme]:nth-of-type(even).section-raised {
+  background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--c-violet) / 0.34) 28%,
+      rgb(var(--c-accent-400) / 0.34) 52%,
+      rgb(var(--c-violet) / 0.34) 74%,
+      transparent
+    ),
+    var(--hairline),
+    radial-gradient(56% 52% at 86% 0%, rgb(var(--c-violet) / 0.16), transparent 72%),
+    radial-gradient(52% 56% at 8% 100%, rgb(var(--c-accent-500) / 0.1), transparent 72%);
+}
+
+section[data-scheme]:nth-of-type(even).section-base {
+  background-image: radial-gradient(
+      48% 44% at 12% 6%,
+      rgb(var(--c-accent-500) / 0.1),
+      transparent 72%
+    ),
+    radial-gradient(52% 48% at 88% 94%, rgb(var(--c-primary-500) / 0.15), transparent 72%);
+}
+
+.border-y.section-raised,
+section[data-scheme].border-y {
+  border-color: transparent;
+}
+
+/* Pillars strip — the four "how we work" points read as one instrument panel
+   rather than four loose blocks */
+section.border-y.section-raised .grid > .reveal > .h-full {
+  position: relative;
+  padding: 1.5rem 1.5rem 1.6rem;
+  border-radius: var(--radius-lg);
+  background-image: linear-gradient(160deg, rgb(255 255 255 / 0.05), transparent 58%);
+  box-shadow: var(--edge-highlight);
+  transition: background-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft);
+}
+
+section.border-y.section-raised .grid > .reveal > .h-full::before {
+  content: '';
+  position: absolute;
+  inset-inline: 1.5rem;
+  top: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(var(--c-accent-400)), transparent 70%);
+  opacity: 0.55;
+  transition: opacity var(--dur-base) var(--ease-out-soft);
+}
+
+section.border-y.section-raised .grid > .reveal > .h-full:hover {
+  background-color: rgb(var(--c-surface-2) / 0.5);
+  box-shadow: var(--edge-highlight), var(--shadow-md);
+}
+
+section.border-y.section-raised .grid > .reveal > .h-full:hover::before {
+  opacity: 1;
+}
+
+/* -- 05  Hero ------------------------------------------------------------- */
+
+#main > section:first-child {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Directional key light from the upper right, plus a halo behind the headline.
+   Painting the halo here keeps it off the text itself — a wide text-shadow on
+   an animated gradient headline re-rasters the whole line every frame. */
+#main > section:first-child::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 46% at 76% 12%, rgb(var(--c-primary-500) / 0.34), transparent 66%),
+    radial-gradient(40% 34% at 24% 40%, rgb(var(--c-primary-500) / 0.2), transparent 70%),
+    radial-gradient(46% 40% at 18% 82%, rgb(var(--c-violet) / 0.22), transparent 68%),
+    radial-gradient(80% 56% at 50% 108%, rgb(var(--c-accent-500) / 0.1), transparent 70%);
+}
+
+/* Soft dissolve into the first band below */
+#main > section:first-child::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 22vh;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgb(var(--c-surface-base) / 0.85));
+}
+
+/* A tight shadow only — it seats the headline on the artwork without asking
+   for a wide blur on every repaint. */
+#main > section:first-child h1 {
+  text-shadow: 0 2px 10px rgb(2 5 12 / 0.55);
+}
+
+#main > section:first-child h1 .text-gradient {
+  text-shadow: none;
+}
+
+/* On desktop the opening headline steps up to carry the fold. The text column
+   widens with it so Georgian compounds still break on sensible words. */
+@media (min-width: 1024px) {
+  #main > section:first-child .lg\:grid-cols-\[45fr_55fr\] {
+    grid-template-columns: 52fr 48fr;
+  }
+
+  #main > section:first-child h1 {
+    font-size: clamp(2.6rem, 1.35rem + 2.3vw, 3.4rem);
+    max-width: none;
+  }
+
+  #main > section:first-child h1 + p {
+    max-width: 34rem;
+  }
+}
+
+/* Network diagram: brighter nodes. The glow is scoped to the static circles —
+   the dash and pulse animations run every frame, and a filter on those would
+   re-raster the whole SVG each time. */
+#main > section:first-child svg circle:not(.animate-pulse-node) {
+  filter: drop-shadow(0 0 7px rgb(var(--c-accent-500) / 0.85));
+}
+
+/* -- 06  Header & navigation ---------------------------------------------- */
+
+header.fixed {
+  --header-tint: rgb(var(--c-surface-base) / 0.72);
+}
+
+header.fixed.bg-surface-base\/95 {
+  background-color: rgb(var(--c-surface-base) / 0.86) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  backdrop-filter: blur(26px) saturate(160%);
+  border-bottom-color: transparent !important;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06), 0 18px 44px -28px rgb(2 5 12 / 0.9);
+}
+
+header.fixed.bg-surface-base\/95::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hairline);
+  opacity: 0.7;
+}
+
+/* Nav links get an animated underline rather than a colour-only hover */
+header nav a,
+header a[href^='/'],
+header button[aria-expanded] {
+  position: relative;
+}
+
+header .lg\:flex > a::after,
+header .lg\:flex > button::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.3rem;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(var(--c-primary-400)), rgb(var(--c-accent-400)));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+
+header .lg\:flex > a:hover::after,
+header .lg\:flex > button:hover::after,
+header .lg\:flex > button[aria-expanded='true']::after {
+  transform: scaleX(1);
+}
+
+/* Mega-menu panel drops in rather than appearing */
+header .panel,
+header [class*='bg-surface-1'],
+header [class*='bg-surface-2'] {
+  animation: kms-drop 0.34s var(--ease-out-soft) both;
+}
+
+@keyframes kms-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Mobile drawer */
+header > [class*='overflow-y-auto'] {
+  background-color: rgb(var(--c-surface-base) / 0.94) !important;
+  background-image: radial-gradient(
+      70% 40% at 100% 0%,
+      rgb(var(--c-primary-500) / 0.16),
+      transparent 70%
+    ),
+    radial-gradient(60% 40% at 0% 100%, rgb(var(--c-violet) / 0.14), transparent 72%);
+  border-top-color: transparent !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+header > [class*='overflow-y-auto'] a {
+  border-radius: var(--radius-md);
+  transition: background-color var(--dur-fast) var(--ease-out-soft),
+    color var(--dur-fast) var(--ease-out-soft), padding-left var(--dur-fast) var(--ease-out-soft);
+}
+
+header > [class*='overflow-y-auto'] a:hover,
+header > [class*='overflow-y-auto'] a:active {
+  background-color: rgb(var(--c-primary-500) / 0.12);
+  color: rgb(var(--c-text-primary));
+}
+
+/* Language switch reads as a segmented control */
+header [role='group'][aria-label] {
+  padding: 0.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: rgb(var(--c-surface-2) / 0.5);
+}
+
+header [role='group'][aria-label] a[aria-current] {
+  background: linear-gradient(140deg, rgb(var(--c-primary-500) / 0.9), rgb(var(--c-primary-600)));
+  color: #fff;
+  box-shadow: var(--edge-highlight), 0 4px 14px -6px rgb(var(--c-primary-500) / 0.8);
+}
+
+/* -- 07  Surfaces — panels, cards, spotlight ------------------------------ */
+
+.panel {
+  background-color: rgb(var(--c-surface-1) / 0.6);
+  background-image: var(--glass-sheen);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--edge-highlight);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(16px) saturate(130%);
+}
+
+[data-scheme='light'] .panel {
+  background-color: rgb(var(--c-surface-1) / 0.72);
+  background-image: var(--glass-sheen);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(16px) saturate(130%);
+}
+
+/* The card signature: any rounded surface tile inside the page body */
+main [class*='rounded-lg'][class*='bg-surface']:not([class*='border-dashed']),
+main .panel[class*='rounded-lg'],
+main [class*='rounded-lg'][class*='divide-y'],
+footer .panel {
+  position: relative;
+  isolation: isolate;
+  background-color: rgb(var(--c-surface-1) / 0.55);
+  background-image: var(--glass-sheen);
+  border-color: transparent;
+  box-shadow: var(--edge-highlight), var(--shadow-md);
+  transition: transform var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    background-color var(--dur-base) var(--ease-out-soft);
+}
+
+/* Gradient hairline frame, drawn with a mask so it stays 1px at any radius */
+main [class*='rounded-lg'][class*='bg-surface']:not([class*='border-dashed'])::after,
+main .panel[class*='rounded-lg']::after,
+main [class*='rounded-lg'][class*='divide-y']::after,
+footer .panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    145deg,
+    rgb(255 255 255 / 0.16),
+    rgb(255 255 255 / 0.04) 34%,
+    rgb(255 255 255 / 0.02) 62%,
+    rgb(var(--c-primary-400) / 0.16)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: background var(--dur-base) var(--ease-out-soft);
+}
+
+/* Cursor spotlight — coordinates are written by kms-atelier.js */
+.kms-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out-soft);
+  background: radial-gradient(
+    22rem 22rem at var(--kx, 50%) var(--ky, 0%),
+    rgb(var(--c-primary-400) / 0.16),
+    transparent 62%
+  );
+}
+
+.kms-card:hover::before,
+.kms-card:focus-within::before {
+  opacity: 1;
+}
+
+/* Keep real content above both decorative layers */
+.kms-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Interactive tiles lift; static ones only brighten */
+main a[class*='rounded-lg'][class*='bg-surface']:hover,
+main a.panel[class*='rounded-lg']:hover,
+main .kms-card.kms-card--link:hover {
+  transform: translateY(-4px);
+  background-color: rgb(var(--c-surface-2) / 0.62);
+  box-shadow: var(--edge-highlight), var(--shadow-lg),
+    0 0 0 1px rgb(var(--c-primary-400) / 0.22);
+}
+
+main a[class*='rounded-lg'][class*='bg-surface']:hover::after,
+main a.panel[class*='rounded-lg']:hover::after,
+main .kms-card.kms-card--link:hover::after {
+  background: linear-gradient(
+    145deg,
+    rgb(var(--c-accent-400) / 0.5),
+    rgb(var(--c-primary-400) / 0.28) 42%,
+    rgb(255 255 255 / 0.05) 70%,
+    rgb(var(--c-violet) / 0.34)
+  );
+}
+
+/* Tailwind's own translate-on-hover would fight the transform above */
+main .hover\:-translate-y-1:hover {
+  --tw-translate-y: 0;
+}
+
+/* Nested tiles stay quiet so hierarchy survives */
+main [class*='rounded-lg'][class*='bg-surface'] [class*='rounded-lg'][class*='bg-surface'] {
+  box-shadow: var(--edge-highlight);
+}
+
+/* The arrow in "read more" links tracks with the card hover */
+.group:hover .lucide-arrow-right {
+  transform: translateX(4px);
+}
+
+.lucide-arrow-right {
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+
+/* -- 08  Icon badges ------------------------------------------------------ */
+
+.icon-badge,
+[data-scheme='light'] .icon-badge {
+  position: relative;
+  border: 1px solid rgb(var(--c-primary-400) / 0.24);
+  background-image: linear-gradient(
+    145deg,
+    rgb(var(--c-primary-500) / 0.34),
+    rgb(var(--c-violet) / 0.18) 52%,
+    rgb(var(--c-accent-500) / 0.14)
+  );
+  background-color: rgb(var(--c-surface-2) / 0.7);
+  color: rgb(var(--c-accent-300));
+  box-shadow: var(--edge-highlight), 0 8px 20px -12px rgb(var(--c-primary-500) / 0.9);
+  transition: transform var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft), color var(--dur-base) var(--ease-out-soft);
+}
+
+.icon-badge svg {
+  filter: drop-shadow(0 0 8px rgb(var(--c-accent-500) / 0.45));
+}
+
+.group:hover > .icon-badge,
+.group:hover .icon-badge,
+.kms-card:hover .icon-badge {
+  transform: translateY(-2px) scale(1.05);
+  color: rgb(var(--c-accent-300));
+  box-shadow: var(--edge-highlight), 0 0 0 1px rgb(var(--c-accent-400) / 0.4),
+    0 14px 30px -14px rgb(var(--c-accent-500) / 0.75);
+}
+
+/* -- 09  Buttons ---------------------------------------------------------- */
+
+/* Primary */
+a[class*='bg-primary-500'][class*='text-white'],
+button[class*='bg-primary-500'][class*='text-white'] {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--c-primary-400)) 0%,
+    rgb(var(--c-primary-500)) 46%,
+    rgb(var(--c-primary-600)) 100%
+  );
+  border-color: rgb(var(--c-primary-300) / 0.42);
+  box-shadow: var(--edge-highlight), 0 12px 28px -12px rgb(var(--c-primary-500) / 0.85);
+  letter-spacing: 0.005em;
+}
+
+/* Sheen sweep */
+a[class*='bg-primary-500'][class*='text-white']::before,
+button[class*='bg-primary-500'][class*='text-white']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgb(255 255 255 / 0.28) 46%,
+    transparent 68%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.75s var(--ease-out-soft);
+}
+
+a[class*='bg-primary-500'][class*='text-white']:hover,
+button[class*='bg-primary-500'][class*='text-white']:hover {
+  background-image: linear-gradient(
+    135deg,
+    rgb(var(--c-accent-400)) -10%,
+    rgb(var(--c-primary-400)) 40%,
+    rgb(var(--c-primary-500)) 100%
+  );
+  box-shadow: var(--edge-highlight), 0 0 0 1px rgb(var(--c-accent-400) / 0.45),
+    0 18px 40px -14px rgb(var(--c-primary-500) / 0.95);
+  transform: translateY(-1px);
+}
+
+a[class*='bg-primary-500'][class*='text-white']:hover::before,
+button[class*='bg-primary-500'][class*='text-white']:hover::before {
+  transform: translateX(120%);
+}
+
+/* Secondary — glass */
+a.panel[class*='px-5'],
+button.panel[class*='px-5'],
+a.panel[class*='px-6'],
+button.panel[class*='px-6'] {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--border-default);
+  box-shadow: var(--edge-highlight), var(--shadow-sm);
+  transition: transform var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    border-color var(--dur-base) var(--ease-out-soft);
+}
+
+a.panel[class*='px-5']:hover,
+button.panel[class*='px-5']:hover,
+a.panel[class*='px-6']:hover,
+button.panel[class*='px-6']:hover {
+  transform: translateY(-1px);
+  border-color: rgb(var(--c-primary-400) / 0.45);
+  box-shadow: var(--edge-highlight), 0 0 0 1px rgb(var(--c-primary-400) / 0.2),
+    0 16px 34px -18px rgb(var(--c-primary-500) / 0.7);
+}
+
+/* -- 10  Eyebrows, rules, links ------------------------------------------- */
+
+.text-overline {
+  font-weight: 600;
+}
+
+/* The little dash before an eyebrow becomes a glowing tick */
+.text-overline > .h-px,
+.text-overline > span.bg-accent-400\/60 {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgb(var(--c-accent-400)));
+  box-shadow: 0 0 10px rgb(var(--c-accent-500) / 0.7);
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--c-line) / 0.14) 18%,
+    rgb(var(--c-line) / 0.14) 82%,
+    transparent
+  );
+}
+
+.rule-gradient {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--c-primary-400) / 0.24) 18%,
+    rgb(var(--c-accent-400) / 0.3) 50%,
+    rgb(var(--c-primary-400) / 0.24) 82%,
+    transparent
+  );
+}
+
+.text-link {
+  color: rgb(var(--c-primary-300));
+  transition: color var(--dur-fast) var(--ease-out-soft);
+}
+
+a:hover > .text-link,
+a.text-link:hover,
+.text-link:hover {
+  color: rgb(var(--c-accent-300));
+}
+
+/* Inline body links get a gradient underline that grows on hover */
+main p a:not([class*='rounded']):not(.panel) {
+  background-image: linear-gradient(90deg, rgb(var(--c-accent-400)), rgb(var(--c-primary-400)));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  transition: background-size var(--dur-base) var(--ease-out-soft);
+}
+
+main p a:not([class*='rounded']):not(.panel):hover {
+  background-size: 100% 1.5px;
+}
+
+/* -- 11  Chips & tags ----------------------------------------------------- */
+
+main [class*='rounded-sm'][class*='bg-surface-3'],
+main [class*='rounded-sm'][class*='text-caption'][class*='border-line'] {
+  border-radius: 999px;
+  border-color: var(--border-subtle);
+  background-color: rgb(var(--c-surface-3) / 0.5);
+  background-image: linear-gradient(140deg, rgb(255 255 255 / 0.05), transparent 60%);
+  box-shadow: var(--edge-highlight);
+  transition: border-color var(--dur-base) var(--ease-out-soft),
+    color var(--dur-base) var(--ease-out-soft), background-color var(--dur-base) var(--ease-out-soft);
+}
+
+main [class*='rounded-sm'][class*='bg-surface-3']:hover {
+  border-color: rgb(var(--c-primary-400) / 0.4);
+  background-color: rgb(var(--c-primary-500) / 0.14);
+  color: rgb(var(--c-text-primary));
+}
+
+/* Hero badge pill */
+#main > section:first-child [class*='rounded-full'][class*='border'] {
+  background-color: rgb(var(--c-surface-2) / 0.55);
+  background-image: linear-gradient(
+    120deg,
+    rgb(var(--c-primary-500) / 0.22),
+    rgb(var(--c-accent-500) / 0.1)
+  );
+  border-color: rgb(var(--c-primary-400) / 0.32);
+  box-shadow: var(--edge-highlight), 0 10px 30px -18px rgb(var(--c-primary-500) / 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* -- 12  Process steps ---------------------------------------------------- */
+
+/* Numbered step markers */
+main [class*='h-14'][class*='w-14'][class*='border-primary-400'] {
+  border-color: rgb(var(--c-primary-400) / 0.3);
+  background-color: rgb(var(--c-surface-2) / 0.8);
+  background-image: linear-gradient(
+    145deg,
+    rgb(var(--c-primary-500) / 0.32),
+    rgb(var(--c-violet) / 0.16) 60%,
+    transparent
+  );
+  color: rgb(var(--c-accent-300));
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--edge-highlight), 0 12px 28px -16px rgb(var(--c-primary-500) / 0.9);
+}
+
+/* Connector rail between steps */
+main .border-dashed[class*='left-['],
+main [class*='w-px'][class*='bg-line'] {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(var(--c-primary-400) / 0.4) 12%,
+    rgb(var(--c-accent-400) / 0.3) 88%,
+    transparent
+  );
+  border: 0;
+}
+
+/* -- 13  Stat figures ----------------------------------------------------- */
+
+main .text-display-lg.font-extrabold,
+main .text-display-lg.leading-none {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  filter: drop-shadow(0 6px 22px rgb(var(--c-primary-500) / 0.35));
+}
+
+/* -- 14  Blueprint frames ------------------------------------------------- */
+
+/* The build ships dashed placeholder boxes. They become deliberate technical
+   plates: layered grid, corner brackets, sweep, glow. */
+main [class*='aspect-'][class*='border-dashed'] {
+  border-style: solid;
+  border-color: transparent;
+  background-color: rgb(var(--c-surface-1) / 0.5);
+  background-image:
+    radial-gradient(70% 55% at 50% 0%, rgb(var(--c-primary-500) / 0.22), transparent 70%),
+    radial-gradient(60% 50% at 90% 100%, rgb(var(--c-violet) / 0.16), transparent 68%),
+    linear-gradient(160deg, rgb(255 255 255 / 0.05), transparent 55%);
+  box-shadow: var(--edge-highlight), var(--shadow-lg);
+}
+
+/* Corner brackets */
+main [class*='aspect-'][class*='border-dashed']::before {
+  content: '';
+  position: absolute;
+  inset: 0.9rem;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 0.4rem;
+  background:
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 0 0 / 1.5rem 1.5px no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 0 0 / 1.5px 1.5rem no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 100% 0 / 1.5rem 1.5px no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 100% 0 / 1.5px 1.5rem no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 0 100% / 1.5rem 1.5px no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 0 100% / 1.5px 1.5rem no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 100% 100% / 1.5rem 1.5px no-repeat,
+    linear-gradient(rgb(var(--c-accent-400) / 0.75) 0 0) 100% 100% / 1.5px 1.5rem no-repeat;
+  filter: drop-shadow(0 0 6px rgb(var(--c-accent-500) / 0.5));
+}
+
+/* Slow scanning sweep */
+main [class*='aspect-'][class*='border-dashed']::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 45%;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(var(--c-accent-400) / 0.09) 60%,
+    rgb(var(--c-accent-400) / 0.22)
+  );
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000);
+  mask-image: linear-gradient(180deg, transparent, #000);
+  animation: kms-scan 7s var(--ease-in-out-soft, ease-in-out) infinite;
+}
+
+@keyframes kms-scan {
+  0%,
+  100% {
+    transform: translateY(-40%);
+    opacity: 0;
+  }
+  35%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(230%);
+  }
+}
+
+main [class*='aspect-'][class*='border-dashed'] .bg-grid-faint {
+  opacity: 0.85;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse at center, #000 25%, transparent 78%);
+}
+
+/* Centre glyph inside the plate */
+main [class*='aspect-'][class*='border-dashed'] [class*='h-12'][class*='w-12'] {
+  border-color: rgb(var(--c-primary-400) / 0.3);
+  background-color: rgb(var(--c-surface-2) / 0.8);
+  background-image: linear-gradient(
+    145deg,
+    rgb(var(--c-primary-500) / 0.35),
+    rgb(var(--c-accent-500) / 0.14)
+  );
+  color: rgb(var(--c-accent-300));
+  box-shadow: var(--edge-highlight), 0 0 0 6px rgb(var(--c-primary-500) / 0.08),
+    0 0 0 14px rgb(var(--c-primary-500) / 0.05), 0 16px 34px -18px rgb(var(--c-primary-500) / 0.9);
+}
+
+main [class*='aspect-'][class*='border-dashed'] .text-caption,
+main [class*='aspect-'][class*='border-dashed'] .text-label {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: var(--fs-overline);
+  color: rgb(var(--c-text-tertiary));
+}
+
+/* -- 15  Accordion -------------------------------------------------------- */
+
+main [class*='divide-y'][class*='rounded-lg'] > * + * {
+  border-top-color: var(--border-subtle);
+}
+
+main [class*='divide-y'][class*='rounded-lg'] button {
+  transition: background-color var(--dur-base) var(--ease-out-soft),
+    color var(--dur-base) var(--ease-out-soft);
+}
+
+main [class*='divide-y'][class*='rounded-lg'] button:hover {
+  background-color: rgb(var(--c-primary-500) / 0.07);
+  color: rgb(var(--c-text-primary));
+}
+
+main [class*='divide-y'][class*='rounded-lg'] button[aria-expanded='true'] {
+  background-color: rgb(var(--c-primary-500) / 0.1);
+}
+
+main [class*='divide-y'][class*='rounded-lg'] button .lucide-chevron-down {
+  transition: transform var(--dur-base) var(--ease-out-soft),
+    color var(--dur-base) var(--ease-out-soft);
+}
+
+main [class*='divide-y'][class*='rounded-lg'] button[aria-expanded='true'] .lucide-chevron-down {
+  color: rgb(var(--c-accent-300));
+}
+
+/* -- 16  Forms ------------------------------------------------------------ */
+
+input,
+textarea,
+select {
+  background-color: rgb(var(--c-surface-2) / 0.55) !important;
+  border-color: var(--border-default) !important;
+  border-radius: var(--radius-md);
+  box-shadow: var(--edge-highlight);
+  transition: border-color var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft),
+    background-color var(--dur-base) var(--ease-out-soft);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: rgb(var(--c-primary-400) / 0.35) !important;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: rgb(var(--c-primary-500));
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.3rem;
+  box-shadow: none;
+}
+
+textarea {
+  min-height: 9rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgb(var(--c-primary-400) / 0.6) !important;
+  background-color: rgb(var(--c-surface-2) / 0.8) !important;
+  box-shadow: var(--edge-highlight), 0 0 0 3px rgb(var(--c-primary-500) / 0.22),
+    0 12px 30px -16px rgb(var(--c-primary-500) / 0.8);
+}
+
+/* -- 17  Footer ----------------------------------------------------------- */
+
+footer {
+  position: relative;
+  background-color: rgb(var(--c-surface-1) / 0.7) !important;
+  border-top-color: transparent !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: var(--hairline);
+}
+
+footer::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 16rem;
+  pointer-events: none;
+  background: radial-gradient(60% 100% at 50% 0%, rgb(var(--c-primary-500) / 0.14), transparent 70%);
+}
+
+footer a {
+  transition: color var(--dur-fast) var(--ease-out-soft),
+    transform var(--dur-fast) var(--ease-out-soft);
+}
+
+footer a:hover {
+  color: rgb(var(--c-text-primary));
+}
+
+/* -- 18  Chrome — scrollbar, selection, focus ----------------------------- */
+
+::selection {
+  background: rgb(var(--c-primary-500) / 0.42);
+  color: rgb(var(--c-text-primary));
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-primary-500) / 0.5) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--c-surface-1) / 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  background-color: rgb(var(--c-primary-500) / 0.55);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--c-accent-500) / 0.7);
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--c-accent-400));
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* Reading progress rail under the header */
+.kms-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  z-index: 55;
+  transform-origin: left;
+  transform: scaleX(var(--kms-progress, 0));
+  background: linear-gradient(
+    90deg,
+    rgb(var(--c-primary-500)),
+    rgb(var(--c-accent-400)) 55%,
+    rgb(var(--c-violet-soft))
+  );
+  box-shadow: 0 0 12px rgb(var(--c-accent-500) / 0.6);
+  pointer-events: none;
+}
+
+/* -- 19  Motion & reveal -------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px) scale(0.995);
+  filter: blur(4px);
+  transition: opacity var(--dur-slow) var(--ease-out-soft),
+    transform var(--dur-slow) var(--ease-out-soft), filter var(--dur-slow) var(--ease-out-soft);
+}
+
+.reveal-in,
+.kms-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .text-gradient,
+  main [class*='aspect-'][class*='border-dashed']::after {
+    animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .kms-card::before {
+    display: none;
+  }
+}
+
+/* -- Narrow viewports ------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  body::after {
+    opacity: 0.35;
+  }
+
+  .kms-card::before {
+    display: none;
+  }
+
+  main [class*='rounded-lg'][class*='bg-surface']:not([class*='border-dashed']),
+  main .panel[class*='rounded-lg'] {
+    box-shadow: var(--edge-highlight), var(--shadow-sm);
+  }
+}

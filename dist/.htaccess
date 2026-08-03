@@ -1,0 +1,183 @@
+# KMS — Apache / cPanel configuration
+# Upload the contents of dist/ (including this file) into public_html.
+
+Options -Indexes
+
+# Fallback for the homepage if mod_rewrite is unavailable. With mod_rewrite on,
+# rule 4 below handles "/" before mod_dir ever runs.
+DirectoryIndex index.html
+
+# /services, /industries and /en are both route paths AND directories on disk.
+# Without this, mod_dir would 301 them to /services/ and break the canonical
+# URLs.
+<IfModule mod_dir.c>
+  DirectorySlash Off
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Routing. Each route has a prerendered .html file carrying its own <head>
+# (title, description, canonical, hreflang, Open Graph) so crawlers that do
+# not run JavaScript still get per-page metadata. Anything unmatched is a real
+# 404.
+# ---------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 0. Force HTTPS. %{HTTPS} is unreliable behind a proxy or load balancer,
+  #    so the forwarded-proto header is checked too.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 1. Canonical URLs never carry a trailing slash (see <link rel="canonical">
+  #    in every prerendered document). "/" itself is exempt — (.+) needs at
+  #    least one character before the slash.
+  RewriteRule ^(.+)/$ /$1 [L,R=301]
+
+  # 2. Serve the brotli / gzip variants the build already produced, so the
+  #    server never spends CPU recompressing immutable hashed assets.
+  #    mod_mime's AddEncoding (bottom of this file) supplies both the
+  #    Content-Encoding header and the underlying Content-Type, and the whole
+  #    block is skipped if mod_mime is missing rather than shipping bytes the
+  #    browser cannot decode.
+  <IfModule mod_mime.c>
+    RewriteCond %{HTTP:Accept-Encoding} br
+    RewriteCond %{DOCUMENT_ROOT}/$1.br -f
+    RewriteRule ^(assets/.+\.(?:js|css|svg))$ /$1.br [L,E=no-gzip:1,E=no-brotli:1]
+
+    RewriteCond %{HTTP:Accept-Encoding} gzip
+    RewriteCond %{DOCUMENT_ROOT}/$1.gz -f
+    RewriteRule ^(assets/.+\.(?:js|css|svg))$ /$1.gz [L,E=no-gzip:1,E=no-brotli:1]
+  </IfModule>
+
+  # 3. Real files (hashed assets, sitemap.xml, robots.txt, og-image.png).
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 4. Homepage. This rule is why the site is reachable at all: DirectorySlash
+  #    Off stops mod_dir from resolving "/" to index.html, and rule 5's pattern
+  #    requires at least one character, so without this line "/" fell through
+  #    to the 404 rule and the homepage answered 404 to every crawler.
+  RewriteRule ^$ /index.html [L]
+
+  # 5. Prerendered route:  /services/cctv  ->  /services/cctv.html
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+
+  # 6. Genuinely missing. Every real route has a prerendered .html file, so
+  #    nothing legitimate reaches this line. Returning the SPA shell with a
+  #    200 would make each typo look like a duplicate of the homepage to any
+  #    crawler that does not run JavaScript.
+  #    The guard keeps "/" out of this rule even on an Apache build where the
+  #    per-directory path for the site root is not the empty string.
+  RewriteCond %{REQUEST_URI} !^/?$
+  RewriteRule ^ - [L,R=404]
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Compression. Precompressed variants cover /assets; everything else (HTML,
+# sitemap, robots) is compressed on the fly.
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/xml
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript text/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Caching. Build assets carry a content hash, so they can be cached forever;
+# index.html must never be cached or users get a stale app shell.
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css                "access plus 1 year"
+  ExpiresByType application/javascript  "access plus 1 year"
+  ExpiresByType text/javascript         "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType image/webp              "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 year"
+  ExpiresByType image/jpeg              "access plus 1 year"
+  ExpiresByType font/woff2              "access plus 1 year"
+  ExpiresByType text/html               "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|svg|woff2|png|jpe?g|webp)(\.(br|gz))?$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # Baseline security headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+  # Two years with includeSubDomains + preload is what Chrome's HSTS audit and
+  # hstspreload.org both require. The token alone changes nothing until the
+  # domain is actually submitted at https://hstspreload.org — but do not submit
+  # until every kms.ge subdomain is known to serve HTTPS, because removal from
+  # the preload list takes months.
+  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+
+  # The site opens no cross-origin popups and is not embedded anywhere, so
+  # full origin isolation costs nothing and takes this origin out of other
+  # documents' browsing-context group.
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-origin"
+
+  # Everything is same-origin: scripts, styles, fonts and images are all built
+  # into /assets. The one exception is the contact form, which POSTs to
+  # Web3Forms.
+  #
+  # style-src needs 'unsafe-inline' because the reveal-on-scroll wrapper sets
+  # an inline transition-delay, and a static host cannot mint a per-request
+  # nonce. script-src carries no such exemption, which is where it matters:
+  # an injected <script> is blocked. JSON-LD is a data block, not executable,
+  # so it is unaffected.
+  #
+  # require-trusted-types-for turns every DOM injection sink into a hard error.
+  # The app needs exactly one exemption — the <script type="application/ld+json">
+  # block the Seo component writes per route — so the policy list names that one
+  # policy and nothing else. Any other injection sink, in app code or in
+  # anything injected into it, throws.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.web3forms.com; form-action 'self' https://api.web3forms.com; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; require-trusted-types-for 'script'; trusted-types kms-jsonld; upgrade-insecure-requests"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Correct MIME types (some shared hosts still miss these) and the encoding
+# suffixes that make rule 2 work: for foo.js.br mod_mime reads ".br" as the
+# content encoding and ".js" as the content type.
+# ---------------------------------------------------------------------------
+<IfModule mod_mime.c>
+  # The content is Georgian; never let a host's default latin-1 guess through.
+  AddDefaultCharset utf-8
+
+  AddType application/javascript          .js .mjs
+  AddType image/svg+xml                   .svg
+  AddType font/woff2                      .woff2
+  AddType application/manifest+json       .webmanifest
+
+  # Apache's stock mime.types maps .gz to application/x-gzip, which would win
+  # over the encoding reading and hand the browser a JS file typed as an
+  # archive. Drop the type association first, then declare both suffixes as
+  # encodings so index-<hash>.js.gz resolves to "javascript, gzip-encoded".
+  RemoveType .br .gz
+  AddEncoding br                          .br
+  AddEncoding gzip                        .gz
+</IfModule>
+
+ErrorDocument 404 /404.html

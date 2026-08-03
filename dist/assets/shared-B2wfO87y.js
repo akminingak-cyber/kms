@@ -1,0 +1,1 @@
+const e={home:"/",about:"/about",services:"/services",service:s=>`/services/${s}`,industries:"/industries",industry:s=>`/industries/${s}`,portfolio:"/portfolio",process:"/process",technologies:"/technologies",faq:"/faq",contact:"/contact",legal:s=>`/${s}`};export{e as R};

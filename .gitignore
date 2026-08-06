@@ -11,6 +11,9 @@ dist
 dist-ssr
 *.local
 
+# Regenerable design screenshots (npm run shots)
+design-preview
+
 .vscode/*
 !.vscode/extensions.json
 .idea

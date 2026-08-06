@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-300 font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-brand-400/30 text-white;
+  }
+
+  /* Georgian headings need a touch more line-height than latin */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-white font-semibold;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-8;
+  }
+
+  /* Frosted surface used across cards, nav and panels */
+  .glass {
+    @apply border border-white/10 bg-white/[0.035] backdrop-blur-xl;
+  }
+
+  .glass-strong {
+    @apply border border-white/12 bg-ink-850/70 backdrop-blur-2xl;
+  }
+
+  .card-hover {
+    @apply transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-brand-400/40 hover:bg-white/[0.06];
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-brand-400/25 bg-brand-400/[0.08]
+           px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-300;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold
+           transition-all duration-300 focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+  }
+
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-brand-400 to-iris-500 text-ink-950 shadow-lg shadow-brand-500/25
+           hover:shadow-xl hover:shadow-brand-500/40 hover:brightness-110;
+  }
+
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/[0.04] text-white backdrop-blur
+           hover:border-brand-400/50 hover:bg-white/[0.08];
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-300 via-brand-400 to-iris-400 bg-clip-text text-transparent;
+  }
+
+  /* Hairline gradient divider */
+  .rule {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/12 bg-white/[0.04] px-4 py-3.5 text-sm text-white
+           placeholder:text-slate-500 transition-colors duration-200
+           focus:border-brand-400/60 focus:bg-white/[0.07] focus:outline-none;
+  }
+}
+
+@layer utilities {
+  /* Scroll-reveal: elements start hidden, .is-visible is added by IntersectionObserver */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar keeps the dark theme consistent */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: #04060d;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a253e;
+  border-radius: 99px;
+  border: 3px solid #04060d;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #26334f;
+}

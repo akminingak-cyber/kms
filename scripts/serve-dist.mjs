@@ -63,13 +63,9 @@ http
     const ext = path.extname(file);
     const headers = { 'Content-Type': MIME[ext] ?? 'application/octet-stream' };
 
-    if ((ext === '.js' || ext === '.css') && accept.includes('br') && fs.existsSync(`${file}.br`)) {
-      headers['Content-Encoding'] = 'br';
-      headers.Vary = 'Accept-Encoding';
-      return send(res, 200, headers, fs.readFileSync(`${file}.br`));
-    }
-
-    if (ext === '.html' && accept.includes('gzip')) {
+    // Compressed on the fly, exactly as the output filters in .htaccess do —
+    // nothing is served from a pre-compressed twin on disk.
+    if (['.html', '.css', '.js', '.xml', '.svg', '.txt'].includes(ext) && accept.includes('gzip')) {
       headers['Content-Encoding'] = 'gzip';
       headers.Vary = 'Accept-Encoding';
       return send(res, 200, headers, zlib.gzipSync(fs.readFileSync(file)));

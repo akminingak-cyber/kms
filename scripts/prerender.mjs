@@ -181,7 +181,7 @@ ${entries.join('\n')}
 /* -------------------------------------------------------------------------- */
 
 function buildHtaccess() {
-  const host = new URL(COMPANY.url).host;
+  const hostPattern = new URL(COMPANY.url).host.replace(/\./g, '\\.');
   const analyticsOrigin = ANALYTICS.enabled ? new URL(ANALYTICS.host).origin : null;
 
   // Plausible is cookieless and first-party-only in what it stores, but the
@@ -213,37 +213,45 @@ Options -Indexes
   RewriteEngine On
   RewriteBase /
 
-  # 0. One canonical origin. The host is hard-coded rather than taken from
-  #    %{HTTP_HOST}, which a request can set to anything — with the header
-  #    echoed back into a 301 that becomes an open redirect. This also folds
-  #    www into the apex, so a page is never reachable on two hostnames.
-  #    %{HTTPS} is unreliable behind a proxy, hence the forwarded-proto check.
-  RewriteCond %{HTTPS} !=on [OR]
-  RewriteCond %{HTTP_HOST} !^${host.replace(/\./g, '\\.')}$ [NC]
-  RewriteCond %{HTTP:X-Forwarded-Proto} !=https [OR]
-  RewriteCond %{HTTP_HOST} !^${host.replace(/\./g, '\\.')}$ [NC]
+  # 0a. One canonical hostname. Folds www (and any other alias) into the apex,
+  #     so a page is never reachable on two hostnames. The target is hard-coded
+  #     rather than echoed from %{HTTP_HOST}, which a request can set to
+  #     anything — echoing it back into a 301 is an open redirect. This cannot
+  #     loop: after the redirect the host matches and the rule stops firing.
+  RewriteCond %{HTTP_HOST} !^${hostPattern}$ [NC]
   RewriteRule ^ ${COMPANY.url}%{REQUEST_URI} [L,R=301]
 
-  # 1. Pre-compressed assets, emitted by the precompress plugin in
-  #    vite.config.ts. This has to precede the real-file rule below, which
-  #    would otherwise serve the uncompressed original and stop. Both
-  #    conditions must hold — the client asked for the encoding and the file is
-  #    actually on disk — so if the build skipped compression these rules
-  #    simply never fire. no-gzip stops mod_deflate re-compressing a response
-  #    that already is.
-  RewriteCond %{HTTP:Accept-Encoding} br
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.br -f
-  RewriteRule ^assets/.+\\.(js|css)$ %{REQUEST_URI}.br [L,E=no-gzip:1]
+  # 0b. HTTPS. %{HTTPS} is not set on every host — behind a proxy or on
+  #     LiteSpeed the scheme arrives in a forwarded header instead, and a rule
+  #     that checked only %{HTTPS} would redirect an already-secure request to
+  #     itself forever. All four signals must say "not secure" before this
+  #     fires, so an unknown-but-secure setup fails safe by doing nothing.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteCond %{HTTP:X-Forwarded-SSL} !=on
+  RewriteCond %{HTTP:CF-Visitor} !'"scheme":"https"'
+  RewriteRule ^ ${COMPANY.url}%{REQUEST_URI} [L,R=301]
 
-  RewriteCond %{HTTP:Accept-Encoding} gzip
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.gz -f
-  RewriteRule ^assets/.+\\.(js|css)$ %{REQUEST_URI}.gz [L,E=no-gzip:1]
+  # NOTE — there is deliberately no rewrite to pre-compressed .br/.gz files
+  # here.
+  #
+  # That trick serves assets/app.css.br in place of assets/app.css and relies
+  # on a <FilesMatch "\\.br$"> block to attach Content-Encoding: br. On cPanel's
+  # LiteSpeed the header is matched against the *requested* path rather than the
+  # rewritten one, so it never gets attached: the browser receives brotli bytes
+  # labelled text/css and silently discards the stylesheet. The page then
+  # renders as unstyled HTML — content intact, every style and script gone —
+  # and nothing in the server log looks wrong.
+  #
+  # Compression still happens, just in the output filters below, where the
+  # server sets Content-Encoding itself and cannot get it wrong. With hashed
+  # filenames cached for a year, it costs one gzip per asset per visitor.
 
-  # 2. Collapse the duplicate spellings of a page onto its canonical URL.
+  # 1. Collapse the duplicate spellings of a page onto its canonical URL.
   #    /services.html and /services/ both used to answer 200 with identical
   #    content, which is three URLs for one page. Redirecting is cheaper than
   #    asking every crawler to work it out from the canonical tag.
-  #    The internal rewrite in rule 5 is exempt: it carries no query string
+  #    The internal rewrite in rule 4 is exempt: it carries no query string
   #    marker and REDIRECT_STATUS is only set once Apache has re-entered.
   RewriteCond %{ENV:REDIRECT_STATUS} ^$
   RewriteRule ^(.+)\\.html$ /$1 [L,R=301]
@@ -252,22 +260,22 @@ Options -Indexes
   RewriteCond %{REQUEST_URI} !^/$
   RewriteRule ^(.+)/$ /$1 [L,R=301]
 
-  # 3. Real files (hashed assets, sitemap.xml, robots.txt, og-image.png).
+  # 2. Real files (hashed assets, sitemap.xml, robots.txt, og-image.png).
   RewriteCond %{REQUEST_FILENAME} -f
   RewriteRule ^ - [L]
 
-  # 4. Prerendered route:  /services/cctv  ->  /services/cctv.html
+  # 3. Prerendered route:  /services/cctv  ->  /services/cctv.html
   RewriteCond %{DOCUMENT_ROOT}/$1.html -f
   RewriteRule ^(.+?)/?$ /$1.html [L]
 
-  # 5. The root. In a per-directory context the path for "/" is the empty
+  # 4. The root. In a per-directory context the path for "/" is the empty
   #    string, which none of the rules above can match: the document root is a
-  #    directory so -f fails, and rule 4 requires at least one character.
+  #    directory so -f fails, and rule 3 requires at least one character.
   #    DirectoryIndex cannot rescue it either, because mod_rewrite's fixup hook
   #    runs before mod_dir's — the 404 below would already have fired.
   RewriteRule ^$ index.html [L]
 
-  # 6. Genuinely missing. Every real route has a prerendered file, so nothing
+  # 5. Genuinely missing. Every real route has a prerendered file, so nothing
   #    legitimate reaches this line. The pattern is \`.+\` rather than \`^\`:
   #    a bare \`^\` matches the empty path too, which is precisely how this rule
   #    once 404'd the homepage.
@@ -278,10 +286,10 @@ Options -Indexes
 # Compression
 # ---------------------------------------------------------------------------
 <IfModule mod_deflate.c>
-  # Fallback only — /assets/*.js and *.css are served pre-compressed above.
-  # text/javascript is listed because that is what a host serves .js as when
-  # our AddType directive does not take effect, and missing it would ship the
-  # largest files on the site uncompressed.
+  # This is the only thing compressing responses, so the type list has to be
+  # complete. text/javascript is listed because that is what a host serves .js
+  # as when our AddType directive does not take effect, and missing it would
+  # ship the largest files on the site uncompressed.
   AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
   AddOutputFilterByType DEFLATE text/javascript application/javascript application/x-javascript
   AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
@@ -313,39 +321,18 @@ Options -Indexes
 </IfModule>
 
 <IfModule mod_headers.c>
-  # Pre-compressed assets.
-  #
-  # Content-Type has to be forced: the file on disk ends in .br or .gz, and
-  # left alone mod_mime labels it as an archive, at which point the browser
-  # downloads it instead of running it. Content-Encoding tells the browser to
-  # decode rather than save. Vary keeps a proxy from handing a brotli response
-  # to a client that never asked for one.
-  <FilesMatch "\\.js\\.(br|gz)$">
-    Header set Content-Type "application/javascript; charset=utf-8"
-  </FilesMatch>
-
-  <FilesMatch "\\.css\\.(br|gz)$">
-    Header set Content-Type "text/css; charset=utf-8"
-  </FilesMatch>
-
-  <FilesMatch "\\.br$">
-    Header set Content-Encoding br
-    Header unset Content-Length
-  </FilesMatch>
-
-  <FilesMatch "\\.gz$">
-    Header set Content-Encoding gzip
-    Header unset Content-Length
-  </FilesMatch>
-
-  <FilesMatch "\\.(css|js)(\\.(br|gz))?$">
+  # Compressed responses must not be cached as if they were the only variant.
+  <FilesMatch "\\.(css|js)$">
     Header append Vary Accept-Encoding
   </FilesMatch>
 
-  <FilesMatch "\\.(css|js|svg|woff2|png|jpe?g|webp|avif)(\\.(br|gz))?$">
+  # Every one of these carries a content hash in its filename, so a change
+  # produces a new URL and the old one can be cached indefinitely.
+  <FilesMatch "\\.(css|js|svg|woff2|png|jpe?g|webp|avif)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 
+  # HTML has no hash, so it must be revalidated or visitors keep a stale page.
   <FilesMatch "\\.(html)$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
@@ -410,9 +397,28 @@ const lastmod = new Date().toISOString().slice(0, 10);
 writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(lastmod));
 writeFileSync(path.join(DIST, '.htaccess'), buildHtaccess());
 
+/* -------------------------------------------------------------------------- */
+/* Guard: does every asset the HTML asks for actually exist?                   */
+/*                                                                            */
+/* A missing stylesheet does not fail loudly — the page still renders, just    */
+/* unstyled — so the build checks rather than trusting.                        */
+/* -------------------------------------------------------------------------- */
+
+const referenced = new Set(
+  [...readFileSync(path.join(DIST, 'index.html'), 'utf8').matchAll(/\/assets\/[A-Za-z0-9._-]+/g)].map(
+    (m) => m[0],
+  ),
+);
+const missing = [...referenced].filter((ref) => !existsSync(path.join(DIST, ref.slice(1))));
+if (missing.length > 0) {
+  console.error(`✗ HTML references assets that were not built:\n  ${missing.join('\n  ')}`);
+  process.exit(1);
+}
+
 // dist-ssr is a build artefact, not something to upload.
 rmSync(SSR, { recursive: true, force: true });
 
 console.log(`✓ Prerendered ${count} pages`);
 console.log(`✓ sitemap.xml — ${SITE_ROUTES.length * LOCALES.length} URLs, lastmod ${lastmod}`);
 console.log(`✓ .htaccess — analytics ${ANALYTICS.enabled ? `on (${ANALYTICS.host})` : 'off'}`);
+console.log(`✓ ${referenced.size} referenced assets all present`);

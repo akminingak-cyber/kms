@@ -24,9 +24,9 @@ bundle then hydrates that same markup instead of rebuilding it.
 
 | Step | What it does |
 | --- | --- |
-| `build:client` | Vite builds the browser bundle and pre-compresses assets to `.br` / `.gz` |
+| `build:client` | Vite builds the browser bundle |
 | `build:server` | Vite builds `src/entry-server.tsx` for Node |
-| `prerender` | Renders every route to HTML, then generates `sitemap.xml` and `.htaccess` |
+| `prerender` | Renders every route to HTML, generates `sitemap.xml` and `.htaccess`, and fails the build if the HTML references an asset that was not emitted |
 
 `scripts/prerender.mjs` imports the route table and config **from the app
 itself**, so the router, the sitemap and the server rewrite rules cannot drift
@@ -118,11 +118,35 @@ Upload `dist/` to `public_html`. The generated `.htaccess` handles:
 - one canonical origin — HTTPS, apex host, hard-coded (not echoed from the
   request, which would make the redirect an open redirect)
 - `301` from `/services.html` and `/services/` onto `/services`
-- pre-compressed `.br` / `.gz` assets with the right `Content-Type` and `Vary`
+- gzip / brotli through the server's own output filters
 - year-long immutable caching for hashed assets, no caching for HTML
 - a real `404` status for missing pages, not a `200` shell
 - CSP with `script-src` free of `unsafe-inline`, plus HSTS, COOP, nosniff,
   `X-Frame-Options`, `Referrer-Policy` and `Permissions-Policy`
+
+### Do not add pre-compressed assets
+
+It is tempting to ship `app.css.br` next to `app.css` and rewrite to it. Do not.
+The rewrite needs a `<FilesMatch "\.br$">` block to attach
+`Content-Encoding: br`, and on cPanel's LiteSpeed that block is matched against
+the *requested* path rather than the rewritten one. The header is never
+attached, the browser receives brotli bytes labelled `text/css`, and it drops
+the stylesheet and the script bundle without a word — the site renders as raw
+unstyled HTML while every server log line reads `200`.
+
+The output filters compress the same bytes with the server setting
+`Content-Encoding` itself, and hashed filenames mean it happens once per asset
+per visitor.
+
+### If the site ever renders unstyled
+
+That symptom means the browser could not use `/assets/*.css`. Open DevTools →
+Network, reload, and look at the stylesheet request:
+
+- **404** — `dist/assets/` did not upload completely. Re-upload it.
+- **200 but the response body is binary** — something is serving a compressed
+  file without `Content-Encoding`. See above.
+- **blocked by CSP** — a header from outside this file is interfering.
 
 ## Notes
 

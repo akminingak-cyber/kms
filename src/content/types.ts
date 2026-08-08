@@ -46,6 +46,8 @@ export interface Ui {
   relatedIndustries: string;
   onThisPage: string;
   breadcrumbHome: string;
+  /** Accessible name for the breadcrumb landmark itself. */
+  breadcrumbNav: string;
   ctaPrimary: string;
   ctaSecondary: string;
   callUs: string;

@@ -24,6 +24,7 @@ export const ka: LocaleContent = {
     relatedIndustries: 'სად გამოიყენება',
     onThisPage: 'გვერდის სექციები',
     breadcrumbHome: 'მთავარი',
+    breadcrumbNav: 'ნავიგაციის გზა',
     ctaPrimary: 'პროექტის განხილვა',
     ctaSecondary: 'მომსახურებების ნახვა',
     callUs: 'დარეკვა',

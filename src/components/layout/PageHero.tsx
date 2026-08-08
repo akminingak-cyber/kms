@@ -15,7 +15,9 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
   const ui = useUi();
 
   return (
-    <nav aria-label={ui.breadcrumbHome}>
+    // The landmark is named for what it is, not for its first link — labelling
+    // it "Home" made a screen reader announce "Home navigation" on every page.
+    <nav aria-label={ui.breadcrumbNav}>
       <ol className="flex flex-wrap items-center gap-1.5 text-caption text-content-tertiary">
         <li>
           <Link to={path(ROUTES.home)} className="transition-colors duration-fast hover:text-content-primary">

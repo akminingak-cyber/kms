@@ -96,7 +96,10 @@ export function Footer() {
                     >
                       <Icon name={channel.icon} className="mt-1 h-4 w-4 shrink-0 text-accent-400" />
                       <span className="flex flex-col">
-                        <span className="text-caption uppercase tracking-[0.1em] text-content-tertiary/80">
+                        {/* Full tertiary, not tertiary/80: the 80% variant
+                            lands at 4.38:1 on the footer surface, just under
+                            the 4.5:1 this 13px text needs. */}
+                        <span className="text-caption uppercase tracking-[0.1em] text-content-tertiary">
                           {channel.label}
                         </span>
                         <span>{channel.value}</span>

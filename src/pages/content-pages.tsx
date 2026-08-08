@@ -1132,8 +1132,12 @@ export function NotFoundPage() {
                 {ui.allServices}
               </Button>
             </div>
-            <nav aria-label={content.nav.services} className="mt-4 flex flex-wrap gap-2">
-              {content.services.slice(0, 6).map((service) => (
+            {/* Labelled `allServices`, not `nav.services`: the footer already
+                has a navigation landmark called "Services", and two landmarks
+                sharing an accessible name are indistinguishable to anyone
+                navigating by landmark. */}
+            <nav aria-label={ui.allServices} className="mt-4 flex flex-wrap gap-2">
+              {content.services.map((service) => (
                 <Link
                   key={service.slug}
                   to={path(ROUTES.service(service.slug))}

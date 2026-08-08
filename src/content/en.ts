@@ -24,6 +24,7 @@ export const en: LocaleContent = {
     relatedIndustries: 'Where it applies',
     onThisPage: 'On this page',
     breadcrumbHome: 'Home',
+    breadcrumbNav: 'Breadcrumb',
     ctaPrimary: 'Discuss your project',
     ctaSecondary: 'Explore services',
     callUs: 'Call us',

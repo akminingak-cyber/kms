@@ -11,6 +11,7 @@
  * and the server rules cannot disagree with each other.
  */
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -31,6 +32,19 @@ const {
 } = await import(pathToFileURL(path.join(SSR, 'entry-server.js')).href);
 
 const template = readFileSync(path.join(DIST, 'index.html'), 'utf8');
+
+/**
+ * CSP hashes for the inline scripts in the shell.
+ *
+ * script-src is deliberately free of 'unsafe-inline' — that exemption is the
+ * whole point of the policy. An inline script therefore has to be allowed by
+ * its exact hash, computed here from the bytes that actually ship. Get this
+ * wrong and the browser blocks the script and logs a CSP violation on every
+ * page load, which is easy to miss because the page still renders.
+ */
+const inlineScriptHashes = [...template.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+  (match) => `'sha256-${createHash('sha256').update(match[1], 'utf8').digest('base64')}'`,
+);
 
 /* -------------------------------------------------------------------------- */
 /* Asset discovery — chunk names carry a content hash, so they are looked up   */
@@ -187,7 +201,7 @@ function buildHtaccess() {
   // Plausible is cookieless and first-party-only in what it stores, but the
   // script and its event endpoint are still a separate origin, so both have to
   // be named. When analytics is switched off these entries vanish entirely.
-  const scriptSrc = ["'self'", analyticsOrigin].filter(Boolean).join(' ');
+  const scriptSrc = ["'self'", ...inlineScriptHashes, analyticsOrigin].filter(Boolean).join(' ');
   const connectSrc = ["'self'", 'https://api.web3forms.com', analyticsOrigin].filter(Boolean).join(' ');
 
   return `# KMS — Apache / cPanel configuration

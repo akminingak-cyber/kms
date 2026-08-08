@@ -13,6 +13,33 @@ import zlib from 'node:zlib';
 const ROOT = path.join(process.cwd(), 'dist');
 const PORT = Number(process.argv[2] ?? 4173);
 
+/**
+ * Replays the security headers from the generated .htaccess.
+ *
+ * Without this the local server is more permissive than production, and a
+ * Content-Security-Policy mistake — an inline script whose hash is missing, say
+ * — passes every local check and only shows up as a console error on the live
+ * site, where the page still renders and nothing looks broken.
+ */
+function securityHeaders() {
+  const htaccess = path.join(ROOT, '.htaccess');
+  if (!fs.existsSync(htaccess)) return {};
+  const source = fs.readFileSync(htaccess, 'utf8');
+  const headers = {};
+  for (const [, name, value] of source.matchAll(
+    /^\s*Header always set ([\w-]+) "([^"]*)"/gm,
+  )) {
+    // HSTS is deliberately skipped: telling a browser to force HTTPS on
+    // localhost for a year would break every other local project on this
+    // machine, and it is not what we are testing here.
+    if (name.toLowerCase() === 'strict-transport-security') continue;
+    headers[name] = value;
+  }
+  return headers;
+}
+
+const SECURITY = securityHeaders();
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -61,7 +88,7 @@ http
     }
 
     const ext = path.extname(file);
-    const headers = { 'Content-Type': MIME[ext] ?? 'application/octet-stream' };
+    const headers = { 'Content-Type': MIME[ext] ?? 'application/octet-stream', ...SECURITY };
 
     // Compressed on the fly, exactly as the output filters in .htaccess do —
     // nothing is served from a pre-compressed twin on disk.

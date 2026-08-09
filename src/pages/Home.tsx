@@ -77,7 +77,15 @@ function Hero() {
 
           {/* The hero illustration is the largest element above the fold, so it
               loads eagerly — everything further down stays lazy. */}
-          <Figure name="heroDiagram" priority sizes="(min-width: 1024px) 46vw, 100vw" />
+          {/* Measured: the hero figure settles at 579px once the container hits
+              its 1280px cap, so 46vw over-asks on wide screens and pulls a file
+              twice the size of the slot. This is the LCP image — the difference
+              is the whole first paint. */}
+          <Figure
+            name="heroDiagram"
+            priority
+            sizes="(min-width: 1400px) 580px, (min-width: 1024px) 46vw, 100vw"
+          />
         </div>
 
         <p className="mt-14 flex items-center gap-2 text-caption uppercase tracking-[0.14em] text-content-tertiary">

@@ -14,10 +14,20 @@
  * Georgian one, so each page downloads only what it actually draws. Nothing is
  * requested from a third-party CDN, which is what lets the privacy policy state
  * that no data reaches anyone but the form processor. */
+/*
+ * `optional`, not `swap`. Both faces are preloaded and small, so in practice the
+ * real font wins the race and is used — but on a slow first load `swap` let the
+ * fallback paint first and then reflowed the page underneath the reader. It cost
+ * 0.06 CLS, almost all of it one 108px jump in the Georgian hero headline, whose
+ * fallback runs ~9% narrower and so wrapped to fewer lines. `optional` tells the
+ * browser to keep whatever it painted for that load rather than reflow, which
+ * fixes it on every platform instead of only the ones whose fallback metrics we
+ * could measure.
+ */
 @font-face {
   font-family: 'Inter Variable';
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   font-weight: 100 900;
   src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2')
     format('woff2-variations');
@@ -28,7 +38,7 @@
 @font-face {
   font-family: 'Noto Sans Georgian Variable';
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   font-weight: 100 900;
   src: url('@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-georgian-wght-normal.woff2')
     format('woff2-variations');

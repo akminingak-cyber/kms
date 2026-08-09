@@ -39,10 +39,16 @@ import type { IllustrationName } from '../components/media/illustrations';
  *
  *  3. Update `alt` to describe the new photo in both languages. Alt text lives
  *     next to the asset precisely so it cannot be forgotten when the asset
- *     changes — a stale alt is worse than none.
+ *     changes — a stale alt is worse than none, and nothing in the type system
+ *     will catch it for you. This is the step people skip.
  *
  * Nothing else needs touching: <Figure> handles the <picture> element, the
  * aspect ratio, lazy loading and decoding for you.
+ *
+ * This path is tested, not assumed: swapping a slot to a .jpg with a .webp
+ * beside it produces a <picture> whose <source> the browser honours — it
+ * fetches the WebP alone, never both — with width/height on the <img> so the
+ * space is reserved before it arrives, and loading="lazy" below the fold.
  */
 
 export type MediaAsset =
@@ -113,6 +119,26 @@ export const MEDIA: Record<string, MediaSlot> = {
     alt: {
       ka: 'პროექტის ჩაბარების დოკუმენტაცია — სქემები, პორტების რეესტრი და ნიშნვის სისტემა',
       en: 'Project handover documentation — diagrams, port register and labelling scheme',
+    },
+    ratio: '4/3',
+  },
+
+  /** About page — the "one accountable supplier" argument, drawn. */
+  accountability: {
+    asset: { kind: 'illustration', name: 'SingleVendor' },
+    alt: {
+      ka: 'შედარება — ოთხი ცალკეული კონტრაქტორი, რომელთა შორის პასუხისმგებლობის ხარვეზებია, და ერთი გუნდი, რომელიც მთელ სისტემაზე აგებს პასუხს',
+      en: 'A comparison — four separate contractors with accountability gaps between them, against one team answerable for the whole system',
+    },
+    ratio: '4/3',
+  },
+
+  /** Process page — six stages and the artefact each one hands over. */
+  processTimeline: {
+    asset: { kind: 'illustration', name: 'ProcessTimeline' },
+    alt: {
+      ka: 'პროექტის ექვსი ეტაპი ერთ ღერძზე — კონსულტაციიდან მხარდაჭერამდე, თითოეულის ქვეშ მითითებული დოკუმენტით, რომელსაც იღებთ',
+      en: 'Six project stages on one axis — from consultation to support, each marked with the document it hands over',
     },
     ratio: '4/3',
   },

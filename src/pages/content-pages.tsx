@@ -81,9 +81,17 @@ export function AboutPage() {
 
       <Section scheme="light" tone="raised">
         <Container>
-          <div className="flex flex-col gap-9">
-            <SectionHeading heading={about.mission.heading} />
-            <FeatureGrid items={about.mission.items} columns={3} />
+          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            {/* The page's central claim is that one accountable supplier beats
+                coordinating four. Drawing it makes the claim checkable instead
+                of something a visitor has to take on trust from prose. */}
+            <Reveal>
+              <Figure name="accountability" />
+            </Reveal>
+            <div className="flex flex-col gap-9">
+              <SectionHeading heading={about.mission.heading} className="max-w-none" />
+              <FeatureGrid items={about.mission.items} columns={2} />
+            </div>
           </div>
         </Container>
       </Section>
@@ -718,7 +726,14 @@ export function ProcessPage() {
 
       <Section scheme="light" tone="raised">
         <Container>
-          <StepList steps={process.steps} />
+          <div className="flex flex-col gap-12">
+            {/* The six stages at a glance before the detail, so a reader can
+                see the shape of the engagement without reading all of it. */}
+            <Reveal>
+              <Figure name="processTimeline" ratio="16/9" />
+            </Reveal>
+            <StepList steps={process.steps} />
+          </div>
         </Container>
       </Section>
 

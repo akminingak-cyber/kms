@@ -14,6 +14,7 @@
 
 import { SERVICE_ILLUSTRATIONS } from './service-illustrations';
 import { INDUSTRY_ILLUSTRATIONS } from './industry-illustrations';
+import { ARGUMENT_ILLUSTRATIONS } from './argument-illustrations';
 
 const stroke = 'rgb(var(--c-line) / 0.14)';
 const strokeStrong = 'rgb(var(--c-line) / 0.24)';
@@ -380,6 +381,7 @@ export const ILLUSTRATIONS = {
   HandoverDocs,
   ...SERVICE_ILLUSTRATIONS,
   ...INDUSTRY_ILLUSTRATIONS,
+  ...ARGUMENT_ILLUSTRATIONS,
 } as const;
 
 export type IllustrationName = keyof typeof ILLUSTRATIONS;

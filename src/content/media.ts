@@ -183,6 +183,73 @@ export const MEDIA: Record<string, MediaSlot> = {
     },
     ratio: '4/3',
   },
+
+  /* ---- One per industry, keyed by slug ----------------------------------- */
+
+  'industry:healthcare': {
+    asset: { kind: 'illustration', name: 'ClinicFloor' },
+    alt: {
+      ka: 'კლინიკის სართულის გეგმა — კრიტიკული ოთახები ორ დამოუკიდებელ კვებაზე, კამერები მხოლოდ საერთო დერეფანში',
+      en: 'Clinic floor plan — critical rooms on two independent power feeds, cameras limited to the shared corridor',
+    },
+    ratio: '4/3',
+  },
+  'industry:corporate': {
+    asset: { kind: 'illustration', name: 'OfficeFloor' },
+    alt: {
+      ka: 'საოფისე სართული — Wi-Fi დაფარვა სიმჭიდროვის მიხედვით დაგეგმილი, სათათბირო ოთახები და ბარათით შესვლა',
+      en: 'Office floor — Wi-Fi coverage planned for user density, meeting rooms and badge-controlled entry',
+    },
+    ratio: '4/3',
+  },
+  'industry:hospitality': {
+    asset: { kind: 'illustration', name: 'HotelSection' },
+    alt: {
+      ka: 'სასტუმროს ჭრილი — ნომრები ბარათის ჩამრთველით, ცარიელი ნომრები ავტომატურად ეკონომ-რეჟიმზე, ლობის ვიდეოკონტროლი',
+      en: 'Hotel section — rooms with card switches, empty rooms dropping to eco automatically, lobby video coverage',
+    },
+    ratio: '4/3',
+  },
+  'industry:education': {
+    asset: { kind: 'illustration', name: 'CampusClassrooms' },
+    alt: {
+      ka: 'საკლასო ოთახები ერთიანი კაბელგაყვანილობით და ორი იზოლირებული ქსელი — მოსწავლეების და ადმინისტრაციის',
+      en: 'Classrooms on one cable plant with two isolated networks — student and administrative',
+    },
+    ratio: '4/3',
+  },
+  'industry:industrial': {
+    asset: { kind: 'illustration', name: 'PlantElevation' },
+    alt: {
+      ka: 'საწარმოს ხედი — დალუქული IP66 კარადა, ოპტიკური ხაზი ოფისამდე, რეზერვირებული რგოლი და პერიმეტრის კამერები',
+      en: 'Plant elevation — sealed IP66 enclosure, fibre run to the office, redundant ring and perimeter cameras',
+    },
+    ratio: '4/3',
+  },
+  'industry:government': {
+    asset: { kind: 'illustration', name: 'SecureZones' },
+    alt: {
+      ka: 'კონცენტრული უსაფრთხოების ზონები კონტროლირებადი გადასასვლელებით და უცვლელი მოვლენების ჟურნალი',
+      en: 'Concentric security zones with controlled crossings and an immutable event log',
+    },
+    ratio: '4/3',
+  },
+  'industry:retail': {
+    asset: { kind: 'illustration', name: 'StoreFloor' },
+    alt: {
+      ka: 'მაღაზიის გეგმა — სალაროების იზოლირებული ქსელი, თითო სალაროზე კამერა, შემსვლელთა დათვლა და სტუმრის Wi-Fi ცალკე',
+      en: 'Store plan — isolated till network, a camera per till, entrance people counting and guest Wi-Fi kept separate',
+    },
+    ratio: '4/3',
+  },
+  'industry:residential': {
+    asset: { kind: 'illustration', name: 'VillaSite' },
+    alt: {
+      ka: 'ვილის ნაკვეთის გეგმა — ჭიშკარი ვიდეო-დომოფონით, პერიმეტრის დაცვა, სარწყავი ზონები და ერთი მართვის პანელი',
+      en: 'Villa site plan — gate with video intercom, perimeter detection, irrigation zones and a single control panel',
+    },
+    ratio: '4/3',
+  },
 };
 
 export type MediaKey = string;
@@ -190,5 +257,11 @@ export type MediaKey = string;
 /** The illustration for a service page, or undefined if it has none yet. */
 export function serviceMedia(slug: string): MediaKey | undefined {
   const key = `service:${slug}`;
+  return key in MEDIA ? key : undefined;
+}
+
+/** The illustration for an industry page, or undefined if it has none yet. */
+export function industryMedia(slug: string): MediaKey | undefined {
+  const key = `industry:${slug}`;
   return key in MEDIA ? key : undefined;
 }

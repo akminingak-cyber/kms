@@ -7,7 +7,7 @@ import { breadcrumbs, faqPage, localBusiness, service as serviceLd, webPage } fr
 import { PageHero, Breadcrumbs } from '../components/layout/PageHero';
 import { CtaSection } from '../components/layout/CtaSection';
 import { Figure } from '../components/media/Figure';
-import { serviceMedia } from '../content/media';
+import { industryMedia, serviceMedia } from '../content/media';
 import { ContactForm } from '../components/forms/ContactForm';
 import { Icon } from '../components/ui/Icon';
 import {
@@ -391,6 +391,9 @@ export function IndustriesIndexPage() {
 
       <Section scheme="light">
         <Container>
+          {/* The grid is the whole section, so without this the card headings
+              (h3) would follow the hero's h1 with no h2 between them. */}
+          <h2 className="sr-only">{nav.industries}</h2>
           <IndustryGrid industries={content.industries} />
         </Container>
       </Section>
@@ -417,6 +420,7 @@ export function IndustryDetailPage() {
   if (!industry) return <NotFoundPage />;
 
   const route = ROUTES.industry(industry.slug);
+  const illustration = industryMedia(industry.slug);
   const services = content.services.filter((item) => industry.services.includes(item.slug));
 
   return (
@@ -443,15 +447,25 @@ export function IndustryDetailPage() {
 
       <Section scheme="light">
         <Container>
-          <div className="flex flex-col gap-6">
-            <SectionHeading heading={industry.context.heading} className="max-w-none" />
-            <Reveal delay={80} className="flex max-w-3xl flex-col gap-5">
-              {industry.context.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="text-body-md text-content-secondary">
-                  {paragraph}
-                </p>
-              ))}
-            </Reveal>
+          <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div className="flex flex-col gap-6">
+              <SectionHeading heading={industry.context.heading} className="max-w-none" />
+              <Reveal delay={80} className="flex flex-col gap-5">
+                {industry.context.paragraphs.map((paragraph) => (
+                  <p key={paragraph} className="max-w-prose text-body-md text-content-secondary">
+                    {paragraph}
+                  </p>
+                ))}
+              </Reveal>
+            </div>
+
+            {/* What makes this building type different, drawn: a clinic's dual
+                feeds, a hotel's per-room state, a plant's sealed enclosure. */}
+            {illustration && (
+              <Reveal delay={140}>
+                <Figure name={illustration} />
+              </Reveal>
+            )}
           </div>
         </Container>
       </Section>

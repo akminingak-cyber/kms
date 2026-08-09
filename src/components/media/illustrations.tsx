@@ -13,6 +13,7 @@
  */
 
 import { SERVICE_ILLUSTRATIONS } from './service-illustrations';
+import { INDUSTRY_ILLUSTRATIONS } from './industry-illustrations';
 
 const stroke = 'rgb(var(--c-line) / 0.14)';
 const strokeStrong = 'rgb(var(--c-line) / 0.24)';
@@ -378,6 +379,7 @@ export const ILLUSTRATIONS = {
   SmartHomeZones,
   HandoverDocs,
   ...SERVICE_ILLUSTRATIONS,
+  ...INDUSTRY_ILLUSTRATIONS,
 } as const;
 
 export type IllustrationName = keyof typeof ILLUSTRATIONS;

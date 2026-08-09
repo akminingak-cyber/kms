@@ -55,6 +55,54 @@ const MIME = {
   '.webmanifest': 'application/manifest+json',
 };
 
+/**
+ * Walks up from the requested path to the document root and returns the
+ * ErrorDocument of the nearest directory that declares one — Apache's own
+ * resolution order, which is what makes the per-locale 404 work.
+ */
+function errorDocumentFor(url) {
+  const parts = url.split('/').filter(Boolean).slice(0, -1);
+  for (let i = parts.length; i >= 0; i--) {
+    const dir = path.join(ROOT, ...parts.slice(0, i));
+    const file = path.join(dir, '.htaccess');
+    if (fs.existsSync(file)) {
+      const m = fs.readFileSync(file, 'utf8').match(/^\s*ErrorDocument\s+404\s+(\S+)/m);
+      if (m) return m[1].replace(/^\//, '');
+    }
+  }
+  return '404.html';
+}
+
+/**
+ * The Cache-Control that applies to a file, resolved the way Apache does it:
+ * the nearest directory wins, and within a file any <FilesMatch> whose pattern
+ * matches the basename takes precedence over an unscoped rule. Without the
+ * FilesMatch part this replay handed HTML the immutable policy meant for hashed
+ * build output — the exact mistake it exists to catch.
+ */
+function cacheControlFor(file) {
+  const name = path.basename(file);
+  let dir = path.dirname(file);
+  while (dir.startsWith(ROOT)) {
+    const ht = path.join(dir, '.htaccess');
+    if (fs.existsSync(ht)) {
+      const text = fs.readFileSync(ht, 'utf8');
+      let unscoped;
+      for (const m of text.matchAll(
+        /<FilesMatch "([^"]+)">([\s\S]*?)<\/FilesMatch>|^[ \t]*Header set Cache-Control "([^"]*)"/gm,
+      )) {
+        if (m[3]) { unscoped ??= m[3]; continue; }
+        const inner = m[2].match(/Header set Cache-Control "([^"]*)"/);
+        if (inner && new RegExp(m[1]).test(name)) return inner[1];
+      }
+      if (unscoped) return unscoped;
+    }
+    if (dir === ROOT) break;
+    dir = path.dirname(dir);
+  }
+  return undefined;
+}
+
 const send = (res, status, headers, body) => {
   res.writeHead(status, headers);
   res.end(body);
@@ -77,18 +125,22 @@ http
       if (fs.existsSync(candidate)) file = candidate;
       else {
         // A miss returns 404, not a 200 shell — that distinction is the whole
-        // reason the 404 page exists as its own file.
+        // reason the 404 page exists as its own file. Which 404 comes from the
+        // nearest directory's ErrorDocument, the same way Apache resolves it,
+        // so a miss under /en/ answers in English.
         return send(
           res,
           404,
           { 'Content-Type': MIME['.html'] },
-          fs.readFileSync(path.join(ROOT, '404.html')),
+          fs.readFileSync(path.join(ROOT, errorDocumentFor(url))),
         );
       }
     }
 
     const ext = path.extname(file);
     const headers = { 'Content-Type': MIME[ext] ?? 'application/octet-stream', ...SECURITY };
+    const cc = cacheControlFor(file);
+    if (cc) headers['Cache-Control'] = cc;
 
     // Compressed on the fly, exactly as the output filters in .htaccess do —
     // nothing is served from a pre-compressed twin on disk.

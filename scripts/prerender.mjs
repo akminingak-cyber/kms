@@ -139,6 +139,9 @@ function renderHead(head, locale) {
 
 const HTML_LANG = { ka: 'ka-GE', en: 'en' };
 
+/** Every page written, so the asset guard can check all of them, not just one. */
+const emitted = [];
+
 async function emit(url, locale) {
   const { html, head } = await render(url);
 
@@ -150,6 +153,7 @@ async function emit(url, locale) {
   const file = url === '/' ? path.join(DIST, 'index.html') : path.join(DIST, `${url.slice(1)}.html`);
   mkdirSync(path.dirname(file), { recursive: true });
   writeFileSync(file, page);
+  emitted.push(file);
   return file;
 }
 
@@ -326,10 +330,10 @@ Options -Indexes
   ExpiresByType text/css                "access plus 1 year"
   ExpiresByType application/javascript  "access plus 1 year"
   ExpiresByType image/svg+xml           "access plus 1 year"
-  ExpiresByType image/webp              "access plus 1 year"
-  ExpiresByType image/avif              "access plus 1 year"
-  ExpiresByType image/png               "access plus 1 year"
-  ExpiresByType image/jpeg              "access plus 1 year"
+  ExpiresByType image/webp              "access plus 1 day"
+  ExpiresByType image/avif              "access plus 1 day"
+  ExpiresByType image/png               "access plus 1 day"
+  ExpiresByType image/jpeg              "access plus 1 day"
   ExpiresByType font/woff2              "access plus 1 year"
   ExpiresByType text/html               "access plus 0 seconds"
 </IfModule>
@@ -340,9 +344,11 @@ Options -Indexes
     Header append Vary Accept-Encoding
   </FilesMatch>
 
-  # Every one of these carries a content hash in its filename, so a change
-  # produces a new URL and the old one can be cached indefinitely.
-  <FilesMatch "\\.(css|js|svg|woff2|png|jpe?g|webp|avif)$">
+  # Build output carries a content hash in its filename, so a change produces a
+  # new URL and the old one can be cached indefinitely. Photographs under
+  # /images/ do NOT carry a hash — they are meant to be swapped in place — so
+  # they get their own, shorter policy from dist/images/.htaccess.
+  <FilesMatch "\\.(css|js|svg|woff2)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 
@@ -402,14 +408,47 @@ for (const locale of LOCALES) {
   }
 }
 
-// The 404 shell. Apache serves it via ErrorDocument at whatever URL was missed,
-// so it has to stand alone; it carries noindex and no canonical.
-await emit('/404', DEFAULT_LOCALE);
-count += 1;
+// A 404 shell per locale. Apache serves these via ErrorDocument at whatever URL
+// was missed, so each has to stand alone; both carry noindex and no canonical.
+//
+// The English one is not decoration. The language switcher on a 404 links to the
+// other locale at the same path, so the Georgian 404 offers /en/404 — without
+// this file that link fell through to the root ErrorDocument and answered an
+// English visitor in Georgian.
+for (const locale of LOCALES) {
+  await emit(localePath(locale, '/404'), locale);
+  count += 1;
+}
 
 const lastmod = new Date().toISOString().slice(0, 10);
 writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(lastmod));
 writeFileSync(path.join(DIST, '.htaccess'), buildHtaccess());
+
+// Photographs are swapped in place under a stable filename, so they cannot be
+// cached like hashed build output. A day of hard caching keeps them fast, and
+// stale-while-revalidate means the replacement is picked up in the background
+// rather than making anyone wait for it. Per-directory .htaccess rather than an
+// <If> block: this is the form every Apache and LiteSpeed host understands.
+writeFileSync(
+  path.join(DIST, 'images', '.htaccess'),
+  ['# These filenames are stable by design — replacing a photograph reuses its',
+   '# name — so they must revalidate. The parent .htaccess caches hashed build',
+   '# output for a year; this overrides that for this directory only.',
+   '<IfModule mod_headers.c>',
+   '  Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"',
+   '</IfModule>',
+   ''].join('\n'),
+);
+
+// ErrorDocument is inherited, not path-aware, so a miss under /en/ would answer
+// in Georgian. A second .htaccess in that directory overrides it for the subtree.
+writeFileSync(
+  path.join(DIST, 'en', '.htaccess'),
+  ['# Answer misses under /en/ in English. Everything else is inherited from the',
+   '# document root.',
+   'ErrorDocument 404 /en/404.html',
+   ''].join('\n'),
+);
 
 /* -------------------------------------------------------------------------- */
 /* Guard: does every asset the HTML asks for actually exist?                   */
@@ -418,14 +457,25 @@ writeFileSync(path.join(DIST, '.htaccess'), buildHtaccess());
 /* unstyled — so the build checks rather than trusting.                        */
 /* -------------------------------------------------------------------------- */
 
-const referenced = new Set(
-  [...readFileSync(path.join(DIST, 'index.html'), 'utf8').matchAll(/\/assets\/[A-Za-z0-9._-]+/g)].map(
-    (m) => m[0],
-  ),
-);
-const missing = [...referenced].filter((ref) => !existsSync(path.join(DIST, ref.slice(1))));
+const referenced = new Map(); // ref -> the first page that asked for it
+for (const page of emitted) {
+  const html = readFileSync(page, 'utf8');
+  // Build output, photographs, and the root-level static files (favicons,
+  // manifest). Anything the browser will fetch by path.
+  for (const m of html.matchAll(/(?:\/assets\/|\/images\/)[A-Za-z0-9._-]+/g)) {
+    if (!referenced.has(m[0])) referenced.set(m[0], page.slice(DIST.length));
+  }
+  for (const m of html.matchAll(/(?:href|src)="(\/[A-Za-z0-9._-]+\.[a-z0-9]{2,12})"/g)) {
+    if (!referenced.has(m[1])) referenced.set(m[1], page.slice(DIST.length));
+  }
+}
+const missing = [...referenced].filter(([ref]) => !existsSync(path.join(DIST, ref.slice(1))));
 if (missing.length > 0) {
-  console.error(`✗ HTML references assets that were not built:\n  ${missing.join('\n  ')}`);
+  console.error(
+    `✗ HTML references files that were not built:\n${missing
+      .map(([ref, from]) => `  ${ref}   (referenced by ${from})`)
+      .join('\n')}`,
+  );
   process.exit(1);
 }
 

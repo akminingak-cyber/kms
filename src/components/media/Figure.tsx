@@ -133,7 +133,13 @@ export function Figure({
           height={height}
           loading={priority ? 'eager' : 'lazy'}
           decoding={priority ? 'sync' : 'async'}
-          fetchPriority={priority ? 'high' : undefined}
+          // React 18 does not map the camelCase `fetchPriority` to a DOM
+          // attribute — it warns and drops it. The lowercase spelling is the one
+          // that actually reaches the HTML, and the cast is what lets the React
+          // 18 typings accept it.
+          {...({
+            fetchpriority: priority ? 'high' : undefined,
+          } as React.ImgHTMLAttributes<HTMLImageElement>)}
           className="h-full w-full object-cover"
         />
       </picture>

@@ -85,40 +85,64 @@ export interface MediaSlot {
 export const MEDIA: Record<string, MediaSlot> = {
   /** Home hero, right-hand side. */
   heroDiagram: {
-    asset: { kind: 'illustration', name: 'NetworkTopology' },
+    asset: {
+      kind: 'image',
+      src: '/images/hero-building.jpg',
+      formats: ['webp'],
+      width: 405,
+      height: 270,
+    },
     alt: {
-      ka: 'დაკავშირებული ინფრასტრუქტურის ტოპოლოგიის სქემა — ობიექტები, ქსელის კვანძები და მათ შორის კავშირები',
-      en: 'Connected infrastructure topology — sites, network nodes and the links between them',
+      ka: 'თანამედროვე საოფისე შენობა შებინდებისას — განათებული სართულები მინის ფასადს მიღმა',
+      en: 'A modern office building at dusk, lit floors behind a glazed facade',
     },
     ratio: '4/3',
   },
 
   /** Home "who we are", and the About page. */
   teamPhoto: {
-    asset: { kind: 'illustration', name: 'RackElevation' },
+    asset: {
+      kind: 'image',
+      src: '/images/team-cabling.jpg',
+      formats: ['webp'],
+      width: 372,
+      height: 248,
+    },
     alt: {
-      ka: 'სერვერული კარადის სქემა — პაჩ-პანელები, კომუტატორები, უწყვეტი კვების წყარო და კაბელების ორგანიზაცია',
-      en: 'Server rack elevation — patch panels, switches, UPS and cable management',
+      ka: 'ტექნიკოსი შეკიდულ ჭერქვეშ კაბელგატარში ლურჯ კაბელებს ალაგებს',
+      en: 'A technician dressing blue cable into overhead containment above a suspended ceiling',
     },
     ratio: '4/3',
   },
 
-  /** Home "smart systems", and the smart-home service page. */
+  /** Home "smart systems". */
   smartPhoto: {
-    asset: { kind: 'illustration', name: 'SmartHomeZones' },
+    asset: {
+      kind: 'image',
+      src: '/images/smart-living.jpg',
+      formats: ['webp'],
+      width: 368,
+      height: 245,
+    },
     alt: {
-      ka: 'ჭკვიანი სახლის ზონების გეგმა — განათება, კლიმატი, დაცვა და ფარდები ერთ სცენარში',
-      en: 'Smart home zone plan — lighting, climate, security and blinds in a single scenario',
+      ka: 'მისაღები ოთახი კედელზე დამონტაჟებული მართვის პანელით — განათება, კლიმატი და დაცვა ერთ ეკრანზე',
+      en: 'A living room with a wall-mounted control panel — lighting, climate and security on one screen',
     },
     ratio: '4/3',
   },
 
   /** Process page, and the project handover section. */
   deliveryPhoto: {
-    asset: { kind: 'illustration', name: 'HandoverDocs' },
+    asset: {
+      kind: 'image',
+      src: '/images/handover-drawing.jpg',
+      formats: ['webp'],
+      width: 380,
+      height: 253,
+    },
     alt: {
-      ka: 'პროექტის ჩაბარების დოკუმენტაცია — სქემები, პორტების რეესტრი და ნიშნვის სისტემა',
-      en: 'Project handover documentation — diagrams, port register and labelling scheme',
+      ka: 'ხელში გაშლილი შესრულებული ნახაზები ობიექტის ჩაბარებისას',
+      en: 'As-built drawings held open at handover',
     },
     ratio: '4/3',
   },
@@ -146,66 +170,114 @@ export const MEDIA: Record<string, MediaSlot> = {
   /* ---- One per service, keyed by slug ------------------------------------ */
 
   'service:it-infrastructure': {
-    asset: { kind: 'illustration', name: 'ServerRoom' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-infrastructure.jpg',
+      formats: ['webp'],
+      width: 405,
+      height: 270,
+    },
     alt: {
-      ka: 'სერვერული ოთახის გეგმა — რეკების ორი რიგი, გამიჯნული ცივი დერეფანი, UPS, გაგრილება და ზედა კაბელგატარი',
-      en: 'Server room plan — two rack rows, contained cold aisle, UPS, cooling and overhead cable tray',
+      ka: 'სერვერული კარადების რიგი — კომუტატორები და მოწესრიგებული პაჩ-კაბელები',
+      en: 'A row of server cabinets — switches and dressed patch leads',
     },
     ratio: '4/3',
   },
   'service:networking': {
-    asset: { kind: 'illustration', name: 'NetworkSegments' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-networking.jpg',
+      formats: ['webp'],
+      width: 362,
+      height: 241,
+    },
     alt: {
-      ka: 'ქსელის სეგმენტაცია — ფაირვოლი, ბირთვის კომუტატორი და ერთმანეთისგან იზოლირებული VLAN-ები პერსონალის, სტუმრების, ვიდეოკონტროლისა და შენობის სისტემებისთვის',
-      en: 'Network segmentation — firewall, core switch and isolated VLANs for staff, guests, video surveillance and building systems',
+      ka: 'პაჩ-პანელი დანომრილი პორტებით და თანაბრად გაყვანილი ლურჯი კაბელებით',
+      en: 'A patch panel with numbered ports and evenly dressed blue patch leads',
     },
     ratio: '4/3',
   },
   'service:cctv': {
-    asset: { kind: 'illustration', name: 'CameraCoverage' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-cctv.jpg',
+      formats: ['webp'],
+      width: 405,
+      height: 270,
+    },
     alt: {
-      ka: 'კამერების დაფარვის რუკა — ხედვის კონუსები გადაფარვით, აღნიშნული უხილავი ზონა, NVR არქივით და დაცული დისტანციური წვდომა',
-      en: 'Camera coverage plan — overlapping fields of view, a marked blind spot, NVR with retention and secured remote access',
+      ka: 'ვიდეოკამერა ბეტონის სვეტზე, დაცულ კაბელგაყვანილობასთან, საწარმოო სივრცის ხედით',
+      en: 'A bullet camera on a concrete column beside protected cabling, overlooking a production space',
     },
     ratio: '4/3',
   },
   'service:access-control': {
-    asset: { kind: 'illustration', name: 'AccessZones' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-access.jpg',
+      formats: ['webp'],
+      width: 362,
+      height: 241,
+    },
     alt: {
-      ka: 'დაშვების ზონები უფლებების დონეების მიხედვით, კონტროლირებადი კარები წამკითხველებით და მოვლენების ჟურნალი',
-      en: 'Access zones by permission level, controlled doors with readers, and the event log',
+      ka: 'ხელი ბარათს წამკითხველთან მიიტანს კონტროლირებად კართან',
+      en: 'A card presented to a reader at a controlled door',
     },
     ratio: '4/3',
   },
   'service:smart-home': {
-    asset: { kind: 'illustration', name: 'SmartHomeZones' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-smart-home.jpg',
+      formats: ['webp'],
+      width: 396,
+      height: 264,
+    },
     alt: {
-      ka: 'ჭკვიანი სახლის ზონების გეგმა — განათება, კლიმატი, დაცვა და ფარდები ერთ სცენარში',
-      en: 'Smart home zone plan — lighting, climate, security and blinds in a single scenario',
+      ka: 'ჭკვიანი სახლის მართვის პანელი მისაღებ ოთახში — განათება, დაცვა და კლიმატი ერთ ადგილას',
+      en: 'A smart home control panel in a living room — lighting, security and climate in one place',
     },
     ratio: '4/3',
   },
   'service:smart-building': {
-    asset: { kind: 'illustration', name: 'BuildingSystems' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-smart-building.jpg',
+      formats: ['webp'],
+      width: 327,
+      height: 218,
+    },
     alt: {
-      ka: 'შენობის ჭრილი — სართულები განათებით, ვენტილაციითა და სენსორებით, ერთიან მართვის სისტემასთან დაკავშირებული',
-      en: 'Building section — floors with lighting, ventilation and sensors, all tied to one management layer',
+      ka: 'შენობის საინჟინრო სისტემები ჭერქვეშ — ვენტილაციის არხები, კაბელგატარი და მილგაყვანილობა',
+      en: 'Building services above the ceiling — ventilation ducts, cable containment and pipework',
     },
     ratio: '4/3',
   },
   'service:audio-visual': {
-    asset: { kind: 'illustration', name: 'MeetingRoom' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-audio-visual.jpg',
+      formats: ['webp'],
+      width: 362,
+      height: 241,
+    },
     alt: {
-      ka: 'სათათბირო ოთახის სქემა — ეკრანი, ჭერის მიკროფონი აღების ზონით, დინამიკები და ერთი ღილაკით შეხვედრის დაწყება',
-      en: 'Meeting room layout — display, ceiling microphone with its pickup pattern, speakers and one-touch meeting join',
+      ka: 'სათათბირო ოთახი დიდი ეკრანით, ვიდეო-პანელით და მაგიდის საკონფერენციო მოწყობილობით',
+      en: 'A meeting room with a large display, video bar and a table conferencing unit',
     },
     ratio: '4/3',
   },
   'service:managed-it': {
-    asset: { kind: 'illustration', name: 'MonitoringDashboard' },
+    asset: {
+      kind: 'image',
+      src: '/images/svc-managed-it.jpg',
+      formats: ['webp'],
+      width: 396,
+      height: 264,
+    },
     alt: {
-      ka: 'მონიტორინგის პანელი — 24-საათიანი ხელმისაწვდომობა, შეტყობინებების ნაკადი და შეთანხმებული რეაგირების ვადა',
-      en: 'Monitoring dashboard — 24-hour uptime, alert feed and the agreed response time',
+      ka: 'მონიტორინგის სამუშაო ადგილი — კამერების ვიდეოკედელი და ოპერატორის ეკრანები',
+      en: 'A monitoring position — a wall of camera feeds and operator screens',
     },
     ratio: '4/3',
   },

@@ -38,7 +38,15 @@ export function ServiceGrid({
             <Link to={path(ROUTES.service(service.slug))} className={CARD_BASE}>
               {media && (
                 <div className="relative border-b border-line/10 bg-surface-2/40">
-                  <Figure name={media} thumb />
+                  {/* Two columns inside a 1280px container, so the card stops
+                      growing at 630px however wide the window gets. Without
+                      this the browser assumes 45vw and pulls a file twice the
+                      size it can use. */}
+                  <Figure
+                    name={media}
+                    thumb
+                    sizes="(min-width: 1400px) 630px, (min-width: 640px) 46vw, 90vw"
+                  />
                 </div>
               )}
               <div className="flex flex-1 flex-col gap-4 p-6">
@@ -84,7 +92,13 @@ export function IndustryGrid({
             <Link to={path(ROUTES.industry(industry.slug))} className={CARD_BASE}>
               {media && (
                 <div className="relative border-b border-line/10 bg-surface-2/40">
-                  <Figure name={media} thumb />
+                  {/* Measured, not guessed: four across in a 1280px container
+                      gives a 303px card at every width above 1400. */}
+                  <Figure
+                    name={media}
+                    thumb
+                    sizes="(min-width: 1400px) 304px, (min-width: 1024px) 21vw, (min-width: 640px) 44vw, 90vw"
+                  />
                 </div>
               )}
               <div className="flex flex-1 flex-col gap-4 p-6">

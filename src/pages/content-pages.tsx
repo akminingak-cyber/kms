@@ -7,6 +7,7 @@ import { breadcrumbs, faqPage, localBusiness, service as serviceLd, webPage } fr
 import { PageHero, Breadcrumbs } from '../components/layout/PageHero';
 import { CtaSection } from '../components/layout/CtaSection';
 import { Figure } from '../components/media/Figure';
+import { serviceMedia } from '../content/media';
 import { ContactForm } from '../components/forms/ContactForm';
 import { Icon } from '../components/ui/Icon';
 import {
@@ -201,6 +202,7 @@ export function ServiceDetailPage() {
   if (!service) return <NotFoundPage />;
 
   const route = ROUTES.service(service.slug);
+  const illustration = serviceMedia(service.slug);
   const related = content.services.filter((item) => service.related.includes(item.slug));
   const industries = content.industries.filter((item) => service.industries.includes(item.slug));
 
@@ -229,26 +231,36 @@ export function ServiceDetailPage() {
 
       <Section scheme="light">
         <Container>
-          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="flex flex-col gap-6">
-              <SectionHeading heading={service.overview.heading} className="max-w-none" />
-              <Reveal delay={80} className="flex flex-col gap-5">
-                {service.overview.paragraphs.map((paragraph) => (
-                  <p key={paragraph} className="max-w-prose text-body-md text-content-secondary">
-                    {paragraph}
-                  </p>
-                ))}
-              </Reveal>
+          <div className="flex flex-col gap-12">
+            <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div className="flex flex-col gap-6">
+                <SectionHeading heading={service.overview.heading} className="max-w-none" />
+                <Reveal delay={80} className="flex flex-col gap-5">
+                  {service.overview.paragraphs.map((paragraph) => (
+                    <p key={paragraph} className="max-w-prose text-body-md text-content-secondary">
+                      {paragraph}
+                    </p>
+                  ))}
+                </Reveal>
+              </div>
+
+              {/* The engineering this service delivers, drawn. A service page
+                  that argues for considered design and shows nothing was the
+                  weakest thing on the site. */}
+              {illustration && (
+                <Reveal delay={140}>
+                  <Figure name={illustration} />
+                </Reveal>
+              )}
             </div>
-            <div className="flex flex-col gap-4">
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {service.overview.highlights.map((item, index) => (
-                <Reveal key={item.title} delay={index * 60}>
-                  <div className="flex gap-4 rounded-lg border border-line/10 bg-surface-1/50 p-5">
-                    <Icon name={item.icon} className="mt-0.5 h-5 w-5 shrink-0 text-accent-400" />
-                    <div className="flex flex-col gap-1.5">
-                      <h3 className="text-h6 font-semibold text-content-primary">{item.title}</h3>
-                      <p className="text-body-sm text-content-tertiary">{item.description}</p>
-                    </div>
+                <Reveal key={item.title} delay={index * 60} className="h-full">
+                  <div className="flex h-full flex-col gap-3 rounded-lg border border-line/10 bg-surface-1/50 p-5">
+                    <Icon name={item.icon} className="h-5 w-5 shrink-0 text-accent-400" />
+                    <h3 className="text-h6 font-semibold text-content-primary">{item.title}</h3>
+                    <p className="text-body-sm text-content-tertiary">{item.description}</p>
                   </div>
                 </Reveal>
               ))}

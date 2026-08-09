@@ -12,6 +12,8 @@
  * aria-hidden and the SVG itself carries no title.
  */
 
+import { SERVICE_ILLUSTRATIONS } from './service-illustrations';
+
 const stroke = 'rgb(var(--c-line) / 0.14)';
 const strokeStrong = 'rgb(var(--c-line) / 0.24)';
 const accent = 'rgb(var(--c-accent-500))';
@@ -375,6 +377,7 @@ export const ILLUSTRATIONS = {
   RackElevation,
   SmartHomeZones,
   HandoverDocs,
+  ...SERVICE_ILLUSTRATIONS,
 } as const;
 
 export type IllustrationName = keyof typeof ILLUSTRATIONS;

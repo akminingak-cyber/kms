@@ -418,13 +418,22 @@ export function StatGrid({
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item, index) => (
         <Reveal key={item.label} delay={index * 60} className="h-full">
-          <div className="flex h-full flex-col gap-3 rounded-lg border border-line/10 bg-surface-1/50 p-6">
-            {item.icon && <Icon name={item.icon} className="h-5 w-5 text-accent-400" />}
-            <span className="text-display-lg font-extrabold leading-none text-content-primary">
+          <div className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-lg border border-line/10 bg-surface-1/50 p-6 transition-colors duration-base hover:border-primary-400/30">
+            {/* The figure is the point of the card, so it gets the weight: a
+                faint oversized ghost behind it and the accent rule under it. */}
+            <span
+              className="pointer-events-none absolute -right-3 -top-5 select-none text-[7rem] font-extrabold leading-none text-content-primary/[0.045]"
+              aria-hidden="true"
+            >
               {item.value}
             </span>
-            <span className="text-label font-semibold text-content-primary">{item.label}</span>
-            <span className="text-caption text-content-tertiary">{item.description}</span>
+            {item.icon && <Icon name={item.icon} className="relative h-5 w-5 text-accent-400" />}
+            <span className="relative text-display-lg font-extrabold leading-none text-gradient-brand">
+              {item.value}
+            </span>
+            <span className="relative h-px w-10 bg-accent-400/50" aria-hidden="true" />
+            <span className="relative text-label font-semibold text-content-primary">{item.label}</span>
+            <span className="relative text-caption text-content-tertiary">{item.description}</span>
           </div>
         </Reveal>
       ))}

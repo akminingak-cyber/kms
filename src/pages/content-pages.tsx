@@ -172,7 +172,7 @@ export function ServicesIndexPage() {
                   heading={group.title}
                   description={group.description}
                 />
-                <ServiceGrid services={services} />
+                <ServiceGrid services={services} illustrated />
               </div>
             </Container>
           </Section>
@@ -394,7 +394,7 @@ export function IndustriesIndexPage() {
           {/* The grid is the whole section, so without this the card headings
               (h3) would follow the hero's h1 with no h2 between them. */}
           <h2 className="sr-only">{nav.industries}</h2>
-          <IndustryGrid industries={content.industries} />
+          <IndustryGrid industries={content.industries} illustrated />
         </Container>
       </Section>
 
@@ -612,33 +612,46 @@ export function PortfolioPage() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              {visible.map((project, index) => (
-                <Reveal key={project.slug} delay={index * 60} className="h-full">
-                  <article className="flex h-full flex-col gap-5 rounded-lg border border-line/10 bg-surface-1/50 p-7">
-                    <div className="flex items-start justify-between gap-4">
-                      <span className="icon-badge inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
-                        <Icon name={project.icon} className="h-5 w-5" />
-                      </span>
-                      <span className="rounded-sm border border-line/10 bg-surface-2/60 px-2.5 py-1 text-caption text-content-tertiary">
-                        {ui.projectKind[project.kind]}
-                      </span>
-                    </div>
-                    <h2 className="text-h5 font-semibold text-content-primary">{project.name}</h2>
-                    <p className="text-body-sm text-content-secondary">{project.summary}</p>
+              {visible.map((project, index) => {
+                // Each project names the kind of building it is for, so it can
+                // carry that industry's drawing rather than inventing a
+                // per-project one that would claim more specificity than a
+                // reference architecture has.
+                const media = industryMedia(project.industry);
+                return (
+                  <Reveal key={project.slug} delay={index * 60} className="h-full">
+                    <article className="flex h-full flex-col overflow-hidden rounded-lg border border-line/10 bg-surface-1/50">
+                      {media && (
+                        <div className="relative border-b border-line/10 bg-surface-2/40">
+                          <Figure name={media} thumb />
+                          <span className="absolute right-4 top-4 rounded-sm border border-line/10 bg-surface-1/90 px-2.5 py-1 text-caption text-content-secondary backdrop-blur-sm">
+                            {ui.projectKind[project.kind]}
+                          </span>
+                        </div>
+                      )}
 
-                    <div className="flex flex-col gap-2">
-                      <h3 className="text-caption uppercase tracking-[0.1em] text-content-tertiary">
-                        {ui.onThisPage}
-                      </h3>
-                      <TagList items={project.scope} />
-                    </div>
+                      <div className="flex flex-1 flex-col gap-5 p-7">
+                        <span className="icon-badge inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
+                          <Icon name={project.icon} className="h-5 w-5" />
+                        </span>
+                        <h2 className="text-h5 font-semibold text-content-primary">{project.name}</h2>
+                        <p className="text-body-sm text-content-secondary">{project.summary}</p>
 
-                    <div className="mt-auto flex flex-col gap-2">
-                      <CheckList items={project.outcomes} />
-                    </div>
-                  </article>
-                </Reveal>
-              ))}
+                        <div className="flex flex-col gap-2">
+                          <h3 className="text-caption uppercase tracking-[0.1em] text-content-tertiary">
+                            {ui.onThisPage}
+                          </h3>
+                          <TagList items={project.scope} />
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                          <CheckList items={project.outcomes} />
+                        </div>
+                      </div>
+                    </article>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </Container>

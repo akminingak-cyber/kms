@@ -4,6 +4,8 @@ import { useLocale } from '../../i18n/LocaleContext';
 
 const RATIOS = {
   '16/9': 'aspect-[16/9]',
+  /** Card headers. Close to the drawings' own 1.4 ratio, so they fit whole. */
+  '3/2': 'aspect-[3/2]',
   '4/3': 'aspect-[4/3]',
   '1/1': 'aspect-square',
   '3/4': 'aspect-[3/4]',
@@ -36,6 +38,14 @@ interface FigureProps {
   priority?: boolean;
   /** Rendered hint for the browser's image selection. */
   sizes?: string;
+  /**
+   * Card header treatment: no frame of its own, and the drawing sized to fit
+   * whole rather than cropped.
+   *
+   * Decorative by definition — the card's own heading already names the thing,
+   * so this is hidden from assistive tech instead of announcing it twice.
+   */
+  thumb?: boolean;
 }
 
 /**
@@ -47,15 +57,42 @@ interface FigureProps {
  * `role="img"` plus an aria-label rather than an <img>, so assistive tech
  * announces them exactly as it would a photograph.
  */
-export function Figure({ name, className = '', ratio, priority = false, sizes }: FigureProps) {
+export function Figure({
+  name,
+  className = '',
+  ratio,
+  priority = false,
+  sizes,
+  thumb = false,
+}: FigureProps) {
   const locale = useLocale();
   const slot = MEDIA[name] as MediaSlot;
   const alt = slot.alt[locale];
-  const aspect = RATIOS[ratio ?? slot.ratio ?? '4/3'];
-  const frame = `relative w-full overflow-hidden rounded-lg border border-line/10 bg-surface-1/40 ${aspect} ${className}`;
+  const aspect = RATIOS[ratio ?? (thumb ? '3/2' : slot.ratio ?? '4/3')];
+  const frame = thumb
+    ? `relative w-full overflow-hidden ${aspect} ${className}`
+    : `relative w-full overflow-hidden rounded-lg border border-line/10 bg-surface-1/40 ${aspect} ${className}`;
 
   if (slot.asset.kind === 'illustration') {
     const Illustration = ILLUSTRATIONS[slot.asset.name];
+
+    if (thumb) {
+      return (
+        <div className={frame} aria-hidden="true">
+          <div
+            className="pointer-events-none absolute inset-0 bg-grid-faint [background-size:24px_24px]"
+            aria-hidden="true"
+          />
+          {/* Shown whole, with a little padding — no crop and no fade.
+              Cropping cut the annotation along the bottom edge of every
+              drawing, which read as a rendering fault rather than a choice. */}
+          <div className="absolute inset-0 p-3 sm:p-4">
+            <Illustration />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={frame} role="img" aria-label={alt}>
         <div

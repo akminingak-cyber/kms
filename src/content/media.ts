@@ -67,7 +67,7 @@ export interface MediaSlot {
   asset: MediaAsset;
   alt: Record<Locale, string>;
   /** Overrides the ratio the illustration or image would otherwise use. */
-  ratio?: '16/9' | '4/3' | '1/1' | '3/4';
+  ratio?: '16/9' | '3/2' | '4/3' | '1/1' | '3/4';
 }
 
 /**

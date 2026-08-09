@@ -1,66 +1,108 @@
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../i18n/routes';
+import { Figure } from '../media/Figure';
+import { industryMedia, serviceMedia } from '../../content/media';
 import { useLocalePath, useUi } from '../../i18n/LocaleContext';
 import type { Industry, Service } from '../../content/types';
 import { Icon } from './Icon';
 import { Reveal } from './primitives';
 
-export function ServiceGrid({ services }: { services: Service[] }) {
+const CARD_BASE =
+  'group flex h-full flex-col overflow-hidden rounded-lg border border-line/10 bg-surface-1/50 transition-all duration-base ease-out-soft hover:-translate-y-1 hover:border-primary-400/40 hover:shadow-lg';
+
+/**
+ * `illustrated` gives each card the drawing from its detail page as a header
+ * band. It is off in the four-column layouts, where the band would be too
+ * small to read as anything but noise.
+ */
+export function ServiceGrid({
+  services,
+  illustrated = false,
+}: {
+  services: Service[];
+  illustrated?: boolean;
+}) {
   const path = useLocalePath();
   const ui = useUi();
+  // Two across when illustrated. The service groups hold 2, 2, 3 and 1 items,
+  // so a three-column grid would leave a hole in every one of them; two also
+  // gives the drawing enough width to stay readable.
+  const columns = illustrated ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-4';
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {services.map((service, index) => (
-        <Reveal key={service.slug} delay={index * 50} className="h-full">
-          <Link
-            to={path(ROUTES.service(service.slug))}
-            className="panel group flex h-full flex-col gap-4 rounded-lg p-6 transition-all duration-base ease-out-soft hover:-translate-y-1 hover:border-primary-400/40 hover:shadow-lg"
-          >
-            <span className="icon-badge inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
-              <Icon name={service.icon} className="h-5 w-5" />
-            </span>
-            <h3 className="text-h6 font-semibold text-content-primary">{service.name}</h3>
-            <p className="flex-1 text-body-sm text-content-tertiary">{service.summary}</p>
-            <span className="inline-flex items-center gap-1.5 text-caption font-medium text-link">
-              {ui.readMore}
-              <Icon
-                name="arrow-right"
-                className="h-3.5 w-3.5 transition-transform duration-base group-hover:translate-x-0.5"
-              />
-            </span>
-          </Link>
-        </Reveal>
-      ))}
+    <div className={`grid gap-5 ${columns}`}>
+      {services.map((service, index) => {
+        const media = illustrated ? serviceMedia(service.slug) : undefined;
+        return (
+          <Reveal key={service.slug} delay={index * 50} className="h-full">
+            <Link to={path(ROUTES.service(service.slug))} className={CARD_BASE}>
+              {media && (
+                <div className="relative border-b border-line/10 bg-surface-2/40">
+                  <Figure name={media} thumb />
+                </div>
+              )}
+              <div className="flex flex-1 flex-col gap-4 p-6">
+                <span className="icon-badge inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
+                  <Icon name={service.icon} className="h-5 w-5" />
+                </span>
+                <h3 className="text-h6 font-semibold text-content-primary">{service.name}</h3>
+                <p className="flex-1 text-body-sm text-content-tertiary">{service.summary}</p>
+                <span className="inline-flex items-center gap-1.5 text-caption font-medium text-link">
+                  {ui.readMore}
+                  <Icon
+                    name="arrow-right"
+                    className="h-3.5 w-3.5 transition-transform duration-base group-hover:translate-x-0.5"
+                  />
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        );
+      })}
     </div>
   );
 }
 
-export function IndustryGrid({ industries }: { industries: Industry[] }) {
+export function IndustryGrid({
+  industries,
+  illustrated = false,
+}: {
+  industries: Industry[];
+  illustrated?: boolean;
+}) {
   const path = useLocalePath();
   const ui = useUi();
 
   return (
+    // Four across either way: eight industries fill two clean rows, and the
+    // thumbnail reads as texture at this width, which is all it needs to do.
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {industries.map((industry, index) => (
-        <Reveal key={industry.slug} delay={index * 50} className="h-full">
-          <Link
-            to={path(ROUTES.industry(industry.slug))}
-            className="group flex h-full flex-col gap-4 rounded-lg border border-line/10 bg-surface-1/50 p-6 transition-all duration-base ease-out-soft hover:-translate-y-1 hover:border-primary-400/40"
-          >
-            <Icon name={industry.icon} className="h-6 w-6 text-accent-400" />
-            <h3 className="text-h6 font-semibold text-content-primary">{industry.name}</h3>
-            <p className="flex-1 text-body-sm text-content-tertiary">{industry.summary}</p>
-            <span className="inline-flex items-center gap-1.5 text-caption font-medium text-link">
-              {ui.learnMore}
-              <Icon
-                name="arrow-right"
-                className="h-3.5 w-3.5 transition-transform duration-base group-hover:translate-x-0.5"
-              />
-            </span>
-          </Link>
-        </Reveal>
-      ))}
+      {industries.map((industry, index) => {
+        const media = illustrated ? industryMedia(industry.slug) : undefined;
+        return (
+          <Reveal key={industry.slug} delay={index * 50} className="h-full">
+            <Link to={path(ROUTES.industry(industry.slug))} className={CARD_BASE}>
+              {media && (
+                <div className="relative border-b border-line/10 bg-surface-2/40">
+                  <Figure name={media} thumb />
+                </div>
+              )}
+              <div className="flex flex-1 flex-col gap-4 p-6">
+                <Icon name={industry.icon} className="h-6 w-6 text-accent-400" />
+                <h3 className="text-h6 font-semibold text-content-primary">{industry.name}</h3>
+                <p className="flex-1 text-body-sm text-content-tertiary">{industry.summary}</p>
+                <span className="inline-flex items-center gap-1.5 text-caption font-medium text-link">
+                  {ui.learnMore}
+                  <Icon
+                    name="arrow-right"
+                    className="h-3.5 w-3.5 transition-transform duration-base group-hover:translate-x-0.5"
+                  />
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        );
+      })}
     </div>
   );
 }

@@ -292,6 +292,28 @@
   [data-scheme='light'].section-base {
     background-color: rgb(var(--c-surface-base));
   }
+
+  /* Where a light section meets the dark shell the edge was a hard cut. A thin
+   * gradient at the boundary reads as a deliberate transition instead — it only
+   * applies to the first and last light section, so consecutive light sections
+   * still flow together. */
+  [data-scheme='light']:not([data-scheme='light'] + [data-scheme='light'])::before,
+  [data-scheme='light']:has(+ :not([data-scheme='light']))::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 4rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+  [data-scheme='light']:not([data-scheme='light'] + [data-scheme='light'])::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgb(var(--c-primary-950) / 0.06), transparent);
+  }
+  [data-scheme='light']:has(+ :not([data-scheme='light']))::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgb(var(--c-primary-950) / 0.06), transparent);
+  }
   [data-scheme='light'].section-raised {
     background-color: #f1f5fb;
   }

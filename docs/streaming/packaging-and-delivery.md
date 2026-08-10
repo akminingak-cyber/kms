@@ -33,8 +33,14 @@ The design targets **`cbcs` for all three DRM systems** so a single encrypted co
 and retains the ability to emit a **`cenc` fallback set** selected per device class if verification
 shows some target device cannot handle `cbcs`. `[UNVERIFIED — ADR-0005 blocking checklist]`
 
-The device-class → format/scheme/DRM mapping is **data, not code**, so it can be corrected as
-device-lab results arrive.
+**There is a second, independent fallback axis: the container.** Legacy HLS implementations on older
+televisions have historically expected MPEG-TS segments rather than fMP4. A device that cannot play
+CMAF fMP4 under HLS is not helped by changing the encryption scheme — it needs a different segment
+set entirely. Container and scheme are therefore selected independently per device class, and both
+are verified on the **oldest** device in the matrix, not the newest.
+
+The device-class → container/format/scheme/DRM mapping is **data, not code**, so it can be corrected
+as device-lab results arrive.
 
 ### Segment duration
 
@@ -137,6 +143,22 @@ is a tuning exercise against real traffic, not a configuration to set once.
   may watch is a CDN that cannot be replaced, and it is a control we cannot audit.
 - Token validation failures are logged and monitored — a spike is a signal of either an attack or a
   client bug, and both need to be seen.
+
+### The token must not enter the cache key
+
+A per-session token in the URL query string is, by default, part of the CDN's cache key — which means
+**every viewer gets a private copy of every segment and cache offload collapses to zero**. Origin
+egress then rises by roughly the offload ratio we were counting on, which is the single largest cost
+line in the platform.
+
+So, as an explicit configuration requirement on every CDN adapter (a P3 verification item):
+
+- The token parameter (or cookie) is **excluded from the cache key** while still being **validated**
+  at the edge on every request. Validate, then key the cache on the path alone.
+- Segment paths stay **identical across viewers**. Anything that varies per viewer belongs in the
+  token, never in the path.
+- Cache offload ratio is monitored per CDN, and a drop is treated as a cost incident — it is the
+  symptom this misconfiguration produces, and it is otherwise invisible until an invoice arrives.
 
 ## 7. Delivery observability
 

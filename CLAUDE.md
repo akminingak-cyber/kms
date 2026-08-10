@@ -143,7 +143,7 @@ archaeology.
 - `CREATE INDEX CONCURRENTLY` on any table with volume. Set `lock_timeout`.
 - Backfills are separate, resumable, throttled jobs — never inline in a migration.
 - Time-based high-volume tables are **partitioned in their first migration**.
-- Public identifiers are ULIDs. Sequential integers are never exposed in an API.
+- Public identifiers are UUIDv7 in `uuid` columns. Sequential integers are never exposed in an API.
 
 Detail: [`docs/database/`](docs/database/)
 

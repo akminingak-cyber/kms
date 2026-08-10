@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | **local** | Development | Seed | Fakes; sandboxes on demand | Developer |
 | **ci** | Automated verification | Seed, ephemeral | **Fakes only** (vendor sandboxes nightly) | Pipeline |
-| **preview** | Per-PR review | Seed, ephemeral | Fakes | Pipeline, per PR |
+| **preview** | Per-PR review — **from Phase 2**, when there is a UI to review | Seed, ephemeral | Fakes | Pipeline, per PR |
 | **staging** | Pre-production verification | Seed + synthetic scale | **Real sandboxes**, real CDN, real DRM test servers | Pipeline, on merge |
 | **production** | Live | Real | Real | Pipeline, gated |
 

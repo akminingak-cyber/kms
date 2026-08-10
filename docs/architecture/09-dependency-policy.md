@@ -88,13 +88,53 @@ recorded as verified.
 
 Node 22.22.2 in this environment satisfies every engine constraint above.
 
+### Version conflicts already visible in this table
+
+Found by reading the constraints against each other rather than individually:
+
+1. **`pestphp/pest` v5.0.4 requires PHP `^8.4`.** Laravel 13's floor is `^8.3`. If production PHP is
+   pinned to 8.3, Pest 5 cannot be used and the choice is Pest 4 or PHP 8.4. This is a decision, not
+   a detail: the test framework should not be what forces the runtime version, and discovering it
+   during Phase 1 setup wastes a day. **Recommendation: pin PHP 8.4** — it is already installed here,
+   it satisfies both Laravel lines and Pest 5, and it gives the longest runtime runway. Recorded on
+   the ADR-0007 checklist.
+2. **`spatie/laravel-permission` 8.3.0 requires PHP `^8.3`** — satisfied either way, noted so it is
+   not rechecked later.
+3. **`typescript` 7.0.2 is a major-version step.** Pin it explicitly and validate against the chosen
+   Next version before adopting; a compiler major is not a routine dependency bump, and every
+   workspace in the monorepo depends on it.
+4. **TV build targets constrain JS dependencies.** A package that ships only modern syntax, or assumes
+   current browser APIs, may not be usable in the Tizen/webOS applications even though it installs
+   cleanly ([`../streaming/player-and-device-matrix.md`](../streaming/player-and-device-matrix.md)).
+   Transpilability to the matrix's oldest engine is an adoption criterion for anything entering
+   `ts-player-core` or `ts-ui-tv`, not an afterthought.
+
 ### Media toolchain (licence text read from each project's repository)
 
 | Tool | Licence position (verbatim from the project's own licence file) | Implication |
 |---|---|---|
-| **FFmpeg** | *"Most files in FFmpeg are under the GNU Lesser General Public License version 2.1 or later (LGPL v2.1+) … Some optional parts of FFmpeg are licensed under the GNU General Public License version 2 or later (GPL v2+) … None of these parts are used by default, you have to explicitly pass `--enable-gpl` to configure to activate them. In this case, FFmpeg's license changes to GPL v2+."* | **The build configuration determines the licence.** Server-side use we do not distribute is low-risk either way, but any FFmpeg code shipped inside a mobile or TV application, or in a publicly distributed container image, must be reviewed by counsel. **Record the exact build flags of the FFmpeg image we use.** |
+| **FFmpeg** | *"Most files in FFmpeg are under the GNU Lesser General Public License version 2.1 or later (LGPL v2.1+) … Some optional parts of FFmpeg are licensed under the GNU General Public License version 2 or later (GPL v2+) … None of these parts are used by default, you have to explicitly pass `--enable-gpl` to configure to activate them. In this case, FFmpeg's license changes to GPL v2+."* | **The build configuration determines the licence.** Server-side use we do not distribute is low-risk either way, but any FFmpeg code shipped inside a mobile or TV application, or in a publicly distributed container image, must be reviewed by counsel. **Record the exact build flags of the FFmpeg image we use.** See the note below — the encoders normally reached for are precisely the ones that require `--enable-gpl`. |
 | **Shaka Packager** | Google, 2014 — three-clause BSD-style permissive terms (redistribution in source and binary permitted with notice retention) | Permissive; suitable. Confirm the current file for any change before adoption. |
 | **Bento4** | *"Bento4 is available under two different licenses … For applications that are entirely distributable under the terms of the GPL, the Bento4 GPL license applies. For applications that cannot be entirely distributable under the terms of the GPL … a non-GPL commercial license is available from Axiomatic Systems LLC."* | **Dual GPL/commercial.** Using it in a proprietary platform likely requires a commercial licence. Legal review required before adoption. |
+
+### Two licensing distinctions that are easy to blur
+
+**Copyright licence ≠ patent licence.** They are separate obligations from separate parties, and
+satisfying one says nothing about the other.
+
+- The **encoder library** carries a copyright licence. The common open-source H.264 and H.265
+  encoders are GPL-or-commercial, and they are exactly the ones a default FFmpeg build reaches for —
+  which is why `--enable-gpl` is not an obscure edge case but the normal path. **Record the encoder
+  libraries and the build flags of the image we use, and review them before any client-side
+  distribution.**
+- The **codec itself** may carry patent licensing obligations to a pool, independent of whatever
+  software implements it, and independent of whether that software is free. These obligations
+  typically attach to distribution and sometimes to service operation, and they differ substantially
+  between codec generations.
+
+Neither question is answerable from this repository, and neither should be answered by an engineer
+alone. **Counsel reviews both before a codec or an encoder is committed to** — before Phase 5, not
+after the pipeline is built around a choice.
 
 ## 3. Explicitly rejected or restricted
 
@@ -104,6 +144,7 @@ Node 22.22.2 in this environment satisfies every engine constraint above.
 | Code-first / annotation-driven OpenAPI generators | Not used for the client API | The spec is the contract and must be reviewable independently of implementation — ADR-0010 |
 | Any package under AGPL | Requires legal sign-off before evaluation | Network-use obligations are incompatible with a proprietary SaaS platform without deliberate legal review |
 | Any package with no licence declared | Prohibited | No licence means no permission |
+| JS packages that cannot be transpiled to the TV build target | Prohibited in `ts-player-core` / `ts-ui-tv` / TV apps | Installs cleanly, fails on the device |
 | Unmaintained packages (no release in 24 months, or unresolved security advisories) | Prohibited without an accepted risk record | |
 | DRM client SDKs | Legal review before any commit | Redistribution terms are typically restrictive and specific |
 

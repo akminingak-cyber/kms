@@ -8,7 +8,7 @@ number of genuinely separate services where the reason is technical and specific
 
 Full rationale: [`adr/ADR-0001-modular-monolith-first.md`](adr/ADR-0001-modular-monolith-first.md).
 
-The short version: sixteen contexts extracted into sixteen services on day one would multiply the
+The short version: seventeen contexts extracted into seventeen services on day one would multiply the
 cost of every cross-cutting change, force distributed transactions across billing and entitlements
 before the model is stable, and demand platform maturity the project does not yet have. The
 monolith is not a compromise — it is the correct starting shape for a domain whose boundaries are
@@ -28,7 +28,7 @@ and scaling economics.
 | **core-api (admin tier)** | Same code, admin routes only | `services/core-api` | An admin bulk import must never contend with subscriber traffic — separate pods, separate DB pool, separate rate limits | P2 |
 | **core-api (workers)** | All — queue consumers | `services/core-api` | Different failure and scaling behaviour to request handling | P1 |
 | **playback-authorizer** | D2 Playback Authorization (+ read-only use of C3, D1, A2, A3) | `services/core-api` initially | **Highest-criticality, highest-RPS, latency-critical path.** Runs the same code with a restricted route set, its own replica count, its own caches and its own database credentials (read-mostly). Extracted to its own codebase only if profiling shows the shared runtime is the constraint | P4 |
-| **drm-license-proxy** | D3 Content Protection | `services/drm-license-proxy` | **Separate from day one, for security not scale.** It is the only workload holding key-vault credentials and vendor DRM secrets. Compromise of core-api must not yield content keys. Different codebase, different network zone, minimal dependencies | P6 |
+| **drm-license-proxy** | D3 Content Protection | `services/drm-license-proxy` | **Separate from day one, for security not scale.** The only component that can resolve a content key by identifier, and the holder of vendor DRM secrets. Compromise of core-api must not yield content keys. Different codebase, different network zone, minimal dependencies | P6 |
 | **media-pipeline** | B3 Media Assets | `services/media-pipeline` | Entirely different runtime (FFmpeg, large local disk, long-running jobs, possibly GPU). Cannot share a PHP web image sensibly | P5 |
 | **epg-ingest** | B2 Channels & Schedule | `services/epg-ingest` | Scheduled, bursty, provider-shaped. Isolating it means a malformed provider feed cannot exhaust web-tier workers | P2 |
 | **telemetry-collector** | E2 Analytics | `services/telemetry-collector` | Write volume orders of magnitude above everything else; must be droppable under load without affecting playback | P10 |

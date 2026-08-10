@@ -6,7 +6,7 @@
 
 ## Context
 
-KMS TV has 16 bounded contexts ([`../02-bounded-contexts.md`](../02-bounded-contexts.md)). Their
+KMS TV has 17 bounded contexts ([`../02-bounded-contexts.md`](../02-bounded-contexts.md)). Their
 boundaries are, at this point, **hypotheses derived from domain analysis, not from operating
 experience with this product**. Several of them — Entitlements vs Subscriptions, Discovery vs
 Catalog, Playback vs Protection — have plausible alternative divisions.

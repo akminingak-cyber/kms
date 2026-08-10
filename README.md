@@ -20,6 +20,7 @@ Smart TV, with subscriptions, entitlements, rights management and DRM-ready stre
 | About to write code | [`CLAUDE.md`](CLAUDE.md) — the engineering rules, and the definition of done |
 | Looking for a specific area | [`docs/README.md`](docs/README.md) — the documentation map |
 | Wondering what was here before | [`docs/architecture/00-inspection-report.md`](docs/architecture/00-inspection-report.md) |
+| Wondering what the architecture got wrong | [`docs/architecture/10-architecture-review.md`](docs/architecture/10-architecture-review.md) |
 | Deciding what to build next | [`docs/architecture/08-development-phases.md`](docs/architecture/08-development-phases.md) |
 
 ## Repository layout
@@ -63,8 +64,9 @@ Versions and licences verified against package registries on 2026-08-10:
 
 1. **Four planes** — control, decision, media, insight — kept separable, because they differ in
    traffic, failure impact and cost by orders of magnitude.
-2. **Sixteen bounded contexts** in one modular monolith with **CI-enforced boundaries**, deployed as
-   several runtime profiles. Services are extracted on evidence, not on principle.
+2. **Seventeen bounded contexts** (16 of them modules in one modular monolith with **CI-enforced
+   boundaries**, deployed as several runtime profiles). Services are extracted on evidence, not on
+   principle.
 3. **Rights, entitlements and DRM are three different things.** Rights are contractual; entitlements
    are commercial; DRM enforces only a subset of either.
 4. **The client API is append-only within a major version.** Smart TVs reach their installed base over

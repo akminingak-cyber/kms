@@ -47,5 +47,7 @@ need, because mistakes are expensive to correct. Specifically:
 5. **Pagination is cursor-based** anywhere the collection can grow.
 6. **Responses carry cache directives that are actually correct** — catalog data is cacheable for a
    long time; an authorization decision is cacheable never.
-7. **No endpoint returns data the caller is not entitled to see**, even filtered client-side. Rights
-   and entitlement filtering happens server-side, always.
+7. **No endpoint returns data the caller is not entitled to see**, and no client is trusted to hide
+   anything. Filtering is server-side, always. Note the corollary that follows in
+   [`conventions.md`](conventions.md) §6: a personalised response can never be `public`-cacheable, so
+   catalog metadata and the personalised availability overlay are **separate responses**.

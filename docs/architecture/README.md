@@ -9,7 +9,7 @@ and the entry point. The documents here are the detail behind it.
 |---|---|---|
 | 00 | [Inspection report](00-inspection-report.md) | What was actually in the repository and the environment on 2026-08-10, and what that constrains |
 | 01 | [System context and scope](01-system-context.md) | What KMS TV is, who uses it, the four planes, quality attributes |
-| 02 | [Bounded contexts](02-bounded-contexts.md) | The 16 contexts, what each owns, and the context map |
+| 02 | [Bounded contexts](02-bounded-contexts.md) | The 17 contexts, what each owns, and the context map |
 | 03 | [Repository structure](03-repository-structure.md) | Monorepo layout, module structure, boundary enforcement, tooling |
 | 04 | [Service boundaries](04-service-boundaries.md) | Deployment units, sync vs async, the playback hot path, extraction criteria |
 | 05 | [Integration boundaries](05-integration-boundaries.md) | The 13 third-party ports and their verification checklists |
@@ -17,6 +17,7 @@ and the entry point. The documents here are the detail behind it.
 | 07 | [Testing strategy](07-testing-strategy.md) | Layers, what "no mocks" means here, high-risk areas, definition of done |
 | 08 | [Development phases](08-development-phases.md) | Phases 0–10 with exit criteria |
 | 09 | [Dependency policy](09-dependency-policy.md) | Policy, and the versions/licences verified on 2026-08-10 |
+| 10 | [Architecture review](10-architecture-review.md) | The Phase 0 review: 25 findings and their corrections |
 | — | [Decision records](adr/) | The decisions themselves, with their reasoning |
 
 ## Domain documents

@@ -40,18 +40,36 @@ Two segment sets instead of six, with device-based selection at authorization ti
 1. Encode once to a CMAF fMP4 ladder.
 2. Encrypt with `cbcs` as the primary scheme.
 3. Generate HLS and DASH manifests over the **same** segments.
-4. Keep the packaging pipeline and the manifest/delivery layer capable of emitting a **second,
-   `cenc`-encrypted** segment set, selected per device class at authorization time — without a
-   redesign.
-5. Device class → format + scheme + DRM system mapping is **data, not code**, so it can be corrected
-   as device-lab results arrive (see
+4. Keep the packaging pipeline and the manifest/delivery layer capable of emitting a **second
+   segment set** on **two independent fallback axes**, selected per device class at authorization
+   time — without a redesign:
+   - **Encryption scheme:** `cenc` (AES-CTR) as an alternative to `cbcs`.
+   - **Container:** MPEG-TS as an alternative to fMP4 for HLS.
+5. Device class → **container + format + scheme + DRM system** mapping is **data, not code**, so it
+   can be corrected as device-lab results arrive (see
    [`../../streaming/player-and-device-matrix.md`](../../streaming/player-and-device-matrix.md)).
+
+### Why the container is a separate axis from the scheme
+
+The first draft of this decision treated the fallback as purely an encryption-scheme question. That
+is the smaller of the two risks. The single-encode premise requires that a device can play **CMAF
+fMP4 segments under HLS** — and legacy HLS implementations on older televisions have historically
+expected MPEG-TS segments. A device that cannot play fMP4 under HLS is not helped at all by changing
+the encryption scheme; it needs a different container, which means a genuinely separate segment set
+and a second cache footprint.
+
+The two axes must therefore be independently selectable. Conflating them would mean discovering
+during Phase 9 device testing that the fallback we built cannot serve the devices that need one —
+after the packaging pipeline is finished.
 
 **This ADR cannot move to Accepted until:**
 - [ ] Widevine, PlayReady and FairPlay `cbcs` support is confirmed from each vendor's current
       documentation, for the specific security levels we require
 - [ ] The device matrix (OQ-3: which platforms and model years) is confirmed, and `cbcs` support is
       verified on the **oldest** device in it
+- [ ] **HLS-with-fMP4 (CMAF) playback is verified on the oldest device in the matrix** — separately
+      from the encryption-scheme check, because a container failure and a scheme failure need
+      different fallbacks
 - [ ] A packager that produces the required output is selected and licence-cleared
       ([`../09-dependency-policy.md`](../09-dependency-policy.md))
 - [ ] An end-to-end test plays `cbcs` content on at least one real device per DRM system

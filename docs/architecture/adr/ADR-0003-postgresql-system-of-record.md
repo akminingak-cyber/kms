@@ -6,7 +6,7 @@
 
 ## Context
 
-Sixteen contexts share one codebase initially (ADR-0001) but must be separable later. The data
+Seventeen contexts share one codebase initially (ADR-0001) but must be separable later. The data
 layer decides whether that separation is ever possible: if every context's tables are joined to
 every other's by foreign keys, extraction is a rewrite regardless of how clean the code is.
 
@@ -45,9 +45,12 @@ makes later extraction a matter of moving a schema.
 6. High-volume time-based tables (EPG programmes, playback sessions, decision audit, admin audit)
    are **partitioned by time** from their first migration. Retrofitting partitioning onto a large
    live table is painful and avoidable.
-7. Public identifiers are **ULIDs** exposed in APIs; internal primary keys stay `bigint` for index
-   locality. Sequential integers are never exposed externally — they leak business volume and invite
-   enumeration.
+7. Public identifiers are **UUIDv7** exposed in APIs, stored in PostgreSQL's native 16-byte `uuid`
+   type; internal primary keys stay `bigint` for index locality. Sequential integers are never
+   exposed externally — they leak business volume and invite enumeration.
+8. **A connection pooler fronts PostgreSQL, with a separate pool per deployment profile.** Without
+   it, process-per-request PHP workers exhaust the connection limit long before they exhaust CPU, and
+   a shared pool would undo the isolation that rule 3 exists to provide.
 
 ## Consequences
 

@@ -110,6 +110,11 @@ per title:  mezzanine (1×, large)
   [`../streaming/catchup-restart-npvr.md`](../streaming/catchup-restart-npvr.md).
 - Storage lifecycle policies are set per class from the first upload. Retrofitting lifecycle rules
   onto petabytes is expensive and slow.
+- **Durability and availability are separate requirements.** Mezzanines must survive a durability
+  failure (replication, versioning, checksums re-verified periodically — not only on write) because a
+  supplier may be unable to redeliver a master. Packaged renditions need only availability: they can
+  be regenerated. The nDVR buffer can be regenerated from nothing at all, which is why gaps in it are
+  permanent ([`../operations/README.md`](../operations/README.md) §6).
 
 ## 7. What to monitor from day one
 

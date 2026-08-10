@@ -47,8 +47,15 @@ The largest and most constrained surface.
 - **`/config` is fetched at app start.** It carries feature flags, minimum supported version, and
   endpoint capability hints. It is the mechanism by which a three-year-old TV app can be told to
   stop trying something, or to prompt for an upgrade.
-- **Rights and entitlement filtering is server-side.** A client never receives an item it may not
-  see and is never trusted to hide it.
+- **Rights and entitlement filtering is server-side.** A client is never trusted to hide anything.
+  Content that must not be disclosed is **absent** from the response; content that is visible but not
+  playable carries an availability state so upsell works. The two are different, and the difference
+  is data on the availability projection, not a hardcoded behaviour
+  ([`conventions.md`](conventions.md) §6).
+- **Catalog metadata and the personalised availability overlay are separate responses**, because one
+  is publicly cacheable and the other cannot be. Merging them means either leaking one viewer's
+  entitlements to another through a shared cache, or giving up caching on the largest and most
+  frequently fetched payload in the product.
 - **`/pages/{page}` is server-driven layout.** Rails, ordering, titles and badges come from the
   server so merchandising changes ship without a client release.
 - **Playback endpoints are served by the `playback-authorizer` profile**, not the general web tier —

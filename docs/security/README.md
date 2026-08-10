@@ -43,7 +43,7 @@ with content owners, and those relationships are the business.
 │ Nothing on a client is a security control. Client-side checks are  │
 │ UX, never enforcement.                                             │
 └──────────────────────────┬─────────────────────────────────────────┘
-                           │  TLS 1.3, WAF, rate limits, bot controls
+                           │  TLS 1.2+ (1.3 preferred), WAF, rate limits, bot controls
 ┌──────────────────────────▼─────────────────────────────────────────┐
 │ EDGE — CDN, load balancers, API gateway                            │
 │ Terminates TLS, enforces coarse controls. Trusted for delivery,    │
@@ -57,16 +57,22 @@ with content owners, and those relationships are the business.
 └──────────────────────────┬─────────────────────────────────────────┘
                            │  narrow, explicitly allowed paths only
 ┌──────────────────────────▼─────────────────────────────────────────┐
-│ PROTECTED — drm-license-proxy, key vault, database primaries       │
-│ No inbound internet. The licence proxy is the ONLY workload that   │
-│ can read content keys. Separate credentials, separate network      │
-│ zone, separate audit stream.                                       │
+│ PROTECTED — drm-license-proxy, packager, key vault, DB primaries   │
+│ No inbound internet. The licence proxy is the ONLY component that  │
+│ can RESOLVE a content key by identifier; the packager only ever    │
+│ receives keys PUSHED to it per job and cannot query the vault.     │
+│ Separate credentials, separate network zone, separate audit stream.│
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 The zone boundary that matters most is the last one. If compromising `core-api` yields content keys,
 every other control is decoration — which is why `drm-license-proxy` is a separate service from
 Phase 6 rather than a module ([ADR-0001](../architecture/adr/ADR-0001-modular-monolith-first.md)).
+
+The packager is inside this zone because it must encrypt, and encryption needs keys. The distinction
+that keeps that safe is **direction**: keys are pushed to it per job and it has no read credential, so
+it cannot be used as a key oracle. Full statement:
+[`secrets-and-key-management.md`](secrets-and-key-management.md) §3.
 
 ## 3. Principles
 
@@ -90,17 +96,46 @@ Phase 6 rather than a module ([ADR-0001](../architecture/adr/ADR-0001-modular-mo
 
 | Layer | Controls |
 |---|---|
-| **Transport** | TLS 1.3 everywhere including internal calls; HSTS; modern cipher suites only; certificate lifecycle automated and monitored |
+| **Transport** | TLS 1.3 preferred, **TLS 1.2 floor at the public edge** (see below); TLS 1.3 mandatory for internal calls; HSTS; certificate lifecycle automated and monitored |
 | **Edge** | WAF; per-account/device/IP rate limits; bot detection on auth endpoints; DDoS protection; geo controls as defence in depth |
 | **Authentication** | Argon2id password hashing; MFA for staff (mandatory) and optional for viewers; rotating refresh tokens with reuse detection; device binding |
 | **Authorization** | Server-side always; RBAC for staff; policy evaluation for playback; 4-eyes on rights and pricing |
 | **Application** | Input validation at the boundary; parameterised queries only; output encoding; CSRF protection on cookie-authenticated flows; strict CSP on web apps |
 | **Data** | Encryption at rest; schema-scoped database roles; field-level protection for sensitive attributes; **no production data outside production** |
-| **Keys** | Vault/HSM-backed; the licence proxy is the sole reader; rotation; access audited |
+| **Keys** | Vault/HSM-backed; licence proxy is the sole *resolver*, packager receives push-only per job; rotation; access audited; **backed up under split control** |
 | **Content** | DRM with rights-derived policy; short-lived, scoped tokens; concurrency enforcement; watermarking under consideration (Phase 10) |
 | **Supply chain** | Lockfiles committed; dependency audit in CI; SBOM per release; reviewed updates on payment, playback and key paths |
 | **Operations** | No standing production access; audited break-glass; immutable infrastructure; signed artifacts |
 | **Monitoring** | Security events to a separate, append-only stream; alerting on anomalies described in [`threat-model.md`](threat-model.md) |
+
+### Transport security and old televisions
+
+"TLS 1.3 everywhere" is the right answer for a service whose clients are browsers we can assume are
+current. It is the **wrong** answer here, and stating it without qualification would have shipped an
+avoidable outage into the device matrix.
+
+Smart TVs are long-lived, updated unevenly, and some effectively stop receiving updates. Two
+consequences:
+
+1. **Protocol floor.** A device that cannot negotiate TLS 1.3 cannot reach the platform at all —
+   there is no partial degradation, the app simply never connects. The public edge therefore accepts
+   **TLS 1.2 as a floor** and prefers 1.3, with the cipher suite list chosen from **measured device
+   support**, not from a hardening template. Internal service-to-service traffic has no such
+   constraint and requires 1.3.
+2. **Root-store expiry is the bigger risk, and it is not ours to fix.** An old device carries an old
+   set of trusted root certificates. When a root that a device trusts expires, or when we move to a
+   chain rooted in a CA that device has never heard of, that device stops connecting — permanently,
+   with no server-side error to alert on and no way to update the device. This has taken large
+   streaming services off older TVs in the past.
+
+   So: the certificate chain and its root are a **device-compatibility decision**, verified against
+   the oldest devices in the matrix and re-verified before any CA or chain change. It is a
+   verification item in
+   [`../streaming/player-and-device-matrix.md`](../streaming/player-and-device-matrix.md), not merely
+   an infrastructure detail.
+
+Both points are why "the oldest device in the matrix" appears repeatedly in this repository as the
+test that matters. The newest device proves almost nothing.
 
 ## 5. Security in the development process
 

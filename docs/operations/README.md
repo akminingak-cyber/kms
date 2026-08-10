@@ -85,13 +85,47 @@ tracked as a first-class metric from Phase 4, broken down by CDN egress, origin 
 transcoding and compute — because by the time an invoice is surprising, the decisions that caused it
 are months old.
 
-## 6. Documentation that must exist before launch
+## 6. Disaster recovery
+
+Backups of the application database are the part everyone remembers. The parts that actually
+determine whether the platform can be brought back are elsewhere, and the review that produced this
+section found three of them missing.
+
+| Asset | Loss means | RPO / RTO | Protection |
+|---|---|---|---|
+| **Content key vault** | **The entire encrypted library is permanently unplayable.** Worse than losing the database | **RPO ≈ 0** | Backup under split control in a separate failure domain; escrowed unseal material; rehearsed restore ([`../security/secrets-and-key-management.md`](../security/secrets-and-key-management.md) §3a) |
+| PostgreSQL | Accounts, billing, rights, decisions | OQ-24, tightest for billing | WAL archiving + PITR; quarterly restore drill |
+| **Mezzanine media** | Titles cannot be re-encoded; masters may be irreplaceable if the supplier cannot redeliver | RPO ≈ 0 | Cross-region replication or versioned durable storage; checksums verified on write **and periodically thereafter** |
+| Packaged renditions | Recoverable by re-packaging | Hours–days | Regenerate from mezzanine; cost is time, not data |
+| **nDVR buffer** | **Irreplaceable.** A broadcast cannot be re-recorded | Bounded by retention | Accept partial loss; alert on gaps; never treat as archival |
+| Object storage config / lifecycle rules | Silent cost or retention drift | — | Infrastructure as code |
+| Secrets (operational) | Services cannot start | RPO ≈ 0 | Secret manager's own backup; documented rotation as the recovery path |
+| Redis | Cache, queues, concurrency | Acceptable loss by design | Reconstructible from PostgreSQL ([`../database/README.md`](../database/README.md) §5) |
+| Read models and projections | Discovery, search, availability | Minutes–hours | Rebuildable from source; **rebuild time is measured**, because it is the real RTO |
+
+Four points that are easy to miss and expensive to discover late:
+
+1. **The key vault is a disaster-recovery asset, not only a security asset.** It is filed under
+   security in most organisations, which is exactly why it goes unbackuped.
+2. **Media storage durability is not the same as media storage availability.** A regional outage
+   makes content unreachable; a durability failure makes it gone. They need different answers.
+3. **The nDVR buffer cannot be recovered from anything.** Live output that was not written is lost
+   permanently, which makes buffer-writer isolation ([`../streaming/catchup-restart-npvr.md`](../streaming/catchup-restart-npvr.md) §7) a data-protection control, not just a reliability one.
+4. **Rebuild time for projections is part of RTO.** "It is rebuildable" is only reassuring once
+   somebody has measured how long the rebuild takes on production-sized data.
+
+**Regional failover is explicitly out of scope until hosting is decided (OQ-16).** Saying so is
+better than implying a multi-region capability that has not been designed, sized or costed.
+
+## 7. Documentation that must exist before launch
 
 - [ ] A runbook per alert
 - [ ] Channel-down procedure
 - [ ] Origin and CDN failover procedure
 - [ ] Database failover and restore procedure, **rehearsed**
+- [ ] **Key vault restore procedure, rehearsed** — including issuing a licence from restored material
 - [ ] Key compromise procedure ([`../security/secrets-and-key-management.md`](../security/secrets-and-key-management.md))
+- [ ] Measured rebuild time for every projection and read model
 - [ ] Payment provider outage procedure
 - [ ] Escalation matrix, with names and numbers
 - [ ] Communication templates for viewer-facing incidents

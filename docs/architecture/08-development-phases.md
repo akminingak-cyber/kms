@@ -19,7 +19,11 @@ Repository inspection, architecture, and engineering rules. No application code.
 - [x] Database, API, security, streaming, rights, testing, CI/CD strategies documented
 - [x] Dependencies and licences verified where verifiable; unverifiable claims marked as such
 - [x] Risks and open questions raised explicitly
+- [x] **Architecture reviewed and corrected** — 25 findings recorded in
+      [`10-architecture-review.md`](10-architecture-review.md); the documents are internally
+      consistent
 - [ ] **Open questions OQ-1 … OQ-4, OQ-13, OQ-16, OQ-17 answered by the product owner** ← blocks Phase 1
+- [ ] **ADR-0007 decided** (Laravel major version, and the PHP pin that follows from it) ← blocks Phase 1
 
 ---
 
@@ -34,6 +38,8 @@ one genuine end-to-end feature (authentication). Nothing simulated.
 - Modules with real implementations: `Identity`, `Profile`, `Device` (registration only),
   `Administration` (staff auth + audit skeleton)
 - PostgreSQL schema-per-context, migration conventions, seed dataset
+- **Connection pooler with a separate pool per deployment profile** — not deferred; retrofitting it
+  means revisiting every transaction-scoped assumption in the codebase
 - Redis: cache, queue, Horizon
 - `packages/api-contracts`: OpenAPI for client API v1 (auth surface only) + generated TS client
 - `infrastructure/docker`: local compose stack (PostgreSQL, Redis, PHP-FPM, Nginx, Mailpit)
@@ -104,7 +110,13 @@ transcode → package → origin → CDN for **one** channel, geo determination 
       each verified by a test that proves the **denial** path with a specific reason code
 - [ ] Every decision is recorded and reproducible from its recorded inputs
 - [ ] Load test at the target concurrency meets the p99 latency objective
-- [ ] Every degraded mode has defined, tested behaviour
+- [ ] Every degraded mode has defined, tested behaviour — including the **denial** paths, and
+      including the distinction between a plan concurrency limit (may fail open) and a
+      licensor-mandated cap (must not)
+- [ ] **Synthetic playback probes** running against the live channel from more than one region,
+      exercising both success and denial ([`../operations/observability.md`](../operations/observability.md) §4a)
+- [ ] CDN cache offload ratio measured and above the modelled threshold — proves the delivery token
+      is not in the cache key
 - [ ] **OQ-11 (advertising/SSAI) answered** — after this phase, retrofitting SSAI is expensive
 
 ---

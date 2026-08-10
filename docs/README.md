@@ -28,6 +28,7 @@ Engineering rules for every contributor: [`CLAUDE.md`](../CLAUDE.md).
 | How do I add a dependency? | [`architecture/09-dependency-policy.md`](architecture/09-dependency-policy.md) |
 | What are we building next? | [`architecture/08-development-phases.md`](architecture/08-development-phases.md) |
 | What is still undecided? | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) § Open questions |
+| What did the architecture get wrong, and how was it fixed? | [`architecture/10-architecture-review.md`](architecture/10-architecture-review.md) |
 
 ## Conventions
 

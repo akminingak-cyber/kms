@@ -48,7 +48,7 @@ support impossible and hide bugs; see [`docs/api/conventions.md`](../api/convent
 | **Platform Rule** | Permitted device classes and platforms |
 | **Usage Rule** | Technical constraints the licensor requires: max resolution, HDCP level, output protection, security level, concurrency cap, download retention |
 | **Blackout** | A time-boxed prohibition overriding an otherwise valid right, scoped by territory and/or channel — most common in sport |
-| **Availability** | The **computed** projection: for a subject × exploitation × platform × territory × monetization, the intervals in which it is available |
+| **Availability** | The **computed** projection, keyed on **subject × exploitation**, carrying resolved intervals plus interned territory/usage rule sets and platform/monetization masks. See [ADR-0011](adr/ADR-0011-availability-projection-shape.md) — a full cross-product of all five dimensions does not scale |
 
 ### Why availability is computed and materialised
 
@@ -63,6 +63,20 @@ and which rule identifiers** produced the decision.
 That last point is the one that matters commercially. When a licensor asks *"why was our film
 playable in Territory X on 12 March?"*, the answer must be a record, not a re-derivation from
 today's data.
+
+### But not as a full cross-product
+
+Materialising `subject × exploitation × platform × territory × monetization` would produce hundreds
+of millions of rows, and — more damagingly — would make recompute proportional to catalog size rather
+than to the size of the change. A licensor-wide territory correction is exactly the change that must
+take effect in seconds, and under a full cross-product it would take hours.
+
+The projection is therefore **factorised**: keyed on `subject × exploitation`, carrying interned
+territory and usage rule sets plus platform and monetization bitmasks, evaluated at read time in
+microseconds. **Blackouts are not projected at all** — they are evaluated against a small hot set,
+because they are few, urgent, and often applied minutes before taking effect.
+
+Full reasoning and structure: [ADR-0011](adr/ADR-0011-availability-projection-shape.md).
 
 ### Precedence
 

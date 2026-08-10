@@ -105,7 +105,7 @@ downstream work is built on it.
 |---|---|---|---|
 | **local** | Development | Seed | Fakes + sandboxes |
 | **ci** | Automated verification | Seed, ephemeral | Fakes only (sandboxes nightly) |
-| **preview** | Per-PR review | Seed | Fakes |
+| **preview** | Per-PR review (Phase 2+) | Seed | Fakes |
 | **staging** | Pre-production verification | Seed + synthetic scale | **Real sandboxes**, real CDN, real DRM test |
 | **production** | Live | Real | Real |
 

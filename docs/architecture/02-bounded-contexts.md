@@ -6,7 +6,14 @@ they map to deployment units is decided separately in
 [`04-service-boundaries.md`](04-service-boundaries.md) — conflating the two is the classic way to
 end up with a distributed monolith.
 
-KMS TV has **16 contexts** in five groups.
+KMS TV has **17 contexts** in five groups.
+
+Two of them have no module in `core-api` and no schema in the transactional database, deliberately:
+**E2 Analytics & Telemetry** lives entirely in `telemetry-collector` and the analytics store
+([ADR-0003](adr/ADR-0003-postgresql-system-of-record.md) §5), and **D4 Delivery Control** is the
+thinnest context in the map — see the note at the end of Group D. So: **17 contexts, 16 modules,
+16 schemas.** If those three numbers ever agree, something has been merged or added without a
+decision.
 
 ---
 
@@ -121,8 +128,10 @@ Devices — it owns none of them.
 **Owns:** content keys and their lifecycle, key rotation, DRM system registration, licence policy
 templates (security level, HDCP, licence duration, offline rules), the licence proxy.
 **Language:** *Content Key*, *Key ID*, *Key Rotation*, *Licence Policy*, *Licence Request*.
-**Key rule:** the only context permitted to touch key material. Isolated in deployment and in
-credentials — see [`docs/security/secrets-and-key-management.md`](../security/secrets-and-key-management.md).
+**Key rule:** the only context permitted to *resolve* key material by identifier. B3 Media Assets
+also handles keys during packaging, but only ones pushed to it per job and never queryable — see
+[`docs/security/secrets-and-key-management.md`](../security/secrets-and-key-management.md) §3.
+Isolated in deployment and in credentials.
 
 ### D4. Delivery Control
 **Owns:** the abstraction over origin and CDN — signed URL / token generation, CDN selection,
@@ -130,6 +139,13 @@ purge, edge configuration references, delivery health signals.
 **Language:** *Delivery Target*, *Edge Token*, *Origin*, *Purge Request*, *CDN Adapter*.
 **Key rule:** no other context knows a CDN vendor's name. See
 [`adr/ADR-0008-cdn-and-origin-abstraction.md`](adr/ADR-0008-cdn-and-origin-abstraction.md).
+
+> **Note — D4 is the thinnest context here, and that is worth admitting.** It owns a port, a token
+> format and a small amount of configuration; it has almost no domain model of its own. It is kept
+> separate because the *boundary* is what matters (nothing else may know a vendor's name), not
+> because it is a rich domain. **If by Phase 10 it has not grown its own model — CDN health, cost
+> signals, steering policy — it should be collapsed into D2 as a port and this context retired.**
+> Reviewed at the Phase 10 gate.
 
 ---
 

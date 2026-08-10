@@ -77,6 +77,35 @@ Server metrics can be entirely green while viewers cannot watch. **Player teleme
 - **Never a synchronous dependency of playback.** Telemetry that can block playback is a liability,
   not an asset.
 
+## 4a. Synthetic playback monitoring
+
+Everything above is **passive**: it measures what real viewers experienced, which means the first
+signal of a failure is that viewers have already hit it. For a platform whose worst failures are
+regional, device-specific, or only occur at the moment someone presses play, that is too late — and
+at 03:00 there may be no viewers on a channel to generate the signal at all.
+
+So there is also an **active probe fleet**:
+
+- **Every live channel is played continuously** by a synthetic player that performs the full journey —
+  authorize, fetch the manifest, acquire a DRM licence, download segments, decode — and reports start
+  time, failures and continuity. Not an HTTP health check on the manifest URL: a health check proves
+  a file exists, which is not the thing that breaks.
+- **VOD probes** cover a representative sample per rights configuration and per device class.
+- **Probes run from multiple regions and networks**, because CDN and geo failures are regional by
+  nature and a probe inside our own infrastructure will not see them.
+- **Probes exercise denial paths too** — an unentitled account must still be denied. A silent
+  authorization regression that starts allowing everything produces no error metric at all, and is
+  otherwise invisible until a licensor notices.
+- Probe accounts and content are **synthetic and clearly marked**, and excluded from business
+  metrics and licensor reporting.
+
+Probe failure alerts before the viewer-experience SLI moves. Where the two disagree, the probe is
+usually right and early.
+
+**The observability pipeline monitors itself.** Telemetry ingestion rate falling to zero must page —
+otherwise the platform's dashboards go quiet and green at the same moment, which is the most
+dangerous state a monitored system can be in.
+
 ## 5. Tracing
 
 - Distributed tracing across services from Phase 4, when the decision plane separates.
@@ -92,10 +121,15 @@ Server metrics can be entirely green while viewers cannot watch. **Player teleme
 | Alert | Severity |
 |---|---|
 | Playback start success below target | **Page** |
+| **Synthetic playback probe failing on any live channel** | **Page** |
+| **Telemetry ingestion rate at zero** | **Page** — dashboards green and blind is the worst state |
 | Playback authorization latency p99 above target | **Page** |
 | Live channel output discontinuity | **Page** |
 | Origin or CDN error rate elevated | **Page** |
-| **Content key read outside the licence proxy** | **Page — security** |
+| **Decision audit write failing** | **Page** — playback is denying by design; §6 of playback-authorization |
+| **Content key access outside the licence proxy or the packager push path** | **Page — security** |
+| Database connection pool saturated or rejecting | **Page** |
+| **Cache offload ratio dropped sharply** | **Page — cost**; usually a cache-key misconfiguration |
 | Playback authorized against an invalid entitlement | **Page — correctness** |
 | Rights or price change without an approval record | **Page — security** |
 | Entitlement staleness or projection lag above threshold | Alert |

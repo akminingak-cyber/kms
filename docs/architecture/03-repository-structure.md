@@ -67,7 +67,7 @@ services/
 │       └── Notification/
 ├── playback-authorizer/      # P4  Same codebase as core-api, separate deployment profile.
 │                             #     Extracted to its own binary only if measurement demands it
-├── drm-license-proxy/        # P6  Isolated: the only workload with key-vault credentials
+├── drm-license-proxy/        # P6  Isolated: sole resolver of content keys by id
 ├── media-pipeline/           # P5  Encode/package orchestration workers (FFmpeg + packager)
 ├── epg-ingest/               # P2  Schedule ingestion, normalisation, reconciliation workers
 └── telemetry-collector/      # P10 High-write playback/QoE event intake

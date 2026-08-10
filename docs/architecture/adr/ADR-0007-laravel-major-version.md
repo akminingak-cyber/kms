@@ -69,8 +69,14 @@ upgrade to 13 should be scheduled explicitly as a Phase 2 work item rather than 
 - [ ] Confirm Laravel 12 and 13 bug-fix and security-fix end dates from Laravel's published support
       policy
 - [ ] Confirm the Phase 1 dependency set is compatible with the chosen major
-- [ ] Confirm the target PHP version for production images (8.3 or 8.4) and enable `bcmath`
-      (missing in this environment — E5)
+- [ ] **Pin the production PHP version — recommend 8.4.** Laravel 13's floor is `^8.3`, but
+      `pestphp/pest` v5 requires `^8.4` (verified 2026-08-10). Pinning 8.3 forces Pest 4; pinning 8.4
+      satisfies both Laravel lines and Pest 5 and gives the longest runtime runway. The test framework
+      should not be what decides the runtime, so decide the runtime first — see
+      [`../09-dependency-policy.md`](../09-dependency-policy.md)
+- [ ] Enable `bcmath` in the production PHP image (missing in this environment — E5)
+- [ ] Confirm UUIDv7 generation support in the chosen major, or plan to generate in application code
+      ([`../../database/README.md`](../../database/README.md) §3)
 
 ## Consequences
 

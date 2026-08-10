@@ -14,7 +14,7 @@ Enforced by Spectral rules in CI where mechanically checkable
 
 ## 2. Identifiers and naming
 
-- Public identifiers are **ULIDs**. Internal integer keys are never exposed.
+- Public identifiers are **UUIDv7**. Internal integer keys are never exposed.
 - JSON fields are `snake_case`. Consistency matters more than the choice; this one matches the
   backend and avoids per-layer transformation bugs.
 - Timestamps are RFC 3339 in UTC with an explicit offset: `2026-08-10T14:30:00Z`.
@@ -43,8 +43,8 @@ Content-Type: application/problem+json
   "detail": "This title is not included in your current package.",
   "instance": "/api/client/v1/playback/sessions",
   "code": "PLAYBACK_NOT_ENTITLED",
-  "correlation_id": "01J9X2K7YQ8ZR3M4N5P6Q7R8S9",
-  "meta": { "required_package_ids": ["01J9X..."] }
+  "correlation_id": "0199c1a4-7e3b-7c21-9f4d-2b6a8e05d913",
+  "meta": { "required_package_ids": ["0199c1a4-7e3b-7c21-9f4d-2b6a8e05d914"] }
 }
 ```
 
@@ -99,6 +99,11 @@ GET /api/client/v1/titles?limit=50&cursor=eyJ...
 
 - Offset pagination is not used on growable collections: it is unstable under concurrent writes
   (items shift between pages) and degrades on deep pages.
+- **EPG is the exception, and deliberately so.** Schedule queries are `channel × time range`, which
+  is a bounded window over an ordered, time-partitioned table, not an open-ended scroll. EPG
+  endpoints take an explicit time range with a documented maximum span rather than a cursor. Forcing
+  a cursor onto a time-range query buys nothing and makes the most cacheable endpoint in the product
+  harder to cache.
 - Cursors are opaque and versioned. Clients never construct or parse them.
 - `limit` has a documented default and maximum.
 - Total counts are omitted unless a specific screen needs one — they are expensive and usually
@@ -109,7 +114,7 @@ GET /api/client/v1/titles?limit=50&cursor=eyJ...
 Every non-`GET` request that creates state or moves money accepts:
 
 ```
-Idempotency-Key: <client-generated ULID>
+Idempotency-Key: <client-generated UUIDv7>
 ```
 
 - The key is stored with the response for a documented window (24 hours minimum).
@@ -125,19 +130,66 @@ viewer sitting alone in their living room.
 
 ## 6. Caching
 
+### The rule that makes the rest safe
+
+> **A response may be `public` only if it is identical for every caller who could share that cache
+> entry.** Anything varying by account, profile, entitlement or device is `private`.
+
+This matters because two other rules in this repository pull against each other: rights and
+entitlement filtering is server-side ([`surfaces.md`](surfaces.md)), and catalog responses should be
+cacheable for cost and for TV performance. A `public` response that has been filtered per viewer
+would be served by a shared cache to the **wrong** viewer — a cross-account data leak wearing the
+costume of a performance optimisation.
+
+The resolution is to split the response, not to weaken either rule:
+
+| Layer | Content | Varies by | Cacheability |
+|---|---|---|---|
+| **Catalog metadata** | Titles, synopses, artwork, credits, ratings | **Locale and territory only** | `public` — keyed on locale + territory |
+| **Availability overlay** | Playable now? In your package? Which exploitations? Badges | Account, profile, device | **`private`** |
+
+Clients fetch metadata (cheap, highly cacheable, long-lived) and the overlay (small, personal,
+short-lived) separately and compose them. Territory is part of the **cache key**, not a `Vary`
+header — an unbounded `Vary` on a header a client controls fragments the cache to uselessness and
+invites cache-poisoning attempts.
+
+### Directives
+
 | Data | Directive | Note |
 |---|---|---|
-| Catalog metadata | `public, max-age=300, stale-while-revalidate=3600` | Plus `ETag` |
+| Catalog metadata | `public, max-age=300, stale-while-revalidate=3600` | Non-personalised. `ETag`. Territory + locale in the cache key |
 | Images | `public, max-age=31536000, immutable` | Content-hashed URLs |
 | EPG (past) | `public, max-age=3600` | Immutable in practice |
 | EPG (now/next) | `public, max-age=30` | |
+| **Availability overlay** | `private, max-age=60` | Personalised |
 | Page layout | `private, max-age=60` | Personalised |
 | Entitlements, profiles | `private, no-store` | |
 | **Playback authorization** | **`no-store`** | Never cached, anywhere, at any layer |
 | Config | `public, max-age=300` | Must be reachable when everything else fails |
 
+### Two kinds of "not available"
+
+The split above also forces a distinction the product needs anyway:
+
+- **Absent** — the item is not in any response at all. Used for content that is embargoed, or not
+  licensed in the territory in a way that makes its very existence confidential. Absence is the only
+  safe treatment; a flagged-but-present item is a leak whatever the flag says.
+- **Present but not playable** — the item appears with an availability state (`not_in_package`,
+  `coming_soon`, `expired`). This is what makes upsell and "leaving soon" possible.
+
+Which content falls in which bucket is an **editorial and rights decision**, expressed as data on the
+availability projection — not a hardcoded API behaviour.
+
 `ETag` and `If-None-Match` on catalog and EPG endpoints matter disproportionately for TV clients on
 constrained hardware and slow connections.
+
+### Client identification headers must not reach the cache key
+
+`X-KMS-Client` and `X-KMS-Client-Version` are used for measurement, diagnostics and minimum-version
+enforcement ([`versioning.md`](versioning.md) §4). They must **not** vary a cacheable response, or
+every client build gets its own cache entry. Where a response genuinely must differ per client
+platform — a device-specific page layout — that response is `private`, or the platform is a path
+segment rather than a header.
 
 ## 7. Rate limiting
 

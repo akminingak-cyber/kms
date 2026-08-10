@@ -75,6 +75,26 @@ Principles:
 - 4K/HDR (**OQ-14**) changes the ladder, the storage model, the DRM security requirements, and the
   device matrix simultaneously. It is not a later toggle.
 
+### Segment and GOP alignment (a correctness requirement, not a tuning knob)
+
+ABR only works if the player can switch renditions at a segment boundary and continue decoding. That
+requires every rung of the ladder to be **aligned**:
+
+- **Closed GOPs with IDR frames at identical timestamps across every rendition.** Fixed GOP length,
+  scene-cut insertion disabled or forced to align, no open GOPs.
+- **Segment boundaries at those IDR positions**, identical in every rendition.
+- **A common timescale and presentation timeline** across video, audio and subtitle tracks.
+- **Audio frame alignment** handled explicitly, since audio frame durations rarely divide evenly into
+  video segment durations.
+
+Misalignment does not produce a clean failure. It produces artefacts, audio drift and stalls **at
+switch points only** — meaning it looks fine on a fast office connection and fails for viewers on
+variable networks, which is exactly the population ABR exists to serve. It is also invisible to any
+test that plays a single rendition end to end.
+
+Consequences: alignment is asserted by automated QC on every encode (§5), it is verified after any
+encoder or ladder change, and encoder failover must preserve the timeline rather than restart it.
+
 ### Codecs
 
 Codec selection is a genuine trade-off and must be **measured, not assumed**:
@@ -123,7 +143,7 @@ Routinely underestimated, and a frequent cause of late rework:
 | Stage | Check | On failure |
 |---|---|---|
 | Ingest | Checksum, container, codec, duration | Reject with a specific reason |
-| Post-encode | All rungs produced; durations match; no frozen or black rungs | Fail the job, alert, retain the mezzanine |
+| Post-encode | All rungs produced; durations match; no frozen or black rungs; **IDR and segment boundaries aligned across every rung** | Fail the job, alert, retain the mezzanine |
 | Post-package | Manifests valid; segments present and aligned; encryption applied | Fail before publication |
 | Pre-publication | Playback verified on a reference player | Block publication |
 | Live, continuous | Frame health, audio presence, bitrate, segment continuity | Alert; fail over if the path is at fault |

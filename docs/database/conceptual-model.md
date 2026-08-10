@@ -126,16 +126,27 @@ rights.agreements                     (counterparty, reference, term, reporting 
                                        concurrency cap, download retention)
 rights.blackouts                      (time-boxed prohibition; territory and/or channel scoped)
 
-rights.availability                   ★ materialised projection, versioned
-  · subject × exploitation × platform × territory × monetization → intervals
-  · availability_version, computed_at, source rule ids
+rights.availability                   ★ materialised projection, versioned — ADR-0011
+  · PK (subject_ref, exploitation, interval_start)
+  · interval_start, interval_end            resolved, incl. transmission-relative windows
+  · territory_rule_set_id, usage_rule_set_id   interned, immutable, shared
+  · platform_mask, monetization_mask           bitmasks, evaluated at read time
+  · availability_version, computed_at, source_rule_ids[]
+
+rights.territory_rule_sets            interned, immutable, versioned  ─┐ hundreds of rows,
+rights.usage_rule_sets                interned, immutable, versioned  ─┘ not millions
 ```
 
 Notes:
 - All rights tables are **effective-dated and append-only**. A right is never updated in place;
   a correction creates a new version. Licensor disputes are about what was true on a date, not what
   is true now.
-- `rights.availability` is the only rights table the hot path reads.
+- `rights.availability` plus the two interned rule-set tables are the only rights data the hot path
+  reads. The rule-set tables are small enough to stay resident in cache.
+- **Interning is what keeps recompute proportional to the change.** An agreement-wide territory
+  correction rewrites one `territory_rule_sets` row rather than millions of availability rows
+  ([ADR-0011](../architecture/adr/ADR-0011-availability-projection-shape.md)).
+- **`rights.blackouts` is deliberately not projected.** It is read directly at decision time.
 - **Absence of a row means prohibited.** Default deny is a database-level invariant, not application
   logic.
 

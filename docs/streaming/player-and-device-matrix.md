@@ -43,9 +43,10 @@ For each platform in scope (**OQ-3** defines which, and which model years):
 1. **Read current vendor documentation** — capabilities change between OS versions and model years.
 2. **Procure real devices**, including the **oldest** model year in scope. The newest device proves
    the least; the oldest is where the platform actually fails.
-3. **Test**, per device: streaming format, encryption scheme, DRM system and security level, codec
-   and profile, maximum resolution, HDCP behaviour, subtitle rendering, audio track switching,
-   ABR behaviour on a constrained network, and error handling.
+3. **Test**, per device: streaming format, **container (fMP4 vs TS)**, encryption scheme, DRM system
+   and security level, codec and profile, maximum resolution, HDCP behaviour, **subtitle format and
+   rendering**, audio track switching, ABR behaviour on a constrained network, error handling,
+   **TLS version and cipher support**, and **whether the device trusts our certificate chain's root**.
 4. **Record results** with device model, firmware/OS version, and test date. A result without a
    firmware version is not reproducible.
 5. **Re-test on platform updates.** A TV firmware update can change playback behaviour without any
@@ -99,9 +100,38 @@ TV applications differ from web and mobile in ways that shape the client archite
 | **Platform certification** | Store review adds real calendar time to every release; plan release trains around it |
 | **Long device lifetimes** | Devices from many years back remain in use and in support scope |
 | **Varying media stacks** | Behaviour differs by manufacturer, model year, and firmware — hence the matrix |
+| **Old JavaScript engines** | Tizen and webOS applications are web applications running in the TV's browser engine, which may be years behind current. **Build target and polyfill set are a device-matrix output**, not a developer preference — see below |
+| **Old TLS stacks and root stores** | A device that cannot negotiate our TLS version, or does not trust our chain's root, simply never connects. There is no server-side error to alert on ([`../security/README.md`](../security/README.md) §4) |
+| **Subtitle format support varies** | Which of WebVTT / TTML-IMSC a device renders, and how well, differs by platform and model year. Verified per device, not assumed |
 
 `packages/ts-ui-tv` provides the shared focus/spatial navigation and remote-key handling, so Tizen and
 webOS applications differ in platform integration rather than in interaction model.
+
+### Build targets are a compatibility decision
+
+The TypeScript in `ts-player-core`, `ts-ui-tv` and the Tizen/webOS applications compiles to whatever
+the **oldest engine in the matrix** supports — not to a modern default. Consequences that are cheap
+to accept up front and expensive to retrofit:
+
+- The build target, polyfill set and bundler configuration are derived from OQ-3 and recorded
+  alongside the matrix.
+- Dependencies that ship only modern syntax, or that assume current browser APIs, are a compatibility
+  risk and are checked before adoption
+  ([`../architecture/09-dependency-policy.md`](../architecture/09-dependency-policy.md)).
+- A dependency that cannot be transpiled to the target is rejected regardless of its other merits.
+- **Bundle size and parse time matter far more here than on desktop**, because the device is slow and
+  the app is launched cold from a remote control.
+
+### Subtitle delivery
+
+Subtitle and caption tracks are part of the packaging output (`media.tracks`), and the format is
+selected per device class from the same mapping table as container and scheme. Two things follow:
+
+- The packaging pipeline must be able to emit **more than one subtitle format** from one source
+  track, rather than assuming a single format across the estate.
+- Rights are checked for subtitle and audio tracks independently — dubs and subtitle tracks are
+  frequently licensed separately, sometimes for different territories
+  ([`ingest-and-transcoding.md`](ingest-and-transcoding.md) §4).
 
 ## 6. Client conformance tests
 

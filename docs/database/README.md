@@ -49,7 +49,16 @@ Rules:
    and rebuildable from source at any time.
 4. **Each deployment profile gets its own role** with the narrowest grants that let it work.
    `playback-authorizer` has read on `entitlement`, `rights`, `profile`, `device`, `catalog`,
-   `schedule`; write only on `playback`; **no access at all to `protection` or `billing`.**
+   `schedule`; write only on `playback`; **no access at all to `protection`, `billing` or
+   `identity`.** It has no `identity` grant because token validation is stateless — see
+   [`../security/playback-authorization.md`](../security/playback-authorization.md) §7. If a future
+   change appears to need one, that is a signal the hot path has acquired a dependency it should not
+   have.
+
+The context list above has 16 schemas for 17 bounded contexts. **E2 Analytics & Telemetry has no
+schema here by design** — it lives in `telemetry-collector` and the analytics store (§1). It is the
+largest dataset in the platform and the least valuable per row; putting it in the transactional
+database would be the single most damaging storage decision available.
 
 Why this matters concretely: when the platform later needs to extract Entitlements or Rights into its
 own service, the work is moving a schema and repointing a connection — not untangling a decade of
@@ -60,15 +69,26 @@ joins.
 | Kind | Type | Where |
 |---|---|---|
 | Internal primary key | `bigint` identity | All tables. Index locality and join performance |
-| Public identifier | **ULID**, stored as `char(26)` or `uuid`, unique-indexed | Every entity exposed in an API |
+| Public identifier | **UUIDv7 in a `uuid` column**, unique-indexed | Every entity exposed in an API |
 | Natural/vendor keys | Their own type | In a per-integration mapping table, never on the aggregate |
-| Correlation | `correlation_id` (ULID) | Propagated across every request, event and log line |
+| Correlation | `correlation_id` (UUIDv7) | Propagated across every request, event and log line |
 
 **Sequential integers are never exposed in an API.** They leak business volume (`/titles/1042` tells
-a competitor the catalog size) and invite enumeration. ULIDs are chosen over random UUIDv4 for index
-locality; they are lexicographically sortable by creation time, which also makes cursor pagination
-natural. UUIDv7 is an acceptable alternative if the chosen PostgreSQL major and the framework both
-support it cleanly — decide once, in Phase 1, and apply it everywhere.
+a competitor the catalog size) and invite enumeration.
+
+**UUIDv7, not ULID or UUIDv4.** All three hide the sequence; the differences that decide it are
+storage and time-ordering. UUIDv7 is time-ordered like ULID — so index locality is good and cursor
+pagination is natural — but it stores in PostgreSQL's native 16-byte `uuid` type, where a ULID string
+needs 26 bytes plus per-row overhead on every unique index and every foreign reference. Across the
+largest tables that difference is real, and the native type also avoids a rendering layer.
+
+This is stated as one decision because the earlier "ULID, stored as `char(26)` or `uuid`" left the
+storage type open, and an identifier type that is decided per table is an identifier type that will
+eventually be inconsistent.
+
+*Verification for Phase 1:* confirm UUIDv7 generation in the chosen framework version. If it is not
+built in, generate in application code — it is a short, well-specified routine — rather than falling
+back to a different identifier type.
 
 ## 4. Consistency model
 
@@ -111,6 +131,26 @@ customer complains.
 **Rule:** if losing a Redis key would cause incorrect money, incorrect entitlement, or unauthorized
 playback that cannot be detected and corrected, it does not belong only in Redis.
 
+## 5a. Connection management
+
+**PHP-FPM is process-per-request, so every worker holds its own database connection.** Four
+deployment profiles, each scaled horizontally, will exhaust PostgreSQL's connection limit long before
+they exhaust its CPU — and connection exhaustion presents as a total outage, not as gradual
+slowdown. This is one of the most common ways a PHP application of this shape falls over, and it is
+entirely avoidable.
+
+- **A connection pooler (PgBouncer or equivalent) sits in front of PostgreSQL from Phase 1**, not
+  added later under load.
+- Transaction-level pooling, which constrains what the application may use: no session-scoped state,
+  no `SET` outside a transaction, no advisory locks held across statements, prepared-statement
+  handling configured deliberately. These constraints are cheap to adopt at the start and expensive
+  to retrofit.
+- **Each deployment profile gets its own pool with its own maximum**, so the admin tier cannot
+  consume the connection budget the playback tier depends on. The isolation is worthless if they
+  share a pool.
+- Pool saturation, wait time and rejected connections are alerted on
+  ([`../operations/observability.md`](../operations/observability.md)).
+
 ## 6. Backup and recovery
 
 - **Continuous WAL archiving with point-in-time recovery.** Nightly base backups.
@@ -120,6 +160,10 @@ playback that cannot be detected and corrected, it does not belong only in Redis
   targets.
 - **Restore is tested quarterly** by restoring to a scratch environment and running a verification
   suite. An untested backup is a hypothesis.
+- **The database is not the only thing that must be recoverable.** The content key vault, mezzanine
+  media and the nDVR buffer each have their own loss profile, and two of them are worse than losing
+  this database. Full table:
+  [`../operations/README.md`](../operations/README.md) §6.
 - Backups are encrypted at rest, access-controlled separately from the database, and **retention
   respects data-protection obligations** — a backup containing data a user asked to have erased is
   still a copy of that data ([`../security/privacy-and-compliance.md`](../security/privacy-and-compliance.md)).

@@ -36,9 +36,16 @@ Every PR, with the affected workspace set computed from the diff:
 │ immutable, digest-pinned artifacts · SBOM · signing           │
 └───────────────────────────────────────────────────────────────┘
 ┌─ 5 VERIFY ────────────────────────────────────────────────────┐
-│ ephemeral preview environment · end-to-end API + UI journeys  │
+│ end-to-end API journeys (Phase 1)                             │
+│ + ephemeral preview environment & UI journeys (Phase 2+)      │
 └───────────────────────────────────────────────────────────────┘
 ```
+
+**Preview environments are deferred to Phase 2, deliberately.** Per-PR ephemeral environments need
+dynamic DNS, on-demand database provisioning, seeding and reliable teardown — a meaningful amount of
+infrastructure. In Phase 1 there is no user interface to look at, so they would review nothing that
+the end-to-end API tests do not already cover. They arrive with `apps/admin`, when there is something
+a human needs to click. Building them earlier is infrastructure work masquerading as rigour.
 
 The two starred items in stages 1 and 2 are the highest-value gates in the pipeline:
 

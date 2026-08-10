@@ -28,6 +28,7 @@ at the time is what makes the change comprehensible later.
 | [0008](ADR-0008-cdn-and-origin-abstraction.md) | CDN and origin behind a delivery port | Accepted |
 | [0009](ADR-0009-payments-boundary.md) | PSP-agnostic payments, no card data on our infrastructure | Accepted |
 | [0010](ADR-0010-contract-first-openapi.md) | Contract-first OpenAPI as the source of truth | Accepted |
+| [0011](ADR-0011-availability-projection-shape.md) | Factorised availability projection | Accepted |
 
 ## Template
 

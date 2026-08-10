@@ -1,7 +1,12 @@
 # KMS TV — Architecture
 
 **Status:** Phase 0 — foundation. No application code exists yet.
-**Last updated:** 2026-08-10
+**Last updated:** 2026-08-10 (revised after the Phase 0 architecture review)
+
+> This document has been through one full review. The 25 findings and their corrections are recorded
+> in [`docs/architecture/10-architecture-review.md`](docs/architecture/10-architecture-review.md) —
+> read it before assuming a design here is arbitrary, because several choices are the *second*
+> answer, and the first one is documented alongside why it failed.
 
 This is the entry point. It summarises the architecture and links to the detail. Every claim here is
 either verifiable in this repository, was verified against a package registry on 2026-08-10, or is
@@ -30,8 +35,9 @@ Detail: [`docs/architecture/01-system-context.md`](docs/architecture/01-system-c
 
 ## 2. Bounded contexts
 
-Sixteen contexts in five groups. Contexts are **logical**; how they map to deployment units is a
-separate decision.
+Seventeen contexts in five groups. Contexts are **logical**; how they map to deployment units is a
+separate decision. **17 contexts, 16 `core-api` modules, 16 database schemas** — E2 Analytics &
+Telemetry deliberately has neither, because it lives in `telemetry-collector` and the analytics store.
 
 | Group | Contexts |
 |---|---|
@@ -82,7 +88,7 @@ and specific.
 |---|---|---|
 | core-api (web / admin / workers) | Same artifact, different configuration. Admin load must never contend with subscriber traffic | 1–2 |
 | **playback-authorizer** | Latency-critical, high-RPS, isolated failure domain. Same artifact initially | 4 |
-| **drm-license-proxy** | **Security isolation** — the only workload with key-vault credentials | 6 |
+| **drm-license-proxy** | **Security isolation** — the only component that can resolve a key by id | 6 |
 | media-pipeline | Different runtime: FFmpeg, large disk, possibly GPU | 5 |
 | epg-ingest | A malformed provider feed must not exhaust web-tier workers | 2 |
 | telemetry-collector | Write volume orders of magnitude higher; droppable under load | 10 |
@@ -143,7 +149,10 @@ Detail: [`docs/architecture/06-rights-management.md`](docs/architecture/06-right
 - **Telemetry never touches the transactional database** — it is the largest dataset and the least
   valuable per row.
 - High-volume time-based tables are **partitioned from their first migration**.
-- Public identifiers are ULIDs; sequential integers are never exposed.
+- Public identifiers are UUIDv7; sequential integers are never exposed.
+- **A connection pooler sits in front of PostgreSQL from Phase 1**, with a separate pool per
+  deployment profile — PHP-FPM is process-per-request, and connection exhaustion presents as a total
+  outage rather than as gradual slowdown.
 - Schema changes use **expand/contract**; migrations are forward-only in production.
 
 Detail: [`docs/database/`](docs/database/)
@@ -165,6 +174,11 @@ some devices effectively stop updating. The contract must outlive the client.
 
 The OpenAPI spec is **the contract**, not a description generated from the implementation.
 
+**A personalised response is never `public`-cacheable.** Catalog metadata (varies by locale and
+territory only) and the personalised availability overlay are therefore **separate responses** —
+merging them means either leaking one viewer's entitlements to another through a shared cache, or
+giving up caching on the largest payload in the product.
+
 Detail: [`docs/api/`](docs/api/)
 
 ## 9. Security
@@ -175,8 +189,15 @@ Four trust zones, with the last one carrying the whole design:
 untrusted (clients) → edge → application → PROTECTED (licence proxy + key vault)
 ```
 
-**The licence proxy is the only workload that can read content key material.** If compromising
-`core-api` yields content keys, every other control is decoration.
+**The licence proxy is the only component that can resolve a content key by identifier.** The
+packager also handles keys — it must, in order to encrypt — but only ones **pushed** to it per job,
+with no ability to query the vault, so it cannot be used as a key oracle. `core-api` cannot reach key
+material at all: if compromising it yielded content keys, every other control would be decoration.
+
+**Key material is backed up under split control, and the restore is rehearsed.** Losing the vault
+makes the entire encrypted library permanently unplayable — a larger single-event risk than losing
+the application database, and one usually missed because key management is filed under security
+rather than availability.
 
 Other load-bearing positions: default deny everywhere; the client is never a security boundary; fail
 closed on the decision path; no secret in the repository, ever; no production data outside production.
@@ -197,6 +218,11 @@ contribution → transcode → CMAF fMP4 (encrypted once) → origin+shield → 
   ([ADR-0005](docs/architecture/adr/ADR-0005-cmaf-multi-drm.md)).
 - **Origin is ours; the CDN is a cache.** Deleting the CDN loses performance, never content.
 - **Delivery targets are a list from day one**, so multi-CDN needs no client update later.
+- **Two independent fallback axes** — encryption scheme (`cbcs`/`cenc`) *and* container (fMP4/TS).
+  A device that cannot play fMP4 under HLS is not helped by re-encrypting it.
+- **The delivery token is validated at the edge but excluded from the CDN cache key.** Leaving it in
+  gives every viewer a private copy of every segment and collapses the offload the single-encode
+  decision exists to protect.
 - **Catch-up and restart are rights, not features** — including content that must never be written to
   the recording buffer at all.
 
@@ -218,6 +244,7 @@ Detail: [`docs/streaming/`](docs/streaming/)
 | 8 | CDN and origin behind a delivery port | Accepted | [ADR-0008](docs/architecture/adr/ADR-0008-cdn-and-origin-abstraction.md) |
 | 9 | PSP-agnostic payments; no card data on our infrastructure | Accepted | [ADR-0009](docs/architecture/adr/ADR-0009-payments-boundary.md) |
 | 10 | Contract-first OpenAPI as the source of truth | Accepted | [ADR-0010](docs/architecture/adr/ADR-0010-contract-first-openapi.md) |
+| 11 | Factorised availability projection (not a full cross-product) | Accepted | [ADR-0011](docs/architecture/adr/ADR-0011-availability-projection-shape.md) |
 
 ---
 
@@ -243,6 +270,11 @@ Ordered by expected impact. Each has an owner-facing action, not just a descript
 | **R14** | This repository contains an unrelated, non-building starter with a Supabase dependency | Confusion; conflicting direction | Certain | **OQ-17 — resolve before Phase 1** |
 | **R15** | Single-CDN dependency at launch | Regional outage = regional blackout | Medium | Delivery port and target list from Phase 4; steering in Phase 10 |
 | **R16** | Development environment cannot run containers, databases, FFmpeg or device toolchains | Unverifiable work | Certain in this container | Recorded in the inspection report; CI runners and developer machines must provide them |
+| **R17** | **Loss of the content key vault makes the entire encrypted library permanently unplayable** — a larger single-event loss than the application database | Catastrophic | Low | Backup under a separate root of trust in a separate failure domain; unseal material escrowed under split control; RPO ≈ 0; **rehearsed** restore ([`docs/security/secrets-and-key-management.md`](docs/security/secrets-and-key-management.md) §3a) |
+| **R18** | Rights recompute lag: a broad rights correction must propagate in seconds, not hours, or the platform serves content it is not licensed to serve | Contract breach | Medium | Factorised, interned projection so recompute is proportional to the change ([ADR-0011](docs/architecture/adr/ADR-0011-availability-projection-shape.md)); projection lag is an alerted SLO |
+| **R19** | Old televisions cannot negotiate current TLS, or stop trusting our certificate chain's root — devices simply never connect, with no server-side error | Silent loss of a device population | Medium | TLS 1.2 floor at the edge; chain and root treated as a device-compatibility decision, verified against the oldest devices and before any CA change |
+| **R20** | Connection exhaustion from process-per-request workers presents as a total outage, not as slowdown | Outage | Medium-high | Pooler from Phase 1, separate pool per deployment profile, saturation alerting |
+| **R21** | A CDN cache-key misconfiguration collapses offload to zero and silently multiplies origin egress — the largest cost line | Financial | Medium | Token validated at the edge but excluded from the cache key; offload ratio alerted as a cost incident |
 
 ---
 
@@ -293,6 +325,8 @@ Ordered by expected impact. Each has an owner-facing action, not just a descript
 | **OQ-23** | Entitlement snapshot staleness budget: how long may playback continue after cancellation? | P4 |
 | **OQ-24** | RPO / RTO targets per data class | P3 |
 | **OQ-26** | Social login, operator SSO, MSISDN identification — required in the launch markets? | P3 |
+| **OQ-29** | **What licence and copyright apply to this repository itself?** There is no `LICENSE` file. Affects contributor terms, any open-sourcing of shared packages, and what may ship inside a client application | P1 |
+| **OQ-30** | **Does telemetry ever feed licensor reporting?** If yes, fabricated client events corrupt contractual numbers rather than just our metrics, and reporting must derive exclusively from server-side decision records | P4 |
 
 ---
 

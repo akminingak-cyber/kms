@@ -55,7 +55,7 @@ which is why that path is the platform's critical path and DRM is a downstream c
                                                               │ · validates token    │
                                                               │ · resolves policy    │
                                                               │ · resolves key       │
-                                                              │   (vault, sole reader)│
+                                                              │   (sole key resolver) │
                                                               │ · applies output     │
                                                               │   constraints        │
                                                               │ · audits the request │
@@ -72,8 +72,9 @@ which is why that path is the platform's critical path and DRM is a downstream c
 1. **The client must not choose its own policy.** The licence token carries a **reference** to a
    policy, never the policy inline; the proxy resolves it server-side. A client that can assert
    "give me a 4K licence with no HDCP requirement" defeats the usage rules the rights depend on.
-2. **Key access is contained.** The proxy is the only workload that can read content key material
-   ([`../security/secrets-and-key-management.md`](../security/secrets-and-key-management.md)).
+2. **Key access is contained.** The proxy is the only component that can resolve a key by identifier;
+   the packager receives keys pushed per job and cannot query the vault
+   ([`../security/secrets-and-key-management.md`](../security/secrets-and-key-management.md) §3).
 3. **Licence issuance is audited** — who asked for what, when, and the outcome. Required for both
    security investigation and licensor questions.
 4. **The vendor is replaceable.** All three DRM systems sit behind one port (P2); the client speaks to

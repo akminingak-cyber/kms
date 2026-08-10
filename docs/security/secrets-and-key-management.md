@@ -65,16 +65,27 @@ is needed, which defeats the purpose of having a rotation procedure.
 
 ### Access control
 
-**The licence proxy is the only workload with read access to content key material.** This is the
-single most important access-control statement in the platform, and it is what makes
-`drm-license-proxy` a separate service in its own network zone rather than a module
-([ADR-0001](../architecture/adr/ADR-0001-modular-monolith-first.md), Phase 6).
+Two components touch key material, and they touch it in opposite directions. Stating this precisely
+matters: an absolute "only the licence proxy ever sees a key" would be false, and a security control
+that is described inaccurately cannot be audited.
 
-- `core-api` cannot read content keys. Compromising it does not yield the library.
-- The packager receives keys through a controlled, audited path for encryption only, and does not
-  retain them.
-- **Every key access is audited**: which key, which identity, when, for which content and session.
-- **Any key read outside the licence proxy raises an immediate page.** Not a dashboard entry — a page.
+| Component | Direction | What it can do | What it cannot do |
+|---|---|---|---|
+| **Packager** (`media-pipeline`) | **Write path** | Receive a key **pushed** to it for a specific packaging job, use it to encrypt, discard it | **Query the vault.** It has no read credential, cannot request a key by id, and cannot enumerate keys. It never retains key material after the job |
+| **Licence proxy** (`drm-license-proxy`) | **Read path** | Resolve `key_id` → key material, per licence request, under policy | Write, create or rotate keys |
+
+**The licence proxy is the only component that can resolve a key by identifier, and the only one on a
+request-driven path.** That is the property that matters: an attacker who reaches the packager gets,
+at most, the keys for jobs running at that moment; an attacker who reaches the licence proxy could
+ask for anything, which is why it is the most heavily constrained and most heavily audited workload
+in the platform.
+
+- `core-api` cannot read content keys at all. Compromising it does not yield the library.
+- Key provisioning to the packager is **push-only, per job, time-boxed, and audited**. There is no
+  packager-initiated key fetch to abuse.
+- **Every key access is audited**: which key, which identity, when, for which content, job or session.
+- **Any key access outside these two paths raises an immediate page.** Not a dashboard entry — a page.
+- Both components sit in the protected zone ([`README.md`](README.md) §2).
 
 ### Rotation policy
 
@@ -88,6 +99,35 @@ single most important access-control statement in the platform, and it is what m
 Rotation must **not interrupt active sessions**: new keys apply to new segments, and clients acquire
 new licences as needed. This is exercised in the Phase 6 exit criteria, because a rotation procedure
 that has only ever been described is not a procedure.
+
+## 3a. Key durability — the disaster-recovery case nobody plans for
+
+**If the key vault is lost, every encrypted asset in the library becomes permanently unplayable.**
+Not degraded — unrecoverable. The mezzanines survive, so the library could in principle be
+re-encoded and re-packaged from scratch, but for a catalog of any size that is weeks of work, and for
+nDVR content already recorded it is simply lost.
+
+This is a larger single-event risk than losing the application database, and it is routinely omitted
+from disaster-recovery planning because key management is filed under security rather than under
+availability. It belongs in both.
+
+Requirements:
+
+1. **Key material is backed up**, encrypted under a separate root of trust, in a separate failure
+   domain from the primary vault. A backup encrypted by the key it is protecting is not a backup.
+2. **The vault's own root key / unseal material has a documented escrow**, held under split control —
+   no single person can reconstruct it, and no single person's absence can prevent reconstruction.
+   Both halves of that sentence are load-bearing.
+3. **Restore is rehearsed**, on the same quarterly cadence as the database restore drill
+   ([`../database/README.md`](../database/README.md) §6), including issuing a licence for an existing
+   asset from restored key material. A key backup that has never been restored is an assumption.
+4. **RPO for key material is effectively zero.** A key created after the last backup and used to
+   encrypt content is a key whose loss orphans that content. Provisioning a new key and backing it up
+   are one operation, not two.
+5. **Key backup access is a break-glass path** with two-person control and mandatory review — the
+   backup is as sensitive as the vault, and it is somewhere less well defended.
+6. **Retention follows content, not a fixed schedule.** A key may be retired only when the content it
+   protects is withdrawn *and* its retention obligation has ended.
 
 ## 4. Separation of duties
 

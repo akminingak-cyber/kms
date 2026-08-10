@@ -62,6 +62,11 @@ Every integration ships with all six parts. An integration missing any of them i
    sync by the contract test above. Rule: **there is one fake per port, not ad-hoc mocks per test.**
 6. **Runbook** — what happens when the vendor is down, degraded, or rate-limiting; who is called;
    what the user sees. In [`docs/operations/`](../operations/).
+7. **Exit plan** — what it would take to replace this vendor: what data of ours they hold, how it is
+   extracted, what identifiers would need remapping, and roughly how long a migration takes. Written
+   **when the adapter is built**, while the answers are known, not during the renegotiation where it
+   is needed. A port with no exit plan is a port whose abstraction has not been tested against the
+   scenario it exists for.
 
 ## 5. Verification checklists
 
@@ -117,9 +122,17 @@ is built. Answers are recorded in an ADR per vendor.
 
 ### P13 SecretStore / KeyVault (blocks Phase 1 for secrets)
 - [ ] HSM or KMS backing for content key wrapping
-- [ ] Access control granularity (the licence proxy must be the only reader of content keys)
+- [ ] Access control granularity — can it express *"the licence proxy may resolve a key by id; the
+      packager may only receive keys pushed per job and may not query"*? If it cannot express that
+      distinction, the key-access model in
+      [`../security/secrets-and-key-management.md`](../security/secrets-and-key-management.md) §3
+      is not enforceable and must be redesigned around what the vault can actually do
 - [ ] Audit logging of key access
 - [ ] Rotation and re-wrapping procedure
+- [ ] **Backup and restore of key material**, and escrow of unseal material under split control —
+      losing the vault makes the library permanently unplayable, so this is a hard requirement, not a
+      preference
+- [ ] Availability characteristics: the licence path depends on it at request time
 
 ## 6. Anti-corruption layer patterns
 

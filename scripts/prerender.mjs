@@ -322,19 +322,26 @@ Options -Indexes
 </IfModule>
 
 # ---------------------------------------------------------------------------
-# Caching. Build assets carry a content hash, so they can be cached forever;
-# HTML must never be cached or users get a stale page.
+# Caching. The rule for the whole site is: a file may be cached forever only if
+# its name changes when its bytes change. Exactly one directory satisfies that
+# — /assets/, where every filename carries a content hash — and it states the
+# policy itself in assets/.htaccess. Everything else here is unhashed and
+# swappable in place, so nothing at this level is immutable.
+#
+# ExpiresByType is deliberately conservative for that reason. It applies to
+# whatever a nearer .htaccess has not already claimed: the root brand files
+# (favicon.svg, the icons, og-image*.png, site.webmanifest). Those are replaced
+# in place when the brand changes, and a year-long Expires on them would outlive
+# the change by a year on every device that had visited.
 # ---------------------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType text/css                "access plus 1 year"
-  ExpiresByType application/javascript  "access plus 1 year"
-  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 day"
   ExpiresByType image/webp              "access plus 1 day"
   ExpiresByType image/avif              "access plus 1 day"
   ExpiresByType image/png               "access plus 1 day"
   ExpiresByType image/jpeg              "access plus 1 day"
-  ExpiresByType font/woff2              "access plus 1 year"
+  ExpiresByType application/manifest+json "access plus 1 day"
   ExpiresByType text/html               "access plus 0 seconds"
 </IfModule>
 
@@ -344,12 +351,12 @@ Options -Indexes
     Header append Vary Accept-Encoding
   </FilesMatch>
 
-  # Build output carries a content hash in its filename, so a change produces a
-  # new URL and the old one can be cached indefinitely. Photographs under
-  # /images/ do NOT carry a hash — they are meant to be swapped in place — so
-  # they get their own, shorter policy from dist/images/.htaccess.
-  <FilesMatch "\\.(css|js|svg|woff2)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
+  # The brand files. A day of cache, then a revalidation that usually answers
+  # 304 — cheap — and a month during which a stale copy may still be shown while
+  # the fresh one downloads. Replacing a favicon or a share card then reaches
+  # people in a day rather than never.
+  <FilesMatch "\\.(png|svg|ico|webmanifest)$">
+    Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"
   </FilesMatch>
 
   # HTML has no hash, so it must be revalidated or visitors keep a stale page.
@@ -424,6 +431,25 @@ const lastmod = new Date().toISOString().slice(0, 10);
 writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(lastmod));
 writeFileSync(path.join(DIST, '.htaccess'), buildHtaccess());
 
+// The year-long cache lives here and nowhere else, because this is the only
+// directory whose filenames change when their contents do. Stating it in the
+// directory rather than in the root by extension is what keeps it honest: an
+// unhashed file cannot accidentally inherit it by being named .svg or .woff2.
+writeFileSync(
+  path.join(DIST, 'assets', '.htaccess'),
+  ['# Every filename in this directory carries a content hash, so a change ships',
+   '# under a new URL and the old one can be kept forever. This is the only place',
+   '# on the site where that is true.',
+   '<IfModule mod_headers.c>',
+   '  Header set Cache-Control "public, max-age=31536000, immutable"',
+   '</IfModule>',
+   '<IfModule mod_expires.c>',
+   '  ExpiresActive On',
+   '  ExpiresDefault "access plus 1 year"',
+   '</IfModule>',
+   ''].join('\n'),
+);
+
 // Photographs are swapped in place under a stable filename, so they cannot be
 // cached like hashed build output. A day of hard caching keeps them fast, and
 // stale-while-revalidate means the replacement is picked up in the background
@@ -432,8 +458,8 @@ writeFileSync(path.join(DIST, '.htaccess'), buildHtaccess());
 writeFileSync(
   path.join(DIST, 'images', '.htaccess'),
   ['# These filenames are stable by design — replacing a photograph reuses its',
-   '# name — so they must revalidate. The parent .htaccess caches hashed build',
-   '# output for a year; this overrides that for this directory only.',
+   '# name — so they must revalidate. Nothing above this directory grants a long',
+   '# cache any more, but stating the policy here keeps it true regardless.',
    '<IfModule mod_headers.c>',
    '  Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"',
    '</IfModule>',
@@ -467,6 +493,15 @@ for (const page of emitted) {
   }
   for (const m of html.matchAll(/(?:href|src)="(\/[A-Za-z0-9._-]+\.[a-z0-9]{2,12})"/g)) {
     if (!referenced.has(m[1])) referenced.set(m[1], page.slice(DIST.length));
+  }
+  // Metadata names its files by absolute URL, not by path — og:image,
+  // twitter:image and the JSON-LD `image`/`logo` all read
+  // https://kms.ge/og-image-ka.png. The two patterns above never see them, so a
+  // share card that was renamed or never generated would ship as a broken
+  // preview in every feed and no build step would notice.
+  for (const chunk of html.split(COMPANY.url).slice(1)) {
+    const m = /^(\/[A-Za-z0-9._-]+\.[a-z0-9]{2,12})/.exec(chunk);
+    if (m && !referenced.has(m[1])) referenced.set(m[1], page.slice(DIST.length));
   }
 }
 const missing = [...referenced].filter(([ref]) => !existsSync(path.join(DIST, ref.slice(1))));

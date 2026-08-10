@@ -1,5 +1,5 @@
 import { COMPANY, socialLinks } from '../../config/site';
-import { localePath, type Locale } from '../../i18n/locales';
+import { LOCALE_META, localePath, type Locale } from '../../i18n/locales';
 
 export type JsonLd = Record<string, unknown>;
 
@@ -51,7 +51,7 @@ export function localBusiness(locale: Locale, description: string): JsonLd {
     description,
     telephone: COMPANY.phone,
     email: COMPANY.emailSales,
-    image: `${COMPANY.url}/og-image.png`,
+    image: `${COMPANY.url}${LOCALE_META[locale].shareCard}`,
     logo: `${COMPANY.url}/favicon.svg`,
     areaServed: COMPANY.region,
     address: compact({

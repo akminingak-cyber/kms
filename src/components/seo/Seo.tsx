@@ -37,7 +37,7 @@ export function buildHead(
   { title, description, path, jsonLd = [], noindex = false }: SeoProps,
 ): HeadData {
   const canonical = `${COMPANY.url}${localePath(locale, path)}`;
-  const image = `${COMPANY.url}/og-image.png`;
+  const image = `${COMPANY.url}${LOCALE_META[locale].shareCard}`;
 
   const alternates = [
     ...LOCALES.map((code) => ({

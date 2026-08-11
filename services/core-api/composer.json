@@ -1,0 +1,65 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "kmstv/core-api",
+    "type": "project",
+    "description": "KMS TV control-plane API — modular monolith.",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-sodium": "*",
+        "laravel/framework": "^12.0",
+        "laravel/tinker": "^2.10.1",
+        "lcobucci/jwt": "^5.6"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.0",
+        "laravel/pail": "^1.2.2",
+        "laravel/pint": "^1.24",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^11.5.50"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Modules\\": "modules/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php artisan package:discover --ansi"
+        ],
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "boundaries": "@php ../../tools/check-module-boundaries.php",
+        "format": "pint",
+        "format-check": "pint --test",
+        "test": "@php artisan test"
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

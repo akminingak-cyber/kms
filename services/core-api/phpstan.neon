@@ -1,0 +1,18 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    # Level is ratcheted upward over time, never downward.
+    level: 6
+    paths:
+        - app
+        - modules
+        - config
+        - database
+    excludePaths:
+        - modules/*/Tests/*
+    ignoreErrors:
+        # Eloquent's magic attributes are typed by docblock on each model; a
+        # narrower rule than disabling the check globally.
+        - identifier: property.notFound
+          path: modules/*/Infrastructure/Eloquent/*.php

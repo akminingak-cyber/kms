@@ -1,0 +1,90 @@
+# Local development stack.
+#
+# `make up` must produce a working system from a fresh clone with no manual
+# steps: every manual step is one somebody gets wrong on their first day, and
+# one that silently rots as the system changes.
+name: kms-tv
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      # Local-only credentials. Nothing here is a secret; production values come
+      # from the secret manager.
+      POSTGRES_USER: kms
+      POSTGRES_PASSWORD: kms_local_dev
+      POSTGRES_DB: kms
+    ports: ['5432:5432']
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U kms -d kms']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # Persistence on, because queues live here. Anything that must survive a
+    # Redis loss is still reconstructible from PostgreSQL.
+    command: ['redis-server', '--appendonly', 'yes']
+    ports: ['6379:6379']
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  core-api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/php.Dockerfile
+      target: development
+    volumes:
+      - ../../services/core-api:/app
+      - ../../packages/api-contracts:/packages/api-contracts:ro
+    env_file: [../../services/core-api/.env]
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      MAIL_HOST: mailpit
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+
+  nginx:
+    image: nginx:1-alpine
+    ports: ['8080:80']
+    volumes:
+      - ../nginx/core-api.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../services/core-api:/app:ro
+    depends_on: [core-api]
+
+  # Queue processing is real in local development, not a synchronous fake: a
+  # job that only ever runs inline is a job whose failure path is untested.
+  worker:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/php.Dockerfile
+      target: development
+    command: ['php', 'artisan', 'queue:work', '--tries=3', '--max-time=3600']
+    volumes: ['../../services/core-api:/app']
+    env_file: [../../services/core-api/.env]
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+
+  # Local mail capture, so verification and password-reset flows are exercised
+  # end to end rather than mocked.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ['8025:8025']
+
+volumes:
+  postgres-data:
+  redis-data:

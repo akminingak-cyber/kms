@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push supersedes an in-flight run for the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  core-api:
+    name: core-api
+    runs-on: ubuntu-latest
+
+    services:
+      # Integration tests run against real PostgreSQL and real Redis. Never
+      # SQLite: it silently accepts SQL PostgreSQL rejects and vice versa, which
+      # converts a caught bug into a production incident.
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kms
+          POSTGRES_PASSWORD: kms_ci
+          POSTGRES_DB: kms_test
+        options: >-
+          --health-cmd "pg_isready -U kms" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+        ports: ['5432:5432']
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+        ports: ['6379:6379']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pgsql, redis, bcmath, intl, zip, sodium
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('services/core-api/composer.lock') }}
+
+      - name: Install dependencies
+        working-directory: services/core-api
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      # ---------------- Stage 1: static ----------------
+
+      - name: Module boundaries
+        # The check that makes ADR-0001 valid. Without it the modular monolith
+        # degrades into a monolith within weeks.
+        run: php tools/check-module-boundaries.php
+
+      - name: Formatting
+        working-directory: services/core-api
+        run: vendor/bin/pint --test
+
+      - name: Static analysis
+        working-directory: services/core-api
+        run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+      - name: Dependency audit
+        working-directory: services/core-api
+        run: composer audit --locked
+
+      - name: No committed secrets
+        run: |
+          # .env must never be tracked. .env.example is the only env file.
+          if git ls-files | grep -E '(^|/)\.env$' ; then
+            echo "::error::A .env file is tracked. Secrets must never be committed."
+            exit 1
+          fi
+          if git ls-files | grep -E '\.(pem|key|p12|keystore|jks)$' ; then
+            echo "::error::Key material is tracked."
+            exit 1
+          fi
+
+      # ---------------- Stage 2 and 3: contract and tests ----------------
+
+      - name: Prepare environment
+        working-directory: services/core-api
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          echo "KMS_TOKEN_SIGNING_KEY=$(php -r 'echo base64_encode(sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair()));')" >> .env
+
+      - name: Migrations run clean from an empty database
+        working-directory: services/core-api
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: kms_test
+          DB_PASSWORD: kms_ci
+          REDIS_HOST: 127.0.0.1
+        run: php artisan migrate --force
+
+      - name: Migrations are reversible
+        working-directory: services/core-api
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: kms_test
+          DB_PASSWORD: kms_ci
+          REDIS_HOST: 127.0.0.1
+        run: |
+          php artisan migrate:rollback --force --step=100
+          php artisan migrate --force
+
+      - name: Tests
+        working-directory: services/core-api
+        env:
+          DB_HOST: 127.0.0.1
+          DB_TEST_DATABASE: kms_test
+          DB_PASSWORD: kms_ci
+          REDIS_HOST: 127.0.0.1
+        # Includes the OpenAPI conformance check in both directions (ADR-0010).
+        run: php artisan test
+
+  docker:
+    name: container builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate the compose stack
+        run: docker compose -f infrastructure/docker/compose.yaml config --quiet
+      - name: Build the production image
+        run: docker build -f infrastructure/docker/php.Dockerfile --target production .

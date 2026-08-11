@@ -1,6 +1,6 @@
 # ADR-0007: Laravel major version for `core-api`
 
-**Status:** **Proposed — requires a decision from the product/technical owner before Phase 1**
+**Status:** **Accepted — option A (Laravel 12), decided by the product owner at Phase 1 kick-off**
 **Date:** 2026-08-10
 **Deciders:** Product owner, Architecture
 
@@ -50,7 +50,19 @@ committing.
 planned upgrade. In practice this means doing the upgrade while the codebase is larger and the team
 is under feature pressure — strictly worse than doing it now, when the codebase is empty.
 
-## Decision (proposed, not accepted)
+## Decision
+
+**Option A — Laravel 12**, as specified in the brief. Implemented on `laravel/framework` v12.65.0.
+
+Two consequences follow and are recorded rather than left implicit:
+
+1. **The upgrade to Laravel 13 is a scheduled Phase 2 work item**, not a discovery. It is cheapest
+   now, while the codebase is small; the architecture in this repository is not version-specific.
+2. **PHP is pinned to 8.4** (`composer.json` requires `^8.3`; images and CI use 8.4). Laravel 12's
+   floor is `^8.2`, but pinning 8.4 satisfies Laravel 13 as well, so the framework upgrade will not
+   also be a runtime upgrade. `bcmath` is enabled explicitly in the image (absent here — E5).
+
+### Original recommendation (retained)
 
 **Recommend option B — Laravel 13 — subject to confirming the support windows for both lines and
 verifying that the Phase 1 dependency set supports 13.**

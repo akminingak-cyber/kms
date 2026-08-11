@@ -1,0 +1,620 @@
+openapi: 3.1.0
+info:
+  title: KMS TV — Client API
+  version: 1.0.0
+  description: |
+    The viewer-facing surface, called by the web, mobile and television
+    applications.
+
+    **This document is the contract, not a description of the implementation**
+    (ADR-0010). The API changes here first, in a reviewed pull request; the
+    server is then verified against it in both directions by
+    `tests/Feature/Contract/OpenApiConformanceTest.php`.
+
+    Within major version 1 this surface is **append-only**. A Smart TV
+    application reaches its installed base over months to years and some devices
+    effectively stop updating, so a breaking change is not a bug to fix forward —
+    it is a population of devices that stops working. See docs/api/versioning.md.
+  license:
+    name: Proprietary
+servers:
+  - url: /api/client/v1
+
+tags:
+  - name: Authentication
+  - name: Device activation
+  - name: Profiles
+  - name: Devices
+  - name: Platform
+
+paths:
+  /config:
+    get:
+      tags: [Platform]
+      operationId: getClientConfig
+      summary: Client configuration, fetched at application start-up
+      description: |
+        How a client learns its minimum supported version and the limits in
+        force. Must stay reachable when the rest of the API is degraded: it is
+        the main lever the platform retains over clients it cannot otherwise
+        change.
+      security: []
+      responses:
+        '200':
+          description: Configuration
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClientConfig' }
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      operationId: register
+      security: []
+      summary: Create an account and its primary profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Account created; a verification email has been sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RegisterResponse' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/verify-email:
+    post:
+      tags: [Authentication]
+      operationId: verifyEmail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, maxLength: 255 }
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    type: object
+                    properties:
+                      id: { $ref: '#/components/schemas/Identifier' }
+                      email_verified: { type: boolean }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      operationId: login
+      security: []
+      summary: Sign in with a password and bind the session to a device
+      description: |
+        Television device classes are rejected here: a TV has no usable keyboard
+        and must use the activation flow, and accepting a password login from
+        one would create a second, weaker path to the same session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Session issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '423': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      operationId: refreshSession
+      security: []
+      summary: Rotate a refresh token
+      description: |
+        Refresh tokens rotate on every use and are tracked as a family.
+        Presenting an already-rotated token means either theft or a client bug;
+        both revoke the whole family and return `AUTH_REFRESH_REUSE_DETECTED`.
+        A client receiving that code must clear its credentials rather than retry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string }
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      operationId: logout
+      summary: Revoke the session
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token: { type: string }
+      responses:
+        '204': { description: Signed out }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/password/forgot:
+    post:
+      tags: [Authentication]
+      operationId: requestPasswordReset
+      security: []
+      description: |
+        Always returns 202, whether or not the address is registered.
+        Distinguishing the two would make this unauthenticated endpoint an
+        account-enumeration oracle.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, maxLength: 320 }
+      responses:
+        '202': { description: Accepted }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/password/reset:
+    post:
+      tags: [Authentication]
+      operationId: resetPassword
+      security: []
+      description: Resetting a password revokes every existing session for the account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string, maxLength: 255 }
+                password: { type: string, minLength: 12, maxLength: 4096 }
+      responses:
+        '204': { description: Password changed; all sessions revoked }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/device/authorize:
+    post:
+      tags: [Device activation]
+      operationId: startDeviceActivation
+      security: []
+      summary: Begin television pairing
+      description: |
+        Returns two secrets. `user_code` is short and is displayed on the
+        television for a person to type elsewhere; `device_code` is
+        high-entropy and is what the television polls with. Polling with the
+        short code is rejected — it is low-entropy by necessity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_class, device_name]
+              properties:
+                device_class: { $ref: '#/components/schemas/PairingDeviceClass' }
+                device_name: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        '201':
+          description: Activation started
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActivationStart' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/device/token:
+    post:
+      tags: [Device activation]
+      operationId: pollDeviceActivation
+      security: []
+      description: |
+        Polled by the television until approved. Returns `428` with
+        `ACTIVATION_PENDING` while waiting, so a client can tell "keep waiting"
+        apart from "give up". Honour the `interval` from the authorize response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_code]
+              properties:
+                device_code: { type: string, maxLength: 255 }
+      responses:
+        '200':
+          description: Session issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '428': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /auth/device/approve:
+    post:
+      tags: [Device activation]
+      operationId: approveDeviceActivation
+      summary: Approve a television from an authenticated session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_code]
+              properties:
+                user_code: { type: string, minLength: 4, maxLength: 16 }
+      responses:
+        '200':
+          description: Approved; the response names the device being authorised
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device: { $ref: '#/components/schemas/Device' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /profiles:
+    get:
+      tags: [Profiles]
+      operationId: listProfiles
+      responses:
+        '200':
+          description: Profiles for the authenticated account
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Profile' }
+                  limit: { type: integer }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Profiles]
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileWrite' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Profile' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /profiles/{profileId}:
+    parameters:
+      - name: profileId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    get:
+      tags: [Profiles]
+      operationId: getProfile
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Profile' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [Profiles]
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileWrite' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Profile' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [Profiles]
+      operationId: deleteProfile
+      description: The primary profile cannot be deleted — an account must always have a viewing subject.
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /devices:
+    get:
+      tags: [Devices]
+      operationId: listDevices
+      responses:
+        '200':
+          description: Registered devices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Device' }
+                  limit: { type: integer }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /devices/{deviceId}:
+    parameters:
+      - name: deviceId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    delete:
+      tags: [Devices]
+      operationId: removeDevice
+      description: |
+        Removes the device and revokes its sessions in the same operation. A
+        removal cooldown applies, so the device limit cannot be trivially cycled.
+      responses:
+        '204': { description: Removed }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A short-lived, device-bound access token. Account, profile and device
+        identity all come from the token — never from a request body, because a
+        client-asserted device identifier would let a caller inherit another
+        device's class, which is an input to the rights decision from Phase 4.
+
+  responses:
+    Problem:
+      description: RFC 9457 problem document
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Identifier:
+      type: string
+      format: uuid
+      description: UUIDv7. Sequential integers are never exposed.
+      examples: ['0199c1a4-7e3b-7c21-9f4d-2b6a8e05d913']
+
+    Problem:
+      type: object
+      required: [type, title, status, code, correlation_id]
+      properties:
+        type: { type: string, format: uri }
+        title:
+          type: string
+          description: Non-localised summary. Clients localise from the code, never from this.
+        status: { type: integer }
+        code:
+          type: string
+          description: |
+            Stable machine-readable code. **Clients switch on this and never on
+            prose.** A code's meaning never changes once shipped; the registry is
+            append-only.
+        detail: { type: string }
+        instance: { type: string }
+        correlation_id: { type: string }
+        meta: { type: object, additionalProperties: true }
+
+    ClientConfig:
+      type: object
+      properties:
+        api:
+          type: object
+          properties:
+            client_version: { type: string }
+            features: { type: array, items: { type: string } }
+        minimum_supported_version: { type: [string, 'null'] }
+        upgrade_required: { type: boolean }
+        upgrade_message_key:
+          type: [string, 'null']
+          description: A message key, never a message. The client localises.
+        activation:
+          type: object
+          properties:
+            poll_interval_seconds: { type: integer }
+        limits:
+          type: object
+          properties:
+            profiles: { type: integer }
+            devices: { type: integer }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, profile_name, accepts_terms]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        password:
+          type: string
+          minLength: 12
+          maxLength: 4096
+          description: Length over composition rules.
+        profile_name: { type: string, minLength: 1, maxLength: 50 }
+        locale: { type: string, maxLength: 20 }
+        accepts_terms: { type: boolean }
+
+    RegisterResponse:
+      type: object
+      properties:
+        account:
+          type: object
+          properties:
+            id: { $ref: '#/components/schemas/Identifier' }
+            email: { type: string }
+            email_verified: { type: boolean }
+        primary_profile_id: { $ref: '#/components/schemas/Identifier' }
+
+    LoginRequest:
+      type: object
+      required: [email, password, device_class, device_name]
+      properties:
+        email: { type: string, format: email, maxLength: 320 }
+        password: { type: string, maxLength: 4096 }
+        device_class: { $ref: '#/components/schemas/PasswordDeviceClass' }
+        device_name: { type: string, minLength: 1, maxLength: 100 }
+        device_fingerprint:
+          type: [string, 'null']
+          maxLength: 512
+          description: Stable per-installation value. Lets a known device sign in again without consuming another device slot.
+
+    Session:
+      type: object
+      required: [access_token, refresh_token, token_type, expires_in]
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        token_type: { type: string, const: Bearer }
+        expires_in: { type: integer }
+        refresh_expires_at: { type: string, format: date-time }
+        device_id: { $ref: '#/components/schemas/Identifier' }
+
+    ActivationStart:
+      type: object
+      properties:
+        user_code:
+          type: string
+          description: Displayed on the television.
+        device_code:
+          type: string
+          description: The polling secret. As sensitive as a refresh token.
+        verification_uri: { type: string, format: uri }
+        expires_at: { type: string, format: date-time }
+        interval:
+          type: integer
+          description: Minimum seconds between polls.
+
+    Profile:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        name: { type: string }
+        is_primary: { type: boolean }
+        locale: { type: string }
+        max_rating: { type: [string, 'null'] }
+        has_pin:
+          type: boolean
+          description: Whether a PIN is set. The PIN itself is never returned.
+        audio_language: { type: [string, 'null'] }
+        subtitle_language: { type: [string, 'null'] }
+
+    ProfileWrite:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 50 }
+        locale: { type: string, maxLength: 20 }
+        max_rating: { type: [string, 'null'], maxLength: 20 }
+        pin: { type: [string, 'null'], pattern: '^[0-9]{4}$' }
+        audio_language: { type: [string, 'null'], maxLength: 20 }
+        subtitle_language: { type: [string, 'null'], maxLength: 20 }
+
+    Device:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        name: { type: string }
+        device_class: { $ref: '#/components/schemas/DeviceClass' }
+        first_seen_at: { type: string, format: date-time }
+        last_seen_at: { type: string, format: date-time }
+        is_current: { type: boolean }
+
+    DeviceClass:
+      type: string
+      description: |
+        Authoritative platform data, not a display label: from Phase 4 it is an
+        input to the rights and DRM decision. Treat as extensible — a client
+        must skip a value it does not recognise rather than fail.
+      enum: [web, mobile, tablet, androidtv, tizen, webos, stb]
+
+    PasswordDeviceClass:
+      type: string
+      enum: [web, mobile, tablet]
+
+    PairingDeviceClass:
+      type: string
+      enum: [androidtv, tizen, webos, stb]
+
+security:
+  - bearerAuth: []

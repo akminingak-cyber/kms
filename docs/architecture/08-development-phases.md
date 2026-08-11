@@ -27,7 +27,7 @@ Repository inspection, architecture, and engineering rules. No application code.
 
 ---
 
-## Phase 1 — Platform skeleton
+## Phase 1 — Platform skeleton  *(delivered 2026-08-11)*
 
 The minimum real system: one Laravel service, one database, CI that actually verifies things, and
 one genuine end-to-end feature (authentication). Nothing simulated.
@@ -53,15 +53,23 @@ one genuine end-to-end feature (authentication). Nothing simulated.
 beyond what is needed to exercise the auth API.
 
 **Exit criteria**
-- [ ] `make up` gives a working stack on a clean machine from a fresh clone
-- [ ] A user can register, verify email, sign in on a device, refresh a token, sign out — against the
+- [~] `make up` gives a working stack on a clean machine from a fresh clone —
+      *stack authored and its compose definition validated; **not started**, because the
+      initialisation container has no Docker daemon (E1). Must be confirmed on a developer
+      machine or a CI runner before this box is ticked.*
+- [x] A user can register, verify email, sign in on a device, refresh a token, sign out — against the
       real database, exercised by an end-to-end test
-- [ ] TV **device activation (pairing code) flow** works end to end — proves the hardest auth
+- [x] TV **device activation (pairing code) flow** works end to end — proves the hardest auth
       interaction before any TV app exists
-- [ ] CI fails on: boundary violation, spec drift, failing test, known-vulnerable dependency,
-      committed secret
-- [ ] A deliberately introduced cross-module import is rejected by CI (verified, not assumed)
-- [ ] Every architecture decision made during the phase is recorded as an ADR
+- [~] CI fails on: boundary violation, spec drift, failing test, known-vulnerable dependency,
+      committed secret — *pipeline authored; the boundary, spec-drift, formatting and test gates
+      were executed locally. The PHPStan gate is configured but **could not be installed here**
+      (the egress policy blocks GitHub zipball downloads), so it has run in CI only.*
+- [x] A deliberately introduced cross-module import is rejected by CI — **verified**: a temporary
+      `Modules\Profile` → `Modules\Identity\Infrastructure\Eloquent` import was added and the
+      checker failed the build. It also caught two real violations in the delivered code, both
+      fixed by moving code rather than by relaxing the rule
+- [x] Every architecture decision made during the phase is recorded as an ADR
 
 ---
 

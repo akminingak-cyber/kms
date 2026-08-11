@@ -71,6 +71,37 @@ return [
         'user_code_alphabet' => 'ACDEFGHJKMNPQRTWXY34679',
     ],
 
+    'schedule' => [
+        // A bounded window rather than a cursor: EPG queries are
+        // channel × time range over a time-partitioned table, and an unbounded
+        // range would let one request scan the whole partition set.
+        'max_range_hours' => (int) env('KMS_EPG_MAX_RANGE_HOURS', 48),
+        'default_range_hours' => 6,
+    ],
+
+    'playback' => [
+        // Heartbeat frequency is a cost parameter, not an implementation
+        // detail: it is the largest control-plane write stream at scale.
+        'heartbeat_interval_seconds' => (int) env('KMS_HEARTBEAT_INTERVAL', 30),
+        // A session with no heartbeat past this is closed and its slot
+        // released, which is what stops a crashed client permanently consuming
+        // a viewer's concurrency allowance.
+        'session_ttl_seconds' => (int) env('KMS_SESSION_TTL', 120),
+        'delivery_token_ttl_seconds' => (int) env('KMS_DELIVERY_TOKEN_TTL', 300),
+        /*
+         * Territory when no other signal is available. Null means undetermined,
+         * which denies territory-restricted content rather than guessing.
+         * A real IP geolocation adapter is P11 and awaits vendor selection.
+         */
+        'default_territory' => env('KMS_DEFAULT_TERRITORY'),
+    ],
+
+    'delivery' => [
+        // Our own origin. A CDN is a cache in front of this (ADR-0008) and
+        // arrives as a sibling adapter, not a rewrite.
+        'origin_base_url' => env('KMS_ORIGIN_BASE_URL', 'https://origin.kmstv.invalid'),
+    ],
+
     'rate_limits' => [
         'auth_per_ip' => env('KMS_RL_AUTH_IP', '20,1'),
         'auth_per_identity' => env('KMS_RL_AUTH_IDENTITY', '5,1'),
@@ -80,6 +111,9 @@ return [
         'read_per_account' => env('KMS_RL_READ', '120,1'),
         'write_per_account' => env('KMS_RL_WRITE', '30,1'),
         'admin' => env('KMS_RL_ADMIN', '60,1'),
+        // Deliberately high but not unlimited: set from the measured legitimate
+        // maximum, since a television retries hard on a flaky connection.
+        'playback' => env('KMS_RL_PLAYBACK', '60,1'),
     ],
 
     'clients' => [

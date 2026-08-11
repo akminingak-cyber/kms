@@ -41,5 +41,8 @@
         <env name="KMS_TOKEN_SIGNING_KEY" value="z+R/aZjxo4eCVRhHPuPKq3hrZaHrv8SilBIsCbLkt9k0MbQdqf49ZDE2DvBLhCrshPuAORJFqrRpQnSvsSnN2Q=="/>
         <env name="KMS_TOKEN_ISSUER" value="http://localhost"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
+        <!-- A determinate territory, so tests exercise rights rather than the
+             undetermined-territory branch. That branch is tested explicitly. -->
+        <env name="KMS_DEFAULT_TERRITORY" value="GB"/>
     </php>
 </phpunit>

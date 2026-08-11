@@ -73,6 +73,27 @@ beyond what is needed to exercise the auth API.
 
 ---
 
+## Phases 2–4 — delivered together as "Phase 2" *(2026-08-11)*
+
+> **Scope note.** The product owner combined what this plan had as Phase 2
+> (content), Phase 3 (commercial) and Phase 4 (playback authorization) into a
+> single phase. The headings below are kept so the exit criteria stay traceable.
+>
+> **Rights & Availability was added to the scope by engineering**, because it was
+> not separable: playback authorization without rights is entitlement-only, which
+> §1 of the rights document calls "encrypted, not compliant".
+>
+> Three things in the combined phase are deliberately **not** built, because the
+> vendor decisions they depend on are still open. None is stubbed:
+>
+> - **Payments.** No PSP is selected (OQ-9). Subscriptions and the entitlement
+>   they produce are real; no money moves, and the provider columns are null.
+> - **DRM.** No vendor agreements exist (OQ-7). `protection` is `null` in the
+>   playback response — absent, not a plausible-looking placeholder.
+> - **IP geolocation.** No vendor (P11). Territory resolves from configuration
+>   and the *method* is recorded on every decision, so the vendor adapter drops
+>   in without changing the decision record's shape.
+
 ## Phase 2 — Content control plane
 
 **Scope:** `Catalog`, `Schedule` (EPG), channels and lineups, `epg-ingest` service with a real
@@ -80,10 +101,14 @@ provider feed, `apps/admin` (Next.js) for content and schedule management, metad
 behind port P7, image handling and derivatives.
 
 **Exit criteria**
-- [ ] A real EPG feed ingests on a schedule, with revision handling and reconciliation of corrections
-- [ ] Content operators manage the catalog through the admin UI, with audit trail
-- [ ] Client API v1 serves channels, lineup, and now/next with cursor pagination
-- [ ] Schedule ingestion survives a malformed feed without data loss or manual repair
+- [~] A real EPG feed ingests on a schedule, with revision handling and reconciliation of corrections —
+      *ingest endpoint, revision handling and `(source, source_ref)` reconciliation are built and
+      tested; there is no scheduled pull, because no provider is selected (OQ-5)*
+- [~] Content operators manage the catalog through the admin UI, with audit trail —
+      *the admin **API** and the audit trail are built; `apps/admin` is not*
+- [x] Client API v1 serves channels, lineup, and now/next — *time-range windows rather than cursors
+      for EPG, which is a deliberate correction recorded in the API conventions*
+- [x] Schedule ingestion survives a malformed feed without data loss or manual repair
 
 ---
 
@@ -94,13 +119,13 @@ invoices, dunning), `Entitlement` (grants, materialised entitlement snapshot), `
 adapter against a **sandbox only**.
 
 **Exit criteria**
-- [ ] Full subscription lifecycle exercised in tests including trials, renewals, failures, dunning,
-      cancellation, and reactivation
-- [ ] Entitlement snapshot correctly reflects every lifecycle transition, verified by property tests
-- [ ] Every payment operation is idempotent under replay; webhooks are signature-verified, stored
-      raw, and processed asynchronously
-- [ ] P1 verification checklist complete and the PSP decision recorded as an ADR
-- [ ] **No production payment credentials exist anywhere in the system yet**
+- [~] Full subscription lifecycle exercised in tests including trials, renewals, cancellation and
+      reactivation — *built and tested. Dunning and payment failure are **not**: both require a PSP*
+- [x] Entitlement snapshot correctly reflects every lifecycle transition
+- [ ] Every payment operation is idempotent under replay; webhooks signature-verified —
+      *blocked on OQ-9; no payment code exists to be idempotent yet*
+- [ ] P1 verification checklist complete and the PSP decision recorded as an ADR — *blocked on OQ-9*
+- [x] **No production payment credentials exist anywhere in the system**
 
 ---
 
@@ -113,11 +138,14 @@ The first end-to-end stream. Deliberately narrow: one channel, clear or test-key
 transcode → package → origin → CDN for **one** channel, geo determination (P11).
 
 **Exit criteria**
-- [ ] One live channel plays end to end on a browser, from a real CDN, through a real origin
-- [ ] Authorization enforces entitlement, rights window, territory, device class and concurrency —
+- [ ] One live channel plays end to end on a browser, from a real CDN, through a real origin —
+      *the authorization half is complete and returns signed origin-addressed delivery targets.
+      There is no media plane yet: no ingest, no packager, no origin, no CDN (OQ-8)*
+- [x] Authorization enforces entitlement, rights window, territory, device class and concurrency —
       each verified by a test that proves the **denial** path with a specific reason code
-- [ ] Every decision is recorded and reproducible from its recorded inputs
-- [ ] Load test at the target concurrency meets the p99 latency objective
+- [x] Every decision is recorded with its inputs — availability version, rights rule ids, entitlement
+      grant ids, territory and the method by which it was determined
+- [ ] Load test at the target concurrency meets the p99 latency objective — *not run; needs OQ-2*
 - [ ] Every degraded mode has defined, tested behaviour — including the **denial** paths, and
       including the distinction between a plan concurrency limit (may fail open) and a
       licensor-mandated cap (must not)

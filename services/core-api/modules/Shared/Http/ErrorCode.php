@@ -57,6 +57,44 @@ enum ErrorCode: string
     case ActivationAlreadyUsed = 'ACTIVATION_ALREADY_USED';
     case ActivationSlowDown = 'ACTIVATION_SLOW_DOWN';
 
+    // --- Content ------------------------------------------------------------
+    case ChannelNotFound = 'CHANNEL_NOT_FOUND';
+    case ProgrammeNotFound = 'PROGRAMME_NOT_FOUND';
+    case CategoryNotFound = 'CATEGORY_NOT_FOUND';
+    case ScheduleRangeTooWide = 'SCHEDULE_RANGE_TOO_WIDE';
+
+    // --- Commerce -----------------------------------------------------------
+    case PackageNotFound = 'PACKAGE_NOT_FOUND';
+    case PlanNotFound = 'PLAN_NOT_FOUND';
+    case PlanRetired = 'PLAN_RETIRED';
+    case SubscriptionNotFound = 'SUBSCRIPTION_NOT_FOUND';
+    case SubscriptionAlreadyActive = 'SUBSCRIPTION_ALREADY_ACTIVE';
+    case SubscriptionNotChangeable = 'SUBSCRIPTION_NOT_CHANGEABLE';
+
+    /*
+     * --- Playback denials ---------------------------------------------------
+     *
+     * Every denial reason gets its own code. A single generic "not available"
+     * would mean support cannot help, product cannot measure, and a rights
+     * misconfiguration is indistinguishable from a billing failure.
+     *
+     * They are specific but never leak what the caller should not know.
+     */
+    case PlaybackNotEntitled = 'PLAYBACK_NOT_ENTITLED';
+    case PlaybackNotAvailableInTerritory = 'PLAYBACK_NOT_AVAILABLE_IN_TERRITORY';
+    case PlaybackOutsideLicenceWindow = 'PLAYBACK_OUTSIDE_LICENCE_WINDOW';
+    case PlaybackBlackedOut = 'PLAYBACK_BLACKED_OUT';
+    case PlaybackPlatformNotPermitted = 'PLAYBACK_PLATFORM_NOT_PERMITTED';
+    case PlaybackConcurrencyExceeded = 'PLAYBACK_CONCURRENCY_EXCEEDED';
+    case PlaybackParentalBlocked = 'PLAYBACK_PARENTAL_BLOCKED';
+    case PlaybackDeviceNotSupported = 'PLAYBACK_DEVICE_NOT_SUPPORTED';
+    case PlaybackContentUnavailable = 'PLAYBACK_CONTENT_UNAVAILABLE';
+    case PlaybackTerritoryUndetermined = 'PLAYBACK_TERRITORY_UNDETERMINED';
+    case PlaybackModeNotPermitted = 'PLAYBACK_MODE_NOT_PERMITTED';
+    /** Fail-closed outcome when a required input cannot be evaluated. */
+    case PlaybackTemporarilyUnavailable = 'PLAYBACK_TEMPORARILY_UNAVAILABLE';
+    case PlaybackSessionNotFound = 'PLAYBACK_SESSION_NOT_FOUND';
+
     // --- Generic ------------------------------------------------------------
     case ValidationFailed = 'VALIDATION_FAILED';
     case NotFound = 'NOT_FOUND';
@@ -95,17 +133,35 @@ enum ErrorCode: string
             self::ProfilePinRequired,
             self::ProfilePinInvalid,
             self::DeviceNotRegistered,
-            self::DeviceClassUnsupported => 403,
+            self::DeviceClassUnsupported,
+            self::PlaybackNotEntitled,
+            self::PlaybackNotAvailableInTerritory,
+            self::PlaybackOutsideLicenceWindow,
+            self::PlaybackBlackedOut,
+            self::PlaybackPlatformNotPermitted,
+            self::PlaybackParentalBlocked,
+            self::PlaybackDeviceNotSupported,
+            self::PlaybackModeNotPermitted,
+            self::PlaybackTerritoryUndetermined => 403,
 
             self::AccountEmailTaken,
             self::ProfileLimitReached,
             self::DeviceLimitReached,
             self::DeviceRemovalCooldown,
             self::ActivationAlreadyUsed,
+            self::SubscriptionAlreadyActive,
+            self::PlaybackConcurrencyExceeded,
             self::IdempotencyKeyConflict => 409,
 
             self::ProfileNotFound,
             self::DeviceNotFound,
+            self::ChannelNotFound,
+            self::ProgrammeNotFound,
+            self::CategoryNotFound,
+            self::PackageNotFound,
+            self::PlanNotFound,
+            self::SubscriptionNotFound,
+            self::PlaybackSessionNotFound,
             self::NotFound => 404,
 
             self::MethodNotAllowed => 405,
@@ -118,10 +174,15 @@ enum ErrorCode: string
             self::AccountResetExpired,
             self::ActivationInvalidCode,
             self::ActivationExpired,
-            self::ProfilePrimaryImmutable => 422,
+            self::ProfilePrimaryImmutable,
+            self::PlanRetired,
+            self::SubscriptionNotChangeable,
+            self::ScheduleRangeTooWide => 422,
 
             self::ActivationPending => 428,
             self::RateLimited, self::ActivationSlowDown => 429,
+            self::PlaybackContentUnavailable,
+            self::PlaybackTemporarilyUnavailable,
             self::ServiceUnavailable => 503,
             self::InternalError => 500,
         };
@@ -162,6 +223,29 @@ enum ErrorCode: string
             self::ActivationInvalidCode => 'Activation code invalid',
             self::ActivationAlreadyUsed => 'Activation code already used',
             self::ActivationSlowDown => 'Polling too frequently',
+            self::ChannelNotFound => 'Channel not found',
+            self::ProgrammeNotFound => 'Programme not found',
+            self::CategoryNotFound => 'Category not found',
+            self::ScheduleRangeTooWide => 'Requested schedule range is too wide',
+            self::PackageNotFound => 'Package not found',
+            self::PlanNotFound => 'Plan not found',
+            self::PlanRetired => 'Plan is no longer available',
+            self::SubscriptionNotFound => 'Subscription not found',
+            self::SubscriptionAlreadyActive => 'A live subscription already exists',
+            self::SubscriptionNotChangeable => 'Subscription cannot be changed in its current state',
+            self::PlaybackNotEntitled => 'Not included in your package',
+            self::PlaybackNotAvailableInTerritory => 'Not available in this territory',
+            self::PlaybackOutsideLicenceWindow => 'Not available at this time',
+            self::PlaybackBlackedOut => 'Temporarily blacked out',
+            self::PlaybackPlatformNotPermitted => 'Not permitted on this kind of device',
+            self::PlaybackConcurrencyExceeded => 'Too many simultaneous streams',
+            self::PlaybackParentalBlocked => 'Blocked by parental settings',
+            self::PlaybackDeviceNotSupported => 'Device cannot meet the required protection',
+            self::PlaybackContentUnavailable => 'Content is not ready to play',
+            self::PlaybackTerritoryUndetermined => 'Territory could not be determined',
+            self::PlaybackModeNotPermitted => 'This playback mode is not licensed',
+            self::PlaybackTemporarilyUnavailable => 'Playback temporarily unavailable',
+            self::PlaybackSessionNotFound => 'Playback session not found',
             self::ValidationFailed => 'Validation failed',
             self::NotFound => 'Resource not found',
             self::Forbidden => 'Not permitted',

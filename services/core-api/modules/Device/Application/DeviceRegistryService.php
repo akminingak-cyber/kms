@@ -136,6 +136,14 @@ final readonly class DeviceRegistryService implements DeviceRegistry
             ->all();
     }
 
+    public function classOf(string $deviceUuid): ?string
+    {
+        return Device::query()
+            ->where('uuid', $deviceUuid)
+            ->whereNull('removed_at')
+            ->value('device_class');
+    }
+
     /**
      * How long the account must wait before removing another device.
      *

@@ -22,6 +22,12 @@ servers:
 
 tags:
   - name: Authentication
+  - name: Catalog
+  - name: Channels
+  - name: EPG
+  - name: Entitlements
+  - name: Commerce
+  - name: Playback
   - name: Device activation
   - name: Profiles
   - name: Devices
@@ -433,6 +439,388 @@ paths:
         '409': { $ref: '#/components/responses/Problem' }
         '429': { $ref: '#/components/responses/Problem' }
 
+  /categories:
+    get:
+      tags: [Catalog]
+      operationId: listCategories
+      security: []
+      summary: The editorial vocabulary
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Category' } }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /channels:
+    get:
+      tags: [Channels]
+      operationId: listChannels
+      security: []
+      summary: Channel metadata
+      description: |
+        Publicly cacheable: this varies by locale and territory only. Whether a
+        given viewer may watch a channel is a **separate**, private response at
+        `/entitlements/channels` — merging the two would either leak one
+        viewer's entitlements to another through a shared cache, or give up
+        caching on the most frequently fetched payload in the product.
+      responses:
+        '200':
+          description: Channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Channel' } }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /channels/{channelId}:
+    parameters:
+      - name: channelId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    get:
+      tags: [Channels]
+      operationId: getChannel
+      security: []
+      responses:
+        '200':
+          description: Channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Channel' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /channels/{channelId}/now-next:
+    parameters:
+      - name: channelId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    get:
+      tags: [EPG]
+      operationId: getNowNext
+      security: []
+      summary: What is on now and next
+      responses:
+        '200':
+          description: Now and next
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  now: { oneOf: [{ $ref: '#/components/schemas/Programme' }, { type: 'null' }] }
+                  next: { oneOf: [{ $ref: '#/components/schemas/Programme' }, { type: 'null' }] }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /epg:
+    get:
+      tags: [EPG]
+      operationId: getSchedule
+      security: []
+      summary: Schedule over a bounded time window
+      description: |
+        Time-range rather than cursor pagination, deliberately: a schedule query
+        is `channel × window` over a time-partitioned table, not an open-ended
+        scroll. The range is bounded — an unbounded one would let a single
+        request scan every partition — and exceeding it returns
+        `SCHEDULE_RANGE_TOO_WIDE`.
+
+        A programme already in progress when the window opens **is** returned:
+        overlap, not containment, because that is the one the viewer is watching.
+      parameters:
+        - name: channel_ids
+          in: query
+          schema: { type: array, maxItems: 100, items: { $ref: '#/components/schemas/Identifier' } }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Programmes in the window
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Programme' } }
+                  window:
+                    type: object
+                    properties:
+                      from: { type: string, format: date-time }
+                      to: { type: string, format: date-time }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /entitlements/channels:
+    get:
+      tags: [Entitlements]
+      operationId: getChannelEntitlements
+      summary: Which channels this account may watch
+      description: |
+        The personalised overlay, always `private`. A channel the account cannot
+        watch is listed with `entitled: false` rather than hidden, because that
+        is what makes upsell possible. Content that must not be disclosed at all
+        is absent from `/channels` instead.
+      responses:
+        '200':
+          description: Entitlement overlay
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        channel_id: { $ref: '#/components/schemas/Identifier' }
+                        entitled: { type: boolean }
+                  snapshot_version: { type: [integer, 'null'] }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /packages:
+    get:
+      tags: [Commerce]
+      operationId: listPackages
+      security: []
+      responses:
+        '200':
+          description: Packages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Package' } }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /plans:
+    get:
+      tags: [Commerce]
+      operationId: listPlans
+      security: []
+      responses:
+        '200':
+          description: Plans and their prices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Plan' } }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /subscription:
+    get:
+      tags: [Commerce]
+      operationId: getSubscription
+      summary: The account's live subscription, if any
+      responses:
+        '200':
+          description: Subscription or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { oneOf: [{ $ref: '#/components/schemas/Subscription' }, { type: 'null' }] }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Commerce]
+      operationId: subscribe
+      summary: Start a subscription
+      description: |
+        **No payment is taken.** No payment provider has been selected, and none
+        is integrated in this phase — the subscription and the entitlement it
+        produces are real, the money movement is not yet built.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan_id]
+              properties:
+                plan_id: { $ref: '#/components/schemas/Identifier' }
+      responses:
+        '201':
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Subscription' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /subscription/{subscriptionId}/cancel:
+    parameters:
+      - name: subscriptionId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Commerce]
+      operationId: cancelSubscription
+      description: |
+        Cancels at the end of the paid period. Cancellation is a decision, not
+        an immediate end: the subscriber keeps access until the period they
+        already paid for runs out.
+      responses:
+        '200':
+          description: Cancellation scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Subscription' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /subscription/{subscriptionId}/resume:
+    parameters:
+      - name: subscriptionId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Commerce]
+      operationId: resumeSubscription
+      responses:
+        '200':
+          description: Cancellation revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Subscription' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /playback/sessions:
+    post:
+      tags: [Playback]
+      operationId: startPlayback
+      summary: Authorize playback and start a session
+      description: |
+        The critical path.
+
+            CAN PLAY = Rights ∧ Entitlement ∧ Parental ∧ Device/Concurrency ∧ Territory
+
+        Checks run cheapest-first and the **first failure wins**, each with its
+        own reason code. Rights is evaluated before entitlement deliberately: if
+        content is not licensed for a territory that is true regardless of what
+        the customer bought, and telling them to upgrade would be wrong.
+
+        Account, profile owner, device and device class all come from the
+        device-bound token. `capabilities` is client-asserted and may only ever
+        **narrow** what is offered — a client claiming a capability that would
+        raise its entitlement is ignored.
+
+        `protection` is `null` until DRM ships in a later phase. It is absent
+        rather than stubbed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content_id, profile_id, mode]
+              properties:
+                content_id: { $ref: '#/components/schemas/Identifier' }
+                profile_id: { $ref: '#/components/schemas/Identifier' }
+                mode: { type: string, enum: [live, restart, catchup] }
+                capabilities:
+                  type: object
+                  properties:
+                    formats: { type: array, items: { type: string, enum: [hls, dash] } }
+      responses:
+        '201':
+          description: Authorized
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlaybackSession' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+
+  /playback/sessions/{sessionId}/heartbeat:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Playback]
+      operationId: heartbeatPlayback
+      description: |
+        Renews the concurrency slot and the delivery token. A session with no
+        heartbeat past its grace period is closed and its slot released, which
+        is what stops a crashed client permanently consuming a viewer's
+        allowance.
+      responses:
+        '200':
+          description: Renewed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id: { $ref: '#/components/schemas/Identifier' }
+                  heartbeat_interval_seconds: { type: integer }
+                  expires_at: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /playback/sessions/{sessionId}/stop:
+    parameters:
+      - name: sessionId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Playback]
+      operationId: stopPlayback
+      responses:
+        '204': { description: Session ended and slot released }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -453,6 +841,132 @@ components:
           schema: { $ref: '#/components/schemas/Problem' }
 
   schemas:
+    Category:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        parent_id: { oneOf: [{ $ref: '#/components/schemas/Identifier' }, { type: 'null' }] }
+        sort_order: { type: integer }
+
+    Channel:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        number: { type: [integer, 'null'] }
+        logo_url: { type: [string, 'null'] }
+        category_id: { oneOf: [{ $ref: '#/components/schemas/Identifier' }, { type: 'null' }] }
+        catchup_enabled:
+          type: boolean
+          description: |
+            Whether the channel may be recorded at all. Catch-up is a separately
+            licensed exploitation, not a feature toggle.
+
+    Programme:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        channel_id: { $ref: '#/components/schemas/Identifier' }
+        title: { type: string }
+        subtitle: { type: [string, 'null'] }
+        description: { type: [string, 'null'] }
+        category_id: { oneOf: [{ $ref: '#/components/schemas/Identifier' }, { type: 'null' }] }
+        age_rating: { type: [string, 'null'] }
+        season_number: { type: [integer, 'null'] }
+        episode_number: { type: [integer, 'null'] }
+        starts_at: { type: string, format: date-time }
+        ends_at: { type: string, format: date-time }
+
+    Money:
+      type: object
+      description: Minor units plus an explicit currency. Never a bare number.
+      required: [amount_minor, currency]
+      properties:
+        amount_minor: { type: integer }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        territory: { type: [string, 'null'] }
+
+    Package:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        channel_ids: { type: array, items: { $ref: '#/components/schemas/Identifier' } }
+
+    Plan:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        package_id: { oneOf: [{ $ref: '#/components/schemas/Identifier' }, { type: 'null' }] }
+        billing_period: { type: string, enum: [monthly, annual] }
+        trial_days: { type: integer }
+        device_limit: { type: integer }
+        concurrency_limit:
+          type: integer
+          description: |
+            The plan's commercial allowance. A licensor's contractual cap is
+            separate and the lower of the two wins at playback.
+        max_resolution: { type: [string, 'null'] }
+        prices: { type: array, items: { $ref: '#/components/schemas/Money' } }
+
+    Subscription:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        plan_id: { $ref: '#/components/schemas/Identifier' }
+        status: { type: string, enum: [trialing, active, past_due, cancelled, expired] }
+        started_at: { type: [string, 'null'], format: date-time }
+        current_period_end: { type: [string, 'null'], format: date-time }
+        trial_ends_at: { type: [string, 'null'], format: date-time }
+        cancel_at_period_end: { type: boolean }
+
+    DeliveryTarget:
+      type: object
+      properties:
+        format: { type: string, enum: [hls, dash] }
+        container:
+          type: string
+          description: |
+            Independent of `format`. A device may need HLS with MPEG-TS rather
+            than HLS with CMAF fMP4, which is a different problem from needing a
+            different encryption scheme (ADR-0005).
+          enum: [cmaf, ts]
+        url: { type: string, format: uri }
+        priority: { type: integer }
+
+    PlaybackSession:
+      type: object
+      properties:
+        session_id: { $ref: '#/components/schemas/Identifier' }
+        decision_id:
+          $ref: '#/components/schemas/Identifier'
+        delivery:
+          type: object
+          properties:
+            targets:
+              type: array
+              description: |
+                An ordered list from day one, even when it holds a single entry.
+                Clients that cannot handle a list would still be in the field
+                years later, blocking multi-CDN adoption (ADR-0008).
+              items: { $ref: '#/components/schemas/DeliveryTarget' }
+            expires_at: { type: string, format: date-time }
+        protection:
+          type: 'null'
+          description: DRM arrives in a later phase. Absent rather than stubbed.
+        restrictions:
+          type: object
+          description: Rights-derived, never hardcoded.
+          additionalProperties: true
+        heartbeat_interval_seconds: { type: integer }
+
     Identifier:
       type: string
       format: uuid

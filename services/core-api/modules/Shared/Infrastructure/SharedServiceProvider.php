@@ -49,6 +49,7 @@ final class SharedServiceProvider extends ServiceProvider
         RateLimiter::for('password-reset-ip', $byIp('password_reset_per_ip'));
         RateLimiter::for('activation-poll', $byIp('activation_poll'));
         RateLimiter::for('admin', $byIp('admin'));
+        RateLimiter::for('playback', $byIp('playback'));
 
         // Identity-scoped: keyed on the submitted email so credential stuffing
         // against one account is bounded regardless of source address.

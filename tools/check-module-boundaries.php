@@ -43,6 +43,16 @@ const SCHEMA_FOR_MODULE = [
     'Profile' => 'profile',
     'Device' => 'device',
     'Administration' => 'admin',
+    'Catalog' => 'catalog',
+    'Schedule' => 'schedule',
+    'Product' => 'product',
+    'Billing' => 'billing',
+    'Entitlement' => 'entitlement',
+    'Rights' => 'rights',
+    'Playback' => 'playback',
+    // Delivery owns no schema: it is a port over origin/CDN addressing and
+    // persists nothing. See the note on D4 in 02-bounded-contexts.md.
+    'Delivery' => null,
 ];
 
 const SHARED_MODULE = 'Shared';
@@ -108,7 +118,7 @@ foreach ($files as $file) {
         $table = $m[1];
         $expected = SCHEMA_FOR_MODULE[$owningModule] ?? null;
 
-        if ($expected === null) {
+        if (! array_key_exists($owningModule, SCHEMA_FOR_MODULE) || $expected === null) {
             $violations[] = [$relative, "module {$owningModule} declares a table but owns no schema"];
         } elseif (! str_starts_with($table, $expected.'.')) {
             $violations[] = [

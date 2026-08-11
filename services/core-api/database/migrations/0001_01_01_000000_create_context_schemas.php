@@ -19,7 +19,10 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /** @var list<string> */
-    private array $schemas = ['identity', 'profile', 'device', 'admin'];
+    private array $schemas = [
+        'identity', 'profile', 'device', 'admin',
+        'catalog', 'schedule', 'product', 'billing', 'entitlement', 'rights', 'playback',
+    ];
 
     public function up(): void
     {

@@ -35,4 +35,12 @@ interface DeviceRegistry
 
     /** @return list<DeviceDescriptor> */
     public function listActive(string $accountUuid): array;
+
+    /**
+     * The device's class as recorded at registration.
+     *
+     * Server-side and authoritative: from Phase 4 it feeds the rights and DRM
+     * decision, so it is never taken from a client claim.
+     */
+    public function classOf(string $deviceUuid): ?string;
 }

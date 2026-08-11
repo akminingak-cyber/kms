@@ -9,7 +9,11 @@ use DateTimeZone;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use Modules\Administration\Domain\TotpVerifier;
+use Modules\Administration\Infrastructure\Eloquent\StaffUser;
 use Modules\Identity\Application\EmailVerificationService;
 use Modules\Identity\Application\PasswordResetService;
 use Modules\Identity\Domain\EmailAddress;
@@ -126,6 +130,173 @@ abstract class TestCase extends BaseTestCase
     protected function accountFor(string $email): Account
     {
         return Account::query()->where('email', strtolower($email))->firstOrFail();
+    }
+
+    /**
+     * Builds a complete, playable world: category, channel, package, plan,
+     * worldwide live rights, and a subscribed account with a session.
+     *
+     * @param  array<string,mixed>  $overrides
+     * @return array<string,mixed>
+     */
+    protected function playableWorld(array $overrides = []): array
+    {
+        $staff = $this->staffToken($overrides['staff_role'] ?? 'platform_engineer');
+
+        $channelId = $this->postJson('/api/admin/v1/channels', [
+            'slug' => $overrides['channel_slug'] ?? 'one',
+            'name' => 'Channel One',
+            'number' => $overrides['channel_number'] ?? 1,
+            'catchup_enabled' => true,
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $packageId = $this->postJson('/api/admin/v1/packages', [
+            'slug' => $overrides['package_slug'] ?? 'basic',
+            'name' => 'Basic',
+            'channel_ids' => [$channelId],
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $planId = $this->postJson('/api/admin/v1/plans', [
+            'slug' => $overrides['plan_slug'] ?? 'basic-monthly',
+            'name' => 'Basic Monthly',
+            'package_id' => $packageId,
+            'billing_period' => 'monthly',
+            'concurrency_limit' => $overrides['concurrency_limit'] ?? 2,
+            'price' => ['amount_minor' => 999, 'currency' => 'EUR'],
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $agreementId = $this->postJson('/api/admin/v1/rights/agreements', [
+            'counterparty' => 'Studio', 'reference' => 'AGR-1',
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        if ($overrides['grant_rights'] ?? true) {
+            $this->postJson('/api/admin/v1/rights/rights', array_merge([
+                'agreement_id' => $agreementId,
+                'subject_type' => 'channel',
+                'subject_id' => $channelId,
+                'exploitation' => 'live',
+                'window_start' => '2020-01-01T00:00:00Z',
+            ], $overrides['rights'] ?? []), $this->bearer($staff))->assertCreated();
+        }
+
+        Cache::flush();
+        $session = $this->signedInAccount($overrides['email'] ?? 'viewer@example.test');
+        Cache::flush();
+
+        $profileId = $this->getJson('/api/client/v1/profiles', $this->bearer($session['access_token']))
+            ->json('data.0.id');
+
+        if ($overrides['subscribe'] ?? true) {
+            $this->postJson('/api/client/v1/subscription', ['plan_id' => $planId],
+                $this->bearer($session['access_token']))->assertCreated();
+            Cache::flush();
+        }
+
+        return [
+            'staff_token' => $staff,
+            'channel_id' => $channelId,
+            'package_id' => $packageId,
+            'plan_id' => $planId,
+            'agreement_id' => $agreementId,
+            'profile_id' => $profileId,
+        ] + $session;
+    }
+
+    /** A staff access token with the given role. */
+    protected function staffToken(string $role = 'platform_engineer'): string
+    {
+        $secret = TotpVerifier::generateSecret();
+
+        StaffUser::query()->create([
+            'uuid' => (string) Str::uuid7(),
+            'email' => $role.'@staff.test',
+            'name' => 'Staff',
+            'password_hash' => Hash::make('staff-password-long-enough'),
+            'role' => $role,
+            'totp_secret' => $secret,
+            'mfa_enrolled_at' => now(),
+            'status' => 'active',
+        ]);
+
+        Cache::flush();
+
+        $token = $this->postJson('/api/admin/v1/auth/sign-in', [
+            'email' => $role.'@staff.test',
+            'password' => 'staff-password-long-enough',
+            'totp_code' => (new TotpVerifier)->codeFor(
+                $secret,
+                $this->app->make(Clock::class)->now()->getTimestamp(),
+            ),
+        ])->assertOk()->json('access_token');
+
+        Cache::flush();
+
+        return $token;
+    }
+
+    /**
+     * Signs in again from the same device.
+     *
+     * Used after a time jump longer than the refresh-token lifetime, where a
+     * real viewer would simply sign in again. The fingerprint is stable, so
+     * this touches the existing device rather than consuming another slot.
+     *
+     * @param  array<string,mixed>  $world
+     * @return array<string,mixed>
+     */
+    protected function reauthenticated(array $world): array
+    {
+        Cache::flush();
+
+        $login = $this->postJson('/api/client/v1/auth/login', [
+            'email' => $world['email'],
+            'password' => $world['password'],
+            'device_class' => 'web',
+            'device_name' => 'Test Device',
+            'device_fingerprint' => 'stable-'.$world['email'],
+        ])->assertOk();
+
+        Cache::flush();
+
+        return array_merge($world, [
+            'access_token' => $login->json('access_token'),
+            'refresh_token' => $login->json('refresh_token'),
+        ]);
+    }
+
+    /**
+     * Re-authenticates after a time jump, as a real client would.
+     *
+     * Access tokens are short-lived by design, so any test that moves time
+     * further than that has to refresh rather than reuse a dead token.
+     *
+     * @param  array<string,mixed>  $world
+     * @return array<string,mixed>
+     */
+    protected function refreshed(array $world): array
+    {
+        Cache::flush();
+
+        $response = $this->postJson('/api/client/v1/auth/refresh', [
+            'refresh_token' => $world['refresh_token'],
+        ])->assertOk();
+
+        Cache::flush();
+
+        return array_merge($world, [
+            'access_token' => $response->json('access_token'),
+            'refresh_token' => $response->json('refresh_token'),
+        ]);
+    }
+
+    /** Starts playback with the standard body. */
+    protected function startPlayback(array $world, array $overrides = []): TestResponse
+    {
+        return $this->postJson('/api/client/v1/playback/sessions', array_merge([
+            'content_id' => $world['channel_id'],
+            'profile_id' => $world['profile_id'],
+            'mode' => 'live',
+        ], $overrides), $this->bearer($world['access_token']));
     }
 
     /** @return array<string,string> */

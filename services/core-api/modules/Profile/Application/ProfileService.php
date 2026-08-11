@@ -10,15 +10,21 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Administration\Contracts\AuditEvent;
 use Modules\Administration\Contracts\AuditRecorder;
+use Modules\Device\Contracts\DeviceRegistry;
+use Modules\Profile\Contracts\ParentalPolicy;
+use Modules\Profile\Contracts\ProfileDirectory;
 use Modules\Profile\Contracts\ProfileProvisioning;
 use Modules\Profile\Infrastructure\Eloquent\Profile;
 use Modules\Shared\Http\ApiProblem;
 use Modules\Shared\Http\ErrorCode;
 use Modules\Shared\Infrastructure\AccountLock;
 
-final readonly class ProfileService implements ProfileProvisioning
+final readonly class ProfileService implements ParentalPolicy, ProfileDirectory, ProfileProvisioning
 {
-    public function __construct(private AuditRecorder $audit) {}
+    public function __construct(
+        private AuditRecorder $audit,
+        private DeviceRegistry $devices,
+    ) {}
 
     public function provisionPrimary(string $accountUuid, string $name, string $locale): string
     {
@@ -197,6 +203,50 @@ final readonly class ProfileService implements ProfileProvisioning
         }
 
         return $profile;
+    }
+
+    /**
+     * Ratings are ordered least to most restrictive. An unknown rating on
+     * either side is treated as the most restrictive value there is: default
+     * deny extends to vocabulary we do not recognise, because the alternative
+     * is showing a child something because a provider used a label we had not
+     * seen before.
+     */
+    private const RATING_ORDER = ['U' => 1, 'PG' => 2, '12' => 3, '15' => 4, '18' => 5];
+
+    public function belongsToAccount(string $accountUuid, string $profileUuid): bool
+    {
+        return Profile::query()
+            ->where('account_uuid', $accountUuid)
+            ->where('uuid', $profileUuid)
+            ->exists();
+    }
+
+    public function deviceClassFor(string $deviceUuid): ?string
+    {
+        return $this->devices->classOf($deviceUuid);
+    }
+
+    public function permits(string $accountUuid, string $profileUuid, ?string $ageRating): bool
+    {
+        $profile = Profile::query()
+            ->where('account_uuid', $accountUuid)
+            ->where('uuid', $profileUuid)
+            ->first();
+
+        if ($profile === null) {
+            return false;
+        }
+
+        // No limit on the profile means no parental restriction.
+        if ($profile->max_rating === null) {
+            return true;
+        }
+
+        $limit = self::RATING_ORDER[strtoupper($profile->max_rating)] ?? 1;
+        $content = $ageRating === null ? PHP_INT_MAX : (self::RATING_ORDER[strtoupper($ageRating)] ?? PHP_INT_MAX);
+
+        return $content <= $limit;
     }
 
     private function isUniqueViolation(QueryException $e): bool

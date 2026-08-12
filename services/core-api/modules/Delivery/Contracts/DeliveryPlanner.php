@@ -13,9 +13,11 @@ namespace Modules\Delivery\Contracts;
 interface DeliveryPlanner
 {
     /**
-     * @param  array<string,mixed>  $capabilities  client-asserted, and may only narrow
-     * @return list<array<string,mixed>> ordered targets; a list from day one so
-     *                                   multi-CDN needs no client update later
+     * @return list<DeliveryTarget> ordered, best first; a list from day one so
+     *                              multi-CDN needs no client update later.
+     *                              Empty means nothing is published — the caller
+     *                              must treat that as a denial rather than as
+     *                              an empty success.
      */
-    public function plan(string $contentRef, string $mode, string $sessionUuid, array $capabilities): array;
+    public function plan(DeliveryRequest $request): array;
 }

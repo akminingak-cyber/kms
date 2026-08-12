@@ -50,6 +50,7 @@ const SCHEMA_FOR_MODULE = [
     'Entitlement' => 'entitlement',
     'Rights' => 'rights',
     'Playback' => 'playback',
+    'Media' => 'media',
     // Delivery owns no schema: it is a port over origin/CDN addressing and
     // persists nothing. See the note on D4 in 02-bounded-contexts.md.
     'Delivery' => null,

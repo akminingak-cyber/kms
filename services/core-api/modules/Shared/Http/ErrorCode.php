@@ -94,6 +94,26 @@ enum ErrorCode: string
     /** Fail-closed outcome when a required input cannot be evaluated. */
     case PlaybackTemporarilyUnavailable = 'PLAYBACK_TEMPORARILY_UNAVAILABLE';
     case PlaybackSessionNotFound = 'PLAYBACK_SESSION_NOT_FOUND';
+    /** Authorized, but nothing has been encoded and published to play. */
+    case PlaybackNoDeliveryTarget = 'PLAYBACK_NO_DELIVERY_TARGET';
+    /** A session that was stopped, displaced, or revalidated into a denial. */
+    case PlaybackSessionEnded = 'PLAYBACK_SESSION_ENDED';
+
+    // --- Media control plane -------------------------------------------------
+    case MediaLadderNotFound = 'MEDIA_LADDER_NOT_FOUND';
+    case MediaLadderInvalid = 'MEDIA_LADDER_INVALID';
+    case MediaPackagingProfileNotFound = 'MEDIA_PACKAGING_PROFILE_NOT_FOUND';
+    case MediaPublicationNotFound = 'MEDIA_PUBLICATION_NOT_FOUND';
+    case MediaManifestNotFound = 'MEDIA_MANIFEST_NOT_FOUND';
+    /** No cleared licence has been recorded for the encoder a rung asks for. */
+    case MediaEncoderNotPermitted = 'MEDIA_ENCODER_NOT_PERMITTED';
+    /** Segment boundaries would not land on IDR frames in every rendition. */
+    case MediaSegmentAlignmentInvalid = 'MEDIA_SEGMENT_ALIGNMENT_INVALID';
+
+    // --- Delivery (origin/edge surface) --------------------------------------
+    case DeliveryTokenInvalid = 'DELIVERY_TOKEN_INVALID';
+    case DeliveryTokenExpired = 'DELIVERY_TOKEN_EXPIRED';
+    case DeliveryPathNotPermitted = 'DELIVERY_PATH_NOT_PERMITTED';
 
     // --- Generic ------------------------------------------------------------
     case ValidationFailed = 'VALIDATION_FAILED';
@@ -142,7 +162,11 @@ enum ErrorCode: string
             self::PlaybackParentalBlocked,
             self::PlaybackDeviceNotSupported,
             self::PlaybackModeNotPermitted,
-            self::PlaybackTerritoryUndetermined => 403,
+            self::PlaybackTerritoryUndetermined,
+            self::PlaybackSessionEnded,
+            self::DeliveryTokenInvalid,
+            self::DeliveryTokenExpired,
+            self::DeliveryPathNotPermitted => 403,
 
             self::AccountEmailTaken,
             self::ProfileLimitReached,
@@ -162,6 +186,10 @@ enum ErrorCode: string
             self::PlanNotFound,
             self::SubscriptionNotFound,
             self::PlaybackSessionNotFound,
+            self::MediaLadderNotFound,
+            self::MediaPackagingProfileNotFound,
+            self::MediaPublicationNotFound,
+            self::MediaManifestNotFound,
             self::NotFound => 404,
 
             self::MethodNotAllowed => 405,
@@ -177,12 +205,16 @@ enum ErrorCode: string
             self::ProfilePrimaryImmutable,
             self::PlanRetired,
             self::SubscriptionNotChangeable,
-            self::ScheduleRangeTooWide => 422,
+            self::ScheduleRangeTooWide,
+            self::MediaLadderInvalid,
+            self::MediaEncoderNotPermitted,
+            self::MediaSegmentAlignmentInvalid => 422,
 
             self::ActivationPending => 428,
             self::RateLimited, self::ActivationSlowDown => 429,
             self::PlaybackContentUnavailable,
             self::PlaybackTemporarilyUnavailable,
+            self::PlaybackNoDeliveryTarget,
             self::ServiceUnavailable => 503,
             self::InternalError => 500,
         };
@@ -246,6 +278,18 @@ enum ErrorCode: string
             self::PlaybackModeNotPermitted => 'This playback mode is not licensed',
             self::PlaybackTemporarilyUnavailable => 'Playback temporarily unavailable',
             self::PlaybackSessionNotFound => 'Playback session not found',
+            self::PlaybackNoDeliveryTarget => 'Nothing is published for this content yet',
+            self::PlaybackSessionEnded => 'Playback session has ended',
+            self::MediaLadderNotFound => 'Encoding ladder not found',
+            self::MediaLadderInvalid => 'Encoding ladder is not producible',
+            self::MediaPackagingProfileNotFound => 'Packaging profile not found',
+            self::MediaPublicationNotFound => 'Publication not found',
+            self::MediaManifestNotFound => 'Manifest has not been generated',
+            self::MediaEncoderNotPermitted => 'Encoder has no recorded licence clearance',
+            self::MediaSegmentAlignmentInvalid => 'Segment and GOP durations do not align',
+            self::DeliveryTokenInvalid => 'Delivery token invalid',
+            self::DeliveryTokenExpired => 'Delivery token expired',
+            self::DeliveryPathNotPermitted => 'Delivery path not permitted',
             self::ValidationFailed => 'Validation failed',
             self::NotFound => 'Resource not found',
             self::Forbidden => 'Not permitted',

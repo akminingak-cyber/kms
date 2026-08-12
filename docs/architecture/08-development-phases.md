@@ -157,6 +157,71 @@ transcode → package → origin → CDN for **one** channel, geo determination 
 
 ---
 
+## Media plane, part one — delivered as "Phase 3" *(2026-08-12)*
+
+> **Scope note.** The product owner asked for FFmpeg, HLS, origin, CDN and
+> streaming sessions as one phase. That cuts across Phase 4 (delivery,
+> streaming sessions) and Phase 5 (`MediaAsset`, the encoding ladder) in the
+> plan above, so the exit criteria are recorded against both rather than
+> renumbered.
+>
+> Four things in this scope are deliberately **not** built, because the
+> decisions they depend on are open. None is stubbed:
+>
+> - **No CDN vendor adapter.** No vendor is selected (OQ-8) and the P3
+>   verification checklist is not complete, so no adapter exists — and neither
+>   does a speculative interface shaped around an imagined vendor. The
+>   `CdnProvider` port carries only what the platform needs today. Delivery is
+>   origin-direct, which is a real delivery mode rather than a placeholder.
+> - **No FFmpeg process runner.** The encode *arguments* are built and
+>   golden-tested; nothing executes them. This environment has no FFmpeg
+>   binary, so a runner written here could not be exercised even on its failure
+>   path — and a component with no tested failure path is not done (§8).
+> - **No muxer stage.** Packager selection is open with a licence gate on it,
+>   so the generated command stops before the output stage and says so, rather
+>   than emitting flags for an unchosen packager.
+> - **No encoder is licensed.** The allow-list is empty by default and an empty
+>   list permits nothing, so a fresh deployment cannot create a ladder until a
+>   clearance is recorded. That is the intended first-run experience.
+
+**Scope delivered:** `Media` context (encoding ladders, packaging profiles,
+publications, device profiles, generated manifests); HLS multivariant and DASH
+MPD generation per quality class ([ADR-0012](adr/ADR-0012-manifest-generation-and-quality-classes.md));
+FFmpeg encode-argument construction; origin addressing, delivery tokens and the
+origin authorization sub-request; `CdnProvider` port with an origin-direct
+adapter and ordered multi-edge planning; mid-session revalidation, delivery
+renewal on heartbeat, session listing and a stale-session reaper.
+
+**Exit criteria**
+- [x] Manifests pass golden-file tests — *four committed golden files, compared
+      byte-for-byte; the DASH output is additionally parsed rather than only
+      diffed, because a golden file would happily record malformed XML*
+- [ ] Manifests validated by an **independent** tool as well as our own —
+      *not done; no validator is reachable from this environment*
+- [x] A resolution cap is enforced where a client cannot override it — the
+      capped manifest does not mention the rungs the viewer may not have
+- [x] **Cache offload is provable, not asserted** — the origin was run against a
+      live `core-api` and a second viewer's token confirmed to hit the same
+      cached segment. This is the property the whole delivery cost model rests
+      on, and it is the one thing here that cannot be established by reasoning
+- [x] The origin authorizer does **no database work**, asserted by a test —
+      without that it could not run at segment request rate
+- [x] A blackout beginning mid-event stops sessions already playing, with the
+      specific reason code, within a bounded and configured lag
+- [x] A crashed client's session and concurrency slot are reclaimed
+- [x] Every ladder defect that breaks ABR switching invisibly — GOP/segment
+      misalignment, non-divisor frame rates, inconsistent aspect ratios — is
+      refused at configuration time
+- [ ] A real encode runs and its output plays — *blocked: no FFmpeg binary and
+      no cleared encoder licence. The argument vector is the contract, and it is
+      tested; that a binary accepts it is not*
+- [ ] One live channel plays end to end from a real CDN — *blocked on OQ-8 and
+      on there being a packager*
+- [ ] CDN cache offload ratio measured in production against the modelled
+      threshold — *the mechanism is proven locally; the ratio needs traffic*
+
+---
+
 ## Phase 5 — VOD pipeline and web application
 
 **Scope:** `MediaAsset` context, `media-pipeline` service (FFmpeg ladder, packaging, QC),

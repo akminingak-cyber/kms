@@ -136,6 +136,37 @@ Neither question is answerable from this repository, and neither should be answe
 alone. **Counsel reviews both before a codec or an encoder is committed to** — before Phase 5, not
 after the pipeline is built around a choice.
 
+### This is enforced in code, not by this document
+
+A policy that lives only in a document is a policy someone will not have read. So the platform
+holds an **allow-list of cleared encoders** in `config/kms.php` (`kms.media.permitted_encoders`),
+and it is **empty by default**:
+
+```php
+'permitted_encoders' => [],
+```
+
+An empty list permits nothing. The consequence is deliberate and immediate: **out of the box, no
+encoding ladder can be created at all** — the API refuses with `MEDIA_ENCODER_NOT_PERMITTED` and
+writes nothing. Absence of a cleared licence is a prohibition, never a permission
+([`../../CLAUDE.md`](../../CLAUDE.md) §1.5).
+
+Each entry records what was actually cleared, and by what terms:
+
+```php
+['encoder' => 'libx264', 'codec' => 'avc',
+ 'licence' => '<as cleared by counsel>', 'requires_gpl_build' => true],
+```
+
+`requires_gpl_build` is surfaced through the admin API alongside the generated FFmpeg command, so
+the build that runs in production can be checked against the clearance that was given rather than
+assumed to match it.
+
+Note what the platform does **not** do: it records no licence conclusion of its own about any
+encoder. Vendor and registry documentation for these projects is unreachable from this environment,
+and a licence recalled from memory is not a licence that was read (§1.2). The list holds what a
+human recorded after clearance, and nothing else.
+
 ## 3. Explicitly rejected or restricted
 
 | Item | Position | Reason |

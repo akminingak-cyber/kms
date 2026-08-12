@@ -18,6 +18,9 @@ final class PlaybackSession extends Model
             'started_at' => 'immutable_datetime',
             'last_heartbeat_at' => 'immutable_datetime',
             'ended_at' => 'immutable_datetime',
+            'revalidated_at' => 'immutable_datetime',
+            'capabilities' => 'array',
+            'quality_caps' => 'array',
         ];
     }
 }

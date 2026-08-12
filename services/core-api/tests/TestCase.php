@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Modules\Administration\Domain\TotpVerifier;
@@ -35,6 +36,23 @@ abstract class TestCase extends BaseTestCase
          * first four. Tests that exercise throttling do so deliberately.
          */
         Cache::flush();
+
+        // Manifests go to a real local filesystem under a throwaway root — the
+        // genuine adapter, not a substitute for one, so atomic-publish and
+        // path-traversal behaviour are actually exercised.
+        Storage::fake('manifests');
+
+        /*
+         * The encoder allow-list is empty by default and an empty list permits
+         * nothing, so a ladder cannot be created until a licence decision has
+         * been recorded. This is the *test suite's* recorded assumption, not a
+         * platform default: no licence has been cleared for this repository,
+         * and the values here are placeholders that exist so ladder tests can
+         * run at all. The refusal path is tested explicitly.
+         */
+        config(['kms.media.permitted_encoders' => [
+            ['encoder' => 'test-avc', 'codec' => 'avc', 'licence' => 'test-only', 'requires_gpl_build' => false],
+        ]]);
 
         // Every test starts from a known instant. Token expiry, lockout
         // windows, activation codes and removal cooldowns are all time
@@ -179,6 +197,20 @@ abstract class TestCase extends BaseTestCase
             ], $overrides['rights'] ?? []), $this->bearer($staff))->assertCreated();
         }
 
+        /*
+         * Encode and publish, so playback resolves a real delivery target.
+         *
+         * Not optional scaffolding: a channel that nobody has encoded is a
+         * denial, and a test world in which authorization succeeds against
+         * media that does not exist would prove the platform works in a
+         * situation it must refuse.
+         */
+        $publication = null;
+
+        if ($overrides['publish_media'] ?? true) {
+            $publication = $this->publishedMedia($staff, $channelId, $overrides);
+        }
+
         Cache::flush();
         $session = $this->signedInAccount($overrides['email'] ?? 'viewer@example.test');
         Cache::flush();
@@ -199,7 +231,82 @@ abstract class TestCase extends BaseTestCase
             'plan_id' => $planId,
             'agreement_id' => $agreementId,
             'profile_id' => $profileId,
+            'publication_id' => $publication,
         ] + $session;
+    }
+
+    /**
+     * A ladder, a packaging profile, and a published channel.
+     *
+     * The numbers are chosen so the alignment invariants hold rather than
+     * merely pass: 2000ms segments over 1000ms GOPs at 25fps is 25 whole frames
+     * per GOP and two whole GOPs per segment, so every rendition can put an IDR
+     * frame at every segment boundary.
+     *
+     * @param  array<string,mixed>  $overrides
+     */
+    protected function publishedMedia(string $staff, string $channelId, array $overrides = []): string
+    {
+        $ladderId = $this->postJson('/api/admin/v1/media/ladders', [
+            'slug' => 'ladder-'.substr($channelId, 0, 8),
+            'name' => 'Test Ladder',
+            'content_class' => 'generic',
+            'rungs' => $overrides['rungs'] ?? $this->defaultRungs(),
+            'audio' => [[
+                'label' => 'audio-en', 'language' => 'en', 'role' => 'main', 'codec' => 'aac-lc',
+                'bitrate_kbps' => 128, 'channels' => 2, 'sample_rate_hz' => 48_000,
+                'source_stream_index' => 0, 'is_default' => true,
+            ]],
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $packagingId = $this->postJson('/api/admin/v1/media/packaging-profiles', [
+            'slug' => 'pkg-'.substr($channelId, 0, 8),
+            'name' => 'Test Packaging',
+            'container' => 'cmaf',
+            'segment_duration_ms' => 2000,
+            'gop_duration_ms' => 1000,
+            'timescale' => 90_000,
+            'playlist_window_segments' => 6,
+            'time_shift_buffer_seconds' => 60,
+            'suggested_presentation_delay_ms' => 6000,
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $publicationId = $this->postJson('/api/admin/v1/media/publications', [
+            'subject_type' => 'channel',
+            'subject_id' => $channelId,
+            'ladder_id' => $ladderId,
+            'packaging_profile_id' => $packagingId,
+        ], $this->bearer($staff))->assertCreated()->json('data.id');
+
+        $this->postJson("/api/admin/v1/media/publications/{$publicationId}/publish", [],
+            $this->bearer($staff))->assertCreated();
+
+        return (string) $publicationId;
+    }
+
+    /** @return list<array<string,mixed>> */
+    protected function defaultRungs(): array
+    {
+        return [
+            [
+                'label' => 'v360p', 'width' => 640, 'height' => 360,
+                'video_bitrate_kbps' => 800, 'max_bitrate_kbps' => 1000,
+                'codec' => 'avc', 'encoder' => 'test-avc', 'profile' => 'main', 'level' => 30,
+                'frame_rate' => '25',
+            ],
+            [
+                'label' => 'v720p', 'width' => 1280, 'height' => 720,
+                'video_bitrate_kbps' => 2500, 'max_bitrate_kbps' => 3200,
+                'codec' => 'avc', 'encoder' => 'test-avc', 'profile' => 'high', 'level' => 31,
+                'frame_rate' => '25',
+            ],
+            [
+                'label' => 'v1080p', 'width' => 1920, 'height' => 1080,
+                'video_bitrate_kbps' => 5000, 'max_bitrate_kbps' => 6500,
+                'codec' => 'avc', 'encoder' => 'test-avc', 'profile' => 'high', 'level' => 40,
+                'frame_rate' => '25',
+            ],
+        ];
     }
 
     /** A staff access token with the given role. */

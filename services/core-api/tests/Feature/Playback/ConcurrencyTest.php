@@ -89,7 +89,12 @@ final class ConcurrencyTest extends TestCase
             $this->bearer($world['access_token']))
             ->assertOk()
             ->assertJsonPath('session_id', $sessionId)
-            ->assertJsonStructure(['heartbeat_interval_seconds', 'expires_at']);
+            // A heartbeat hands back fresh targets, not just an expiry: a
+            // client given an expiry and no new URLs cannot renew.
+            ->assertJsonStructure([
+                'heartbeat_interval_seconds',
+                'delivery' => ['targets' => [['format', 'url', 'expires_at']], 'expires_at'],
+            ]);
     }
 
     #[Test]

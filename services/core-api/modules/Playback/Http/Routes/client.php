@@ -12,6 +12,7 @@ use Modules\Playback\Http\Controllers\PlaybackController;
  * a flaky connection, but not unlimited.
  */
 Route::middleware(['client.auth', 'throttle:playback'])->prefix('playback')->group(function (): void {
+    Route::get('/sessions', [PlaybackController::class, 'index']);
     Route::post('/sessions', [PlaybackController::class, 'start']);
     Route::post('/sessions/{sessionId}/heartbeat', [PlaybackController::class, 'heartbeat']);
     Route::post('/sessions/{sessionId}/stop', [PlaybackController::class, 'stop']);

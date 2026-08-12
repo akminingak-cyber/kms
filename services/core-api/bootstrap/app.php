@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Modules\Administration\Http\Middleware\AuthenticateStaff;
 use Modules\Administration\Http\Middleware\RequireStaffRole;
+use Modules\Delivery\Http\Middleware\AllowOriginNetworks;
 use Modules\Identity\Http\Middleware\AuthenticateClient;
 use Modules\Shared\Http\ApiProblem;
 use Modules\Shared\Http\ErrorCode;
@@ -45,6 +46,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->group('admin', []);
 
+        /*
+         * The origin/edge surface. Not the client API and not the admin API:
+         * its caller is our own origin, its authentication is the delivery
+         * token rather than a bearer token, and it is reached at segment
+         * request rates. It is restricted at the network layer instead of
+         * being throttled — a throttle firing here would stop playback for
+         * every viewer behind that origin.
+         */
+        $middleware->group('internal', [
+            AllowOriginNetworks::class,
+        ]);
+
         $middleware->alias([
             'client.auth' => AuthenticateClient::class,
             'staff.auth' => AuthenticateStaff::class,
@@ -61,7 +74,10 @@ return Application::configure(basePath: dirname(__DIR__))
          * meaning must never change once shipped.
          */
         $exceptions->render(function (Throwable $e, Request $request) {
-            if (! $request->is('api/*') && ! $request->expectsJson()) {
+            // The origin surface is not under `api/`, and the origin does not
+            // send an Accept header — but a 404 there must still be a problem
+            // document, or an operator debugging the edge gets an HTML page.
+            if (! $request->is('api/*') && ! $request->is('internal/*') && ! $request->expectsJson()) {
                 return null;
             }
 

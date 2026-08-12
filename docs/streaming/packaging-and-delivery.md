@@ -86,6 +86,31 @@ Therefore:
 - **Personalisation belongs in the URL and the token, not in the manifest body** wherever possible —
   a per-user manifest body is a cache entry with one consumer, which destroys offload.
 
+### Who writes what (ADR-0012)
+
+Manifest generation is split, and the split follows what each side actually knows:
+
+| Artifact | Written by | Why |
+|---|---|---|
+| HLS multivariant playlist | **Control plane** | Derived entirely from the ladder, the packaging profile and the quality class |
+| DASH MPD (live) | **Control plane** | `SegmentTemplate` with a fixed duration describes every segment by arithmetic |
+| HLS media playlists | **Packager** | Contents change with every segment emitted; only the packager knows what it published |
+| Segments, init segments | **Packager** | Media |
+
+### Quality classes, not per-viewer manifests
+
+A licensor's `max_resolution` rule and a plan's resolution cap have to reach the player, and the only
+place they can be enforced is the manifest — a client that filters its own renditions is a
+client-side security boundary, and the client is never one.
+
+Generating a manifest per viewer would enforce the cap and destroy cache offload with it. So caps are
+quantised into a **small, closed, append-only set of quality classes** (`h576`, `h720`, `h1080`,
+`h2160`, `full`), the class appears in the origin path, and every viewer sharing a cap shares one
+cached manifest. Quantisation rounds **down**; an unrecognised cap is treated as the strictest class.
+
+Segments are not duplicated per class. The class decides which rungs a manifest *mentions*, never
+where their segments live, so capped and uncapped viewers still hit the same cached segments.
+
 ## 3. Origin
 
 - **The origin is the system of record for media.** The CDN is a cache; deleting it must lose nothing
@@ -143,6 +168,13 @@ is a tuning exercise against real traffic, not a configuration to set once.
   may watch is a CDN that cannot be replaced, and it is a control we cannot audit.
 - Token validation failures are logged and monitored — a spike is a signal of either an attack or a
   client bug, and both need to be seen.
+
+### One opaque parameter, not several
+
+Everything that varies per viewer — the signature, the expiry and the session — is packed into a
+**single** opaque query parameter. Carried as three parameters, an edge configuration has three
+separate things to exclude from its cache key, and missing any one of them produces the failure
+below. One parameter is one thing to get right.
 
 ### The token must not enter the cache key
 

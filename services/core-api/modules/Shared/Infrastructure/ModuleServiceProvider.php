@@ -41,7 +41,7 @@ abstract class ModuleServiceProvider extends ServiceProvider
 
     private function registerRoutes(string $routeDir): void
     {
-        foreach (['client', 'admin'] as $surface) {
+        foreach (['client', 'admin', 'internal'] as $surface) {
             $file = $routeDir.'/'.$surface.'.php';
 
             if (! is_file($file)) {

@@ -7,6 +7,8 @@ namespace Modules\Playback\Application;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Delivery\Contracts\DeliveryPlanner;
+use Modules\Delivery\Contracts\DeliveryRequest;
+use Modules\Delivery\Contracts\DeliveryTarget;
 use Modules\Entitlement\Contracts\EntitlementQuery;
 use Modules\Playback\Contracts\PlaybackRequest;
 use Modules\Playback\Contracts\PlaybackResult;
@@ -31,7 +33,7 @@ use Throwable;
  *
  *   CAN PLAY = Rights ∧ Entitlement ∧ Parental ∧ Device/Concurrency ∧ Territory
  *
- * Checks run cheapest-first and the **first failure wins**, so an abusive
+ * Seven checks, cheapest first, and the **first failure wins**, so an abusive
  * client is rejected before expensive work happens. Rights is evaluated
  * **before** entitlement deliberately: if content is not licensed for this
  * territory that is true regardless of what the customer bought, and telling
@@ -145,13 +147,47 @@ final readonly class PlaybackAuthorizer
 
         $restrictions = $verdict->usageRules?->toArray() ?? [];
 
+        /*
+         * 7. Somewhere to actually play it from.
+         *
+         * Planned *before* the session is written, because a channel that
+         * nobody has encoded is a denial, not an allow with an empty target
+         * list. Handing a player zero targets produces an unexplained client
+         * error and no server-side signal at all; a recorded denial with a
+         * specific code produces both.
+         *
+         * The resolution caps are resolved here, where the decision is made and
+         * recorded, and passed to Delivery already combined. Delivery addresses
+         * media and signs URLs — it does not get the inputs to a decision.
+         */
+        $qualityCaps = array_values(array_filter([
+            $verdict->usageRules?->maxResolution,
+            $snapshot->maxResolution,
+        ]));
+
+        $targets = $this->delivery->plan(new DeliveryRequest(
+            subjectType: 'channel',
+            subjectRef: $request->contentRef,
+            mode: $request->mode,
+            sessionUuid: $sessionUuid,
+            deviceClass: $request->deviceClass,
+            qualityCaps: $qualityCaps,
+            capabilities: $request->capabilities,
+        ));
+
+        if ($targets === []) {
+            $this->concurrency->release($request->accountUuid, $sessionUuid);
+
+            throw $this->deny($request, ErrorCode::PlaybackNoDeliveryTarget, $now, $verdict);
+        }
+
         try {
             /*
              * The session, the decision record and the slot mirror are written
              * together. If the decision cannot be recorded, playback does not
              * start: an unauditable decision is indefensible to a licensor.
              */
-            $decisionUuid = DB::transaction(function () use ($request, $sessionUuid, $now, $verdict, $snapshot, $territory, $restrictions, $boundBy): string {
+            $decisionUuid = DB::transaction(function () use ($request, $sessionUuid, $now, $verdict, $snapshot, $territory, $restrictions, $boundBy, $qualityCaps): string {
                 PlaybackSession::query()->create([
                     'uuid' => $sessionUuid,
                     'account_uuid' => $request->accountUuid,
@@ -163,6 +199,12 @@ final readonly class PlaybackAuthorizer
                     'mode' => $request->mode,
                     'started_at' => $now,
                     'last_heartbeat_at' => $now,
+                    'revalidated_at' => $now,
+                    // What this session was planned with. Re-deriving these on
+                    // heartbeat would silently change a live viewer's quality
+                    // class when a usage rule or a device profile changed.
+                    'capabilities' => $request->capabilities,
+                    'quality_caps' => $qualityCaps,
                 ]);
 
                 $this->concurrency->mirror($request->accountUuid, $sessionUuid, $now);
@@ -188,10 +230,10 @@ final readonly class PlaybackAuthorizer
         return new PlaybackResult(
             sessionId: $sessionUuid,
             decisionId: $decisionUuid,
-            deliveryTargets: $this->delivery->plan($request->contentRef, $request->mode, $sessionUuid, $request->capabilities),
+            deliveryTargets: array_map(static fn (DeliveryTarget $t): array => $t->toArray(), $targets),
             restrictions: $restrictions,
             heartbeatIntervalSeconds: (int) config('kms.playback.heartbeat_interval_seconds'),
-            expiresAt: $now->modify('+'.(int) config('kms.playback.delivery_token_ttl_seconds').' seconds'),
+            expiresAt: $targets[0]->expiresAt,
         );
     }
 

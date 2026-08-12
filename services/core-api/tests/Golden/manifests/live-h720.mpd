@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2026-08-01T00:00:00Z" publishTime="2026-08-11T12:00:00Z" minimumUpdatePeriod="PT12S" timeShiftBufferDepth="PT60S" suggestedPresentationDelay="PT6S" minBufferTime="PT2S">
+  <Period id="p0" start="PT0S">
+    <AdaptationSet id="1" contentType="video" mimeType="video/mp4" segmentAlignment="true" startWithSAP="1">
+      <SegmentTemplate timescale="90000" duration="180000" startNumber="1" initialization="../$RepresentationID$/init.mp4" media="../$RepresentationID$/seg-$Number$.m4s"/>
+      <Representation id="v360p" codecs="avc1.4d401e" width="640" height="360" frameRate="25" bandwidth="1000000"/>
+      <Representation id="v720p" codecs="avc1.64001f" width="1280" height="720" frameRate="25" bandwidth="3200000"/>
+    </AdaptationSet>
+    <AdaptationSet id="a-de" contentType="audio" mimeType="audio/mp4" lang="de" segmentAlignment="true" startWithSAP="1">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="90000" duration="180000" startNumber="1" initialization="../$RepresentationID$/init.mp4" media="../$RepresentationID$/seg-$Number$.m4s"/>
+      <Representation id="audio-de" codecs="mp4a.40.2" audioSamplingRate="48000" bandwidth="128000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="a-en" contentType="audio" mimeType="audio/mp4" lang="en" segmentAlignment="true" startWithSAP="1">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="90000" duration="180000" startNumber="1" initialization="../$RepresentationID$/init.mp4" media="../$RepresentationID$/seg-$Number$.m4s"/>
+      <Representation id="audio-en" codecs="mp4a.40.2" audioSamplingRate="48000" bandwidth="128000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation id="audio-en-ad" codecs="mp4a.40.2" audioSamplingRate="48000" bandwidth="96000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

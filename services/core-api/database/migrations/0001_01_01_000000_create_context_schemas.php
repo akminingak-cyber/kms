@@ -22,6 +22,7 @@ return new class extends Migration
     private array $schemas = [
         'identity', 'profile', 'device', 'admin',
         'catalog', 'schedule', 'product', 'billing', 'entitlement', 'rights', 'playback',
+        'media',
     ];
 
     public function up(): void

@@ -40,6 +40,10 @@
              worthless: it signs nothing outside the test database. -->
         <env name="KMS_TOKEN_SIGNING_KEY" value="z+R/aZjxo4eCVRhHPuPKq3hrZaHrv8SilBIsCbLkt9k0MbQdqf49ZDE2DvBLhCrshPuAORJFqrRpQnSvsSnN2Q=="/>
         <env name="KMS_TOKEN_ISSUER" value="http://localhost"/>
+        <!-- Signs delivery tokens. Worthless outside the test suite, and a
+             separate key from the token signing key on purpose: the delivery
+             key is shared with the origin and has a different blast radius. -->
+        <env name="KMS_DELIVERY_TOKEN_KEY" value="test-delivery-key-not-a-secret"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <!-- A determinate territory, so tests exercise rights rather than the
              undetermined-territory branch. That branch is tested explicitly. -->

@@ -29,6 +29,7 @@ at the time is what makes the change comprehensible later.
 | [0009](ADR-0009-payments-boundary.md) | PSP-agnostic payments, no card data on our infrastructure | Accepted |
 | [0010](ADR-0010-contract-first-openapi.md) | Contract-first OpenAPI as the source of truth | Accepted |
 | [0011](ADR-0011-availability-projection-shape.md) | Factorised availability projection | Accepted |
+| [0012](ADR-0012-manifest-generation-and-quality-classes.md) | Control-plane manifest generation, per quality class | Accepted |
 
 ## Template
 

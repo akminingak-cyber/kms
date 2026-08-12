@@ -98,6 +98,26 @@ is built. Answers are recorded in an ADR per vendor.
 - [ ] Test/staging licence server and test devices
 
 ### P3 CdnProvider (blocks Phase 4)
+
+> **Status.** No adapter exists, and none may be built until this list is complete. What *does*
+> exist is the port and an origin-direct provider — which is not a placeholder for a CDN but a real
+> delivery mode, and the one the platform runs on until a vendor is chosen (OQ-8).
+>
+> The port is deliberately minimal: `name()` and `urlFor()`. Purge, log delivery, geo controls and
+> shield configuration all belong here eventually, but their *shapes* differ between vendors, and
+> declaring methods now would mean inventing an interface from an imagined vendor. An adapter may
+> not be built before its checklist is complete, and neither may the interface it would implement.
+>
+> Two checklist items below are now answerable from our side rather than the vendor's, because the
+> platform has been built to make them straightforward to satisfy:
+>
+> - **Per-session tokens** — everything that varies per viewer is packed into one opaque query
+>   parameter, so a vendor needs to support excluding exactly one parameter from the cache key
+>   while still validating it. Confirmed working against our own origin.
+> - **Geo controls** — the design already treats edge geo-blocking as defence in depth only;
+>   territory is decided and recorded at authorization, so a vendor that cannot do it is not
+>   disqualified.
+
 - [ ] Token authentication or signed URL scheme, and whether it supports per-session tokens
 - [ ] Origin shield / mid-tier caching
 - [ ] Purge API: granularity and propagation time

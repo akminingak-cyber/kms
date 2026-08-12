@@ -256,18 +256,64 @@ final class PlaybackAuthorizationTest extends TestCase
     }
 
     #[Test]
-    public function the_delivery_url_keeps_the_token_out_of_the_path(): void
+    public function the_delivery_url_varies_only_in_one_query_parameter(): void
     {
         $world = $this->playableWorld();
+
+        // Two sessions on the same channel. Different tokens, and that must be
+        // the *only* difference.
+        $first = $this->startPlayback($world)->assertCreated()->json('delivery.targets.0');
+        Cache::flush();
+        $second = $this->startPlayback($world)->assertCreated()->json('delivery.targets.0');
+
+        [$myPath, $myQuery] = explode('?', (string) $first['url'], 2);
+        [$theirPath] = explode('?', (string) $second['url'], 2);
+
+        /*
+         * The whole delivery cost model rests on this. Everything that varies
+         * per viewer lives in exactly one opaque parameter, so an edge has one
+         * thing to exclude from its cache key — miss it and every viewer gets a
+         * private copy of every segment, cache offload collapses to zero, and
+         * the failure is invisible until the invoice arrives.
+         */
+        $this->assertSame($myPath, $theirPath, 'two viewers of the same channel must share a path');
+        $this->assertStringContainsString($world['channel_id'], $myPath);
+
+        parse_str($myQuery, $parameters);
+        $this->assertSame(['t'], array_keys($parameters), 'exactly one query parameter may vary per viewer');
+        $this->assertNotSame(
+            't='.$parameters['t'],
+            (string) parse_url((string) $second['url'], PHP_URL_QUERY),
+            'and it must actually differ between sessions',
+        );
+    }
+
+    #[Test]
+    public function it_denies_when_nothing_has_been_published_to_play(): void
+    {
+        // Entitled, licensed, in territory — and nobody has encoded the
+        // channel. Handing the player an empty target list would surface as an
+        // unexplained client error with no server-side signal at all.
+        $world = $this->playableWorld(['publish_media' => false]);
+
+        $this->assertProblem($this->startPlayback($world), 'PLAYBACK_NO_DELIVERY_TARGET', 503);
+    }
+
+    #[Test]
+    public function a_licensor_resolution_cap_selects_a_narrower_manifest(): void
+    {
+        $world = $this->playableWorld([
+            'rights' => [
+                'window_start' => '2020-01-01T00:00:00Z',
+                'usage' => ['max_resolution' => '720p'],
+            ],
+        ]);
+
         $target = $this->startPlayback($world)->assertCreated()->json('delivery.targets.0');
 
-        [$path, $query] = explode('?', (string) $target['url'], 2);
-
-        // The path is identical for every viewer, so an edge configured to
-        // exclude the token from the cache key gets one cache entry per asset
-        // rather than one per viewer.
-        $this->assertStringContainsString($world['channel_id'], $path);
-        $this->assertStringNotContainsString('token', $path);
-        $this->assertStringContainsString('token=', $query);
+        // The cap reaches the player as a different manifest, not as a client
+        // instruction: the client is never a security boundary.
+        $this->assertSame('h720', $target['quality_class']);
+        $this->assertStringContainsString('/h720/', (string) $target['url']);
     }
 }

@@ -17,16 +17,29 @@ because they determine where work can and cannot be validated:
 | Constraint | Consequence |
 |---|---|
 | **No Docker daemon** (`/var/run/docker.sock` absent) | The compose stack cannot run here. It must be validated on a developer machine or a CI runner with a daemon |
-| **No PostgreSQL server, no Redis server** | Only client binaries are installed. No database-backed work can be executed here |
+| **PostgreSQL and Redis servers not preinstalled** | Installable from the distribution repositories, and that is how the integration suite is run here — against real PostgreSQL 16 and real Redis, never SQLite |
 | **No FFmpeg** | No media processing or inspection here |
-| **No Nginx** | No origin or edge configuration testing here |
+| **Nginx not preinstalled** | Installable from the distribution repositories, and that is how the origin configuration was verified — see the note below |
 | **PHP `bcmath` not loaded** | The production PHP image must enable it explicitly |
 | **Egress restricted to an allow-list** | Package registries reachable; **vendor documentation blocked**. Dependency metadata and licences are verifiable here; vendor capabilities are not |
 | **No mobile or TV toolchains** | Client application work is impossible here. iOS additionally needs macOS |
 
 **This environment is suitable for backend, web, schema, contract and documentation work.** Anything
-requiring a container runtime, a database server, FFmpeg, or a device toolchain must be validated
-elsewhere. Plans that assume otherwise produce work nobody has actually run.
+requiring a container runtime, media processing, or a device toolchain must be validated elsewhere.
+Plans that assume otherwise produce work nobody has actually run.
+
+The distinction that matters is between *not preinstalled* and *not possible*. PostgreSQL, Redis and
+Nginx are all installable here, and the work that depends on them is genuinely exercised rather than
+asserted: the integration suite runs against real servers, and the origin configuration in
+[`../../infrastructure/nginx/origin.conf`](../../infrastructure/nginx/origin.conf) has been run
+against a live `core-api` — including the property the delivery cost model rests on, that two
+viewers with different tokens hit the same cached segment.
+
+FFmpeg and a container runtime are a different case. FFmpeg's licence follows its build flags, so
+"install FFmpeg" is not a neutral act here (see
+[`../architecture/09-dependency-policy.md`](../architecture/09-dependency-policy.md)); and there is
+no Docker daemon to run a pinned image with. So the media pipeline is developed against a
+specification and an argument vector, and confirmed where a cleared build exists.
 
 ## 3. Target developer experience (Phase 1)
 

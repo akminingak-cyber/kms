@@ -2,9 +2,12 @@
 
 Applies to **every contributor, human or AI**. Read this before writing code in this repository.
 
-**Current status: Phase 0.** There is no application code. Phase 1 is blocked on the ⛔ open questions
-in [`ARCHITECTURE.md`](ARCHITECTURE.md#13-open-questions) and on
-[ADR-0007](docs/architecture/adr/ADR-0007-laravel-major-version.md).
+**Current status: the control plane is built and the media plane is specified.** `services/core-api`
+carries identity, catalog, commercial, rights, playback and media modules with CI-enforced
+boundaries. What is absent is absent on purpose — payments, DRM, IP geolocation, a CDN adapter and a
+running encoder all await decisions recorded as open questions in
+[`ARCHITECTURE.md`](ARCHITECTURE.md#13-open-questions). Nothing among them is stubbed, and §1.1 below
+is why.
 
 ---
 

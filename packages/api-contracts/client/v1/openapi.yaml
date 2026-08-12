@@ -727,6 +727,40 @@ paths:
         '429': { $ref: '#/components/responses/Problem' }
 
   /playback/sessions:
+    get:
+      tags: [Playback]
+      operationId: listPlaybackSessions
+      summary: The viewer's own live sessions
+      description: |
+        "Too many simultaneous streams" is unactionable without being able to
+        see which devices are using them, so this is what turns a concurrency
+        denial into something a viewer can resolve rather than only be blocked
+        by.
+
+        Scoped to the authenticated account. Sessions that have ended are not
+        listed.
+      responses:
+        '200':
+          description: Live sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        session_id: { $ref: '#/components/schemas/Identifier' }
+                        content_id: { $ref: '#/components/schemas/Identifier' }
+                        mode: { type: string, enum: [live, restart, catchup] }
+                        device_id: { $ref: '#/components/schemas/Identifier' }
+                        device_class: { type: string }
+                        started_at: { type: string, format: date-time }
+                        last_heartbeat_at: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
     post:
       tags: [Playback]
       operationId: startPlayback
@@ -787,10 +821,22 @@ paths:
       tags: [Playback]
       operationId: heartbeatPlayback
       description: |
-        Renews the concurrency slot and the delivery token. A session with no
-        heartbeat past its grace period is closed and its slot released, which
-        is what stops a crashed client permanently consuming a viewer's
-        allowance.
+        Renews the concurrency slot and reissues the delivery targets, and
+        periodically re-runs the decision.
+
+        **The response carries fresh delivery targets, and clients must use
+        them.** A heartbeat that returned only an expiry would leave a client
+        watching a stream whose token it cannot renew.
+
+        A session with no heartbeat past its grace period is closed and its slot
+        released, which is what stops a crashed client permanently consuming a
+        viewer's allowance.
+
+        The decision is re-run at most once per configured interval rather than
+        on every beat — the full check is the most expensive in the platform.
+        A `403` here means playback must stop **now**: the reason code is the
+        specific one, so a blackout that began mid-event is reported as a
+        blackout and not as a generic failure.
       responses:
         '200':
           description: Renewed
@@ -801,10 +847,25 @@ paths:
                 properties:
                   session_id: { $ref: '#/components/schemas/Identifier' }
                   heartbeat_interval_seconds: { type: integer }
-                  expires_at: { type: string, format: date-time }
+                  delivery:
+                    type: object
+                    properties:
+                      targets:
+                        type: array
+                        items: { $ref: '#/components/schemas/DeliveryTarget' }
+                      expires_at: { type: string, format: date-time }
         '401': { $ref: '#/components/responses/Problem' }
+        '403':
+          description: |
+            The session must end. Carries the specific reason — for example
+            `PLAYBACK_BLACKED_OUT`, `PLAYBACK_NOT_ENTITLED` or
+            `PLAYBACK_SESSION_ENDED`.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
 
   /playback/sessions/{sessionId}/stop:
     parameters:
@@ -938,8 +999,45 @@ components:
             than HLS with CMAF fMP4, which is a different problem from needing a
             different encryption scheme (ADR-0005).
           enum: [cmaf, ts]
-        url: { type: string, format: uri }
+        url:
+          type: string
+          format: uri
+          description: |
+            Everything that varies per viewer — the session, the expiry and the
+            signature — is packed into a **single opaque query parameter**, so
+            the path is byte-identical for every viewer of the same content at
+            the same quality class. An edge therefore has exactly one parameter
+            to exclude from its cache key; excluding none, or missing one of
+            several, gives every viewer a private copy of every segment and
+            collapses cache offload to zero.
+
+            Clients must treat the URL as opaque and must not reconstruct it.
         priority: { type: integer }
+        edge:
+          type: string
+          description: |
+            Which delivery edge this target addresses. Reported in player
+            telemetry so a quality problem can be attributed to an edge without
+            parsing hostnames out of URLs.
+        quality_class:
+          type: string
+          enum: [h576, h720, h1080, h2160, full]
+          description: |
+            The manifest variant this target points at. A licensor's
+            `max_resolution` rule and a plan's cap are enforced by serving a
+            manifest that does not mention the rungs the viewer may not have —
+            never by asking the client to filter, because the client is never a
+            security boundary.
+
+            Surfaced so that a viewer who reports "it looks soft" is answered
+            from the response rather than from an investigation.
+        expires_at:
+          type: string
+          format: date-time
+          description: |
+            When this target's token stops working. Renew via the heartbeat
+            before this instant; a client that does not simply stops receiving
+            segments.
 
     PlaybackSession:
       type: object

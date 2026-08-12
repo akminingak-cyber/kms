@@ -72,3 +72,11 @@ local.properties
 *.mov
 *.mpd
 *.m3u8
+
+# …but golden manifests are **source**, not artifacts. They are the recorded
+# client contract, and the whole point of them is that a change shows up as a
+# reviewable diff. Without this exception the rules above silently drop them and
+# the golden tests fail in CI with "golden file missing" — which is a confusing
+# way to learn that the contract was never committed.
+!services/core-api/tests/Golden/manifests/*.mpd
+!services/core-api/tests/Golden/manifests/*.m3u8

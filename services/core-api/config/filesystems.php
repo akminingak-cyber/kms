@@ -38,6 +38,25 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Generated manifests, which the origin serves.
+         *
+         * A local volume shared with the origin in development, and object
+         * storage in production — the disk is swapped in configuration, and
+         * nothing above the `ManifestStore` port knows which it is.
+         *
+         * `throw` is on. Every other disk here can fail quietly because a
+         * failed write is recoverable; a manifest write that fails silently
+         * would mark a publication successful with nothing behind it, and the
+         * failure would surface as an unexplained player error.
+         */
+        'manifests' => [
+            'driver' => 'local',
+            'root' => env('KMS_MANIFEST_ROOT', storage_path('app/manifests')),
+            'throw' => true,
+            'report' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

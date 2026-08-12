@@ -10,6 +10,7 @@ use Modules\Delivery\Infrastructure\DeliveryServiceProvider;
 use Modules\Device\Infrastructure\DeviceServiceProvider;
 use Modules\Entitlement\Infrastructure\EntitlementServiceProvider;
 use Modules\Identity\Infrastructure\IdentityServiceProvider;
+use Modules\Media\Infrastructure\MediaServiceProvider;
 use Modules\Playback\Infrastructure\PlaybackServiceProvider;
 use Modules\Product\Infrastructure\ProductServiceProvider;
 use Modules\Profile\Infrastructure\ProfileServiceProvider;
@@ -35,8 +36,12 @@ return [
     BillingServiceProvider::class,
     EntitlementServiceProvider::class,
 
+    // Media
+    MediaServiceProvider::class,
+
     // Access — Rights is registered before Playback because Playback reads its
-    // projection; the order is documentation, not a dependency the container needs.
+    // projection, and Delivery before Playback because Playback plans delivery.
+    // The order is documentation, not a dependency the container needs.
     RightsServiceProvider::class,
     DeliveryServiceProvider::class,
     PlaybackServiceProvider::class,

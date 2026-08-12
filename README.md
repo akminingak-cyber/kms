@@ -3,12 +3,27 @@
 A production OTT/IPTV platform: Live TV, EPG, VOD, catch-up and restart, delivered to web, mobile and
 Smart TV, with subscriptions, entitlements, rights management and DRM-ready streaming.
 
-> ## Status: **Phase 0 — foundation**
+> ## Status: **control plane built; media plane specified**
 >
-> **There is no application code yet.** This repository currently contains the engineering
-> foundation: the architecture, the boundaries, the strategies, and the rules that the build will
-> follow. Phase 1 is blocked on the decisions listed in
-> [`ARCHITECTURE.md` § Open questions](ARCHITECTURE.md#13-open-questions).
+> `services/core-api` is real and runs: identity, profiles, devices and TV activation; channels,
+> EPG and categories; packages, plans, subscriptions and entitlements; rights, availability and
+> playback authorization; and the media control plane — encoding ladders, packaging profiles,
+> generated HLS and DASH manifests, origin addressing and delivery tokens.
+>
+> **What is deliberately absent, and why.** Nothing here is stubbed, so the gaps are visible rather
+> than papered over:
+>
+> | Absent | Because |
+> |---|---|
+> | Payments | No PSP selected (**OQ-9**). Subscriptions are real; no money moves |
+> | DRM | No vendor agreements (**OQ-7**). `protection` is `null`, not a plausible placeholder |
+> | IP geolocation | No vendor (**P11**). Territory resolves from configuration, and the *method* is recorded on every decision |
+> | A CDN adapter | No vendor selected (**OQ-8**) and the P3 checklist is open. Delivery is origin-direct, which is a real mode rather than a stand-in |
+> | An encoder or packager running | FFmpeg's licence follows its build flags and the usual encoders are GPL-or-commercial. The encoder allow-list is **empty by default and permits nothing** until a clearance is recorded |
+> | Client applications | Later phases |
+>
+> Full picture: [`docs/architecture/08-development-phases.md`](docs/architecture/08-development-phases.md).
+> Open decisions: [`ARCHITECTURE.md` § Open questions](ARCHITECTURE.md#13-open-questions).
 
 ---
 
@@ -28,9 +43,13 @@ Smart TV, with subscriptions, entitlements, rights management and DRM-ready stre
 ```
 kms/
 ├── apps/             # client applications          — empty; created per phase
-├── services/         # backend services and workers — empty; core-api in Phase 1
-├── packages/         # shared libraries             — empty; contracts in Phase 1
-├── infrastructure/   # containers, IaC, edge config, observability-as-code
+├── services/
+│   └── core-api/     # the control plane: 13 modules with CI-enforced boundaries
+├── packages/
+│   └── api-contracts/# OpenAPI — the source of truth for the client API
+├── infrastructure/
+│   ├── docker/       # local compose stack
+│   └── nginx/        # API edge and media origin configuration
 ├── docs/
 │   ├── architecture/ # context, bounded contexts, boundaries, rights, testing, phases, ADRs
 │   ├── database/     # storage strategy, conceptual model, migrations, scaling

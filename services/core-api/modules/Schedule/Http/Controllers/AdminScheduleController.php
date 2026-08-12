@@ -16,6 +16,9 @@ use Modules\Schedule\Infrastructure\Eloquent\Channel;
 use Modules\Schedule\Infrastructure\Eloquent\IngestRun;
 use Modules\Schedule\Infrastructure\Eloquent\Programme;
 use Modules\Shared\Domain\Clock;
+use Modules\Shared\Http\ApiProblem;
+use Modules\Shared\Http\CursorList;
+use Modules\Shared\Http\ErrorCode;
 
 final class AdminScheduleController
 {
@@ -23,6 +26,69 @@ final class AdminScheduleController
         private readonly Clock $clock,
         private readonly AuditRecorder $audit,
     ) {}
+
+    /**
+     * Every channel, including the ones a viewer cannot see.
+     *
+     * Deliberately not the client endpoint with a staff token on it: the client
+     * list is filtered to what is playable, and an operator asking "why is this
+     * channel missing from the app?" needs to see precisely the rows that
+     * filter removes.
+     */
+    public function channels(Request $request): JsonResponse
+    {
+        $query = Channel::query()->orderBy('number')->orderBy('id');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        return new JsonResponse(CursorList::respond($request, $query, $this->presentChannel(...)));
+    }
+
+    public function channel(string $channelId): JsonResponse
+    {
+        $channel = Channel::query()->where('uuid', $channelId)->first();
+
+        if ($channel === null) {
+            throw ApiProblem::of(ErrorCode::ChannelNotFound);
+        }
+
+        $programmes = Programme::query()
+            ->where('channel_uuid', $channel->uuid)
+            ->orderByDesc('starts_at')
+            ->limit(10)
+            ->get();
+
+        return new JsonResponse(['data' => $this->presentChannel($channel) + [
+            // A sample of what has actually been ingested, because "the EPG
+            // looks wrong" is answered by looking at rows rather than at a
+            // count of them.
+            'recent_programmes' => $programmes->map(static fn (Programme $p): array => [
+                'id' => $p->uuid,
+                'title' => $p->title,
+                'starts_at' => $p->starts_at?->format(DATE_RFC3339),
+                'ends_at' => $p->ends_at?->format(DATE_RFC3339),
+                'revision' => (int) $p->revision,
+                'source' => $p->source,
+            ])->all(),
+        ]]);
+    }
+
+    /** @return array<string,mixed> */
+    private function presentChannel(Channel $channel): array
+    {
+        return [
+            'id' => $channel->uuid,
+            'slug' => $channel->slug,
+            'name' => $channel->name,
+            'number' => $channel->number === null ? null : (int) $channel->number,
+            'status' => $channel->status,
+            'category_id' => $channel->category_uuid,
+            'catchup_enabled' => (bool) $channel->catchup_enabled,
+            'created_at' => $channel->created_at?->format(DATE_RFC3339),
+        ];
+    }
 
     public function storeChannel(Request $request): JsonResponse
     {

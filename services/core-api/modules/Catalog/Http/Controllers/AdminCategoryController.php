@@ -9,9 +9,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Modules\Catalog\Infrastructure\Eloquent\Category;
+use Modules\Shared\Http\CursorList;
 
 final class AdminCategoryController
 {
+    public function index(Request $request): JsonResponse
+    {
+        $query = Category::query()->orderBy('sort_order')->orderBy('id');
+
+        return new JsonResponse(CursorList::respond($request, $query, static fn (Category $category): array => [
+            'id' => $category->uuid,
+            'slug' => $category->slug,
+            'name' => $category->name,
+            'parent_id' => $category->parent_id === null ? null : (int) $category->parent_id,
+            'sort_order' => (int) $category->sort_order,
+        ]));
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

@@ -39,7 +39,9 @@ Entries are annotated with the phase that creates them. Nothing beyond Phase 1 e
 ```
 apps/
 ├── web/                      # P5  Next.js — viewer web app (browse, play, account)
-├── admin/                    # P2  Next.js — Admin Control Center
+├── admin/                    # P4  React + Vite, static SPA — the operator panel.
+│                             #     Deliberately not Next.js: no SSR value for a
+│                             #     token-authenticated internal tool (ADR-0013)
 ├── android/                  # P8  Kotlin, AndroidX Media3 — phone + tablet
 ├── androidtv/                # P9  Kotlin, Media3, Leanback — Android TV / Google TV
 ├── ios/                      # P8  Swift, AVFoundation — iOS + iPadOS  (see OQ-15)
@@ -74,7 +76,7 @@ services/
 
 packages/
 ├── api-contracts/            # P1  OpenAPI specs — the source of truth for every client API
-├── ts-api-client/            # P1  Generated TypeScript client (generated, never hand-edited)
+├── ts-api-client/            # P4  Generated TypeScript client (generated, never hand-edited)
 ├── ts-player-core/           # P5  Shared player logic: ABR policy, DRM setup, error taxonomy,
 │                             #     telemetry beacons. Used by web, tizen, webos
 ├── ts-ui-tv/                 # P9  Shared TV UI primitives: focus/spatial navigation, remote keys

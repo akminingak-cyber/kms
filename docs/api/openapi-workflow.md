@@ -61,15 +61,19 @@ moment and the cost lands on a viewer with a television that will never be updat
 
 | Target | Tool (candidate, verified in [`../architecture/09-dependency-policy.md`](../architecture/09-dependency-policy.md)) | Output |
 |---|---|---|
-| TypeScript types | `openapi-typescript` | `packages/ts-api-client/types` |
-| TypeScript client | `orval` | Typed client + TanStack Query hooks |
-| Client test fakes | `msw` handlers from examples | Client tests without a server |
+| TypeScript types | `openapi-typescript` | `packages/ts-api-client/src/types` — **in use** |
+| TypeScript client | `openapi-fetch` | A typed client over those types — **in use**. `orval` was not adopted: it generates a client *and* query hooks, and only the client was wanted ([ADR-0013](../architecture/adr/ADR-0013-admin-panel-stack.md)) |
+| Client test fakes | A `fetch` stub in the app's test harness | **In use.** `msw` earns its keep when many suites share handlers; the panel's do not |
 | Kotlin | Selected in Phase 8 | |
 | Swift | Selected in Phase 8 | |
 | Documentation | `@redocly/cli` | Published reference |
 
 **Generated code is committed** (so diffs are reviewable and builds are reproducible) and
-**never hand-edited** — CI regenerates and fails on any difference.
+**never hand-edited** — `pnpm contracts:verify` regenerates into memory and fails on any difference,
+and that check runs in CI.
+
+That gate is the only thing standing between a spec change and a client compiling against an API
+that no longer exists: both sides still type-check on their own, so nothing else would notice.
 
 ## 5. Server conformance
 

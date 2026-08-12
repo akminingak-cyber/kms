@@ -30,6 +30,7 @@ at the time is what makes the change comprehensible later.
 | [0010](ADR-0010-contract-first-openapi.md) | Contract-first OpenAPI as the source of truth | Accepted |
 | [0011](ADR-0011-availability-projection-shape.md) | Factorised availability projection | Accepted |
 | [0012](ADR-0012-manifest-generation-and-quality-classes.md) | Control-plane manifest generation, per quality class | Accepted |
+| [0013](ADR-0013-admin-panel-stack.md) | Operator panel is a static SPA, not Next.js | Accepted |
 
 ## Template
 

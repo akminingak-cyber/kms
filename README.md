@@ -3,12 +3,16 @@
 A production OTT/IPTV platform: Live TV, EPG, VOD, catch-up and restart, delivered to web, mobile and
 Smart TV, with subscriptions, entitlements, rights management and DRM-ready streaming.
 
-> ## Status: **control plane built; media plane specified**
+> ## Status: **control plane built; media plane specified; operators have a panel**
 >
 > `services/core-api` is real and runs: identity, profiles, devices and TV activation; channels,
 > EPG and categories; packages, plans, subscriptions and entitlements; rights, availability and
 > playback authorization; and the media control plane — encoding ladders, packaging profiles,
 > generated HLS and DASH manifests, origin addressing and delivery tokens.
+>
+> `apps/admin` is the operator panel over that control plane, calling a fully specified admin API
+> through a client generated from the contract. Its most valuable screen is the playback decision
+> log: "why could this person not watch?" answered from a row rather than from guesswork.
 >
 > **What is deliberately absent, and why.** Nothing here is stubbed, so the gaps are visible rather
 > than papered over:
@@ -42,14 +46,17 @@ Smart TV, with subscriptions, entitlements, rights management and DRM-ready stre
 
 ```
 kms/
-├── apps/             # client applications          — empty; created per phase
+├── apps/
+│   └── admin/        # the operator panel — a static SPA over the admin API
 ├── services/
 │   └── core-api/     # the control plane: 13 modules with CI-enforced boundaries
 ├── packages/
-│   └── api-contracts/# OpenAPI — the source of truth for the client API
+│   ├── api-contracts/# OpenAPI — the source of truth for both API surfaces
+│   └── ts-api-client/# generated from those contracts, never hand-edited
 ├── infrastructure/
 │   ├── docker/       # local compose stack
 │   └── nginx/        # API edge and media origin configuration
+├── legacy/           # quarantined; not part of the workspace (OQ-17)
 ├── docs/
 │   ├── architecture/ # context, bounded contexts, boundaries, rights, testing, phases, ADRs
 │   ├── database/     # storage strategy, conceptual model, migrations, scaling

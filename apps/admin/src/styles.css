@@ -1,0 +1,316 @@
+/*
+ * Deliberately hand-written and small.
+ *
+ * A CSS framework here would be a permanent dependency, a build step and a
+ * class vocabulary, bought for an internal tool used by a handful of people
+ * whose requirement is that a table is readable at 2am. Tailwind was already
+ * in this repository, unused, attached to a starter that did not build — that
+ * is the shape of a dependency added without a stated need.
+ */
+:root {
+  --ink: #14161a;
+  --muted: #5d646e;
+  --line: #d9dde3;
+  --surface: #ffffff;
+  --canvas: #f5f6f8;
+  --accent: #1f5fbf;
+  --deny: #a3261d;
+  --allow: #1c6b3f;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e7e9ec;
+    --muted: #9aa3ae;
+    --line: #333941;
+    --surface: #1b1e23;
+    --canvas: #121418;
+    --accent: #6ea8fe;
+    --deny: #f08b82;
+    --allow: #77d39d;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font:
+    15px/1.5 system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+/* Layout ------------------------------------------------------------------ */
+.layout__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.layout__brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.layout__identity {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.layout__body {
+  display: flex;
+  align-items: flex-start;
+}
+.layout__nav {
+  width: 15rem;
+  flex: none;
+  padding: 1rem;
+}
+.layout__nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.125rem;
+}
+.layout__nav a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+.layout__nav a:hover {
+  background: var(--surface);
+}
+.layout__nav a.active {
+  background: var(--surface);
+  font-weight: 600;
+  color: var(--accent);
+}
+.layout__main {
+  flex: 1;
+  padding: 1rem 1.5rem 4rem;
+  min-width: 0;
+}
+
+/* Screens ----------------------------------------------------------------- */
+.screen__head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+.screen h1 {
+  font-size: 1.4rem;
+  margin: 0.5rem 0;
+}
+.screen h2 {
+  font-size: 1.05rem;
+  margin: 2rem 0 0.5rem;
+}
+.screen__intro {
+  max-width: 60ch;
+  color: var(--muted);
+}
+.screen__intro p {
+  margin: 0.35rem 0;
+}
+.muted {
+  color: var(--muted);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75rem 0;
+  background: var(--surface);
+}
+caption {
+  text-align: left;
+  color: var(--muted);
+  padding-bottom: 0.35rem;
+}
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+td .context {
+  display: inline-block;
+  max-width: 34ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.badge--deny {
+  color: var(--deny);
+  border-color: currentColor;
+}
+.badge--allow {
+  color: var(--allow);
+  border-color: currentColor;
+}
+.row-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+/* Forms ------------------------------------------------------------------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  max-width: 44rem;
+}
+.panel h2,
+.panel h3 {
+  margin-top: 0;
+}
+.field {
+  margin: 0.75rem 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.field__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.field__error {
+  margin: 0;
+  color: var(--deny);
+  font-size: 0.85rem;
+}
+.field--invalid input,
+.field--invalid select {
+  border-color: var(--deny);
+}
+input,
+select {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--canvas);
+  color: inherit;
+  max-width: 26rem;
+}
+input[type='checkbox'] {
+  width: auto;
+}
+button {
+  font: inherit;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: inherit;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+.filters label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Notices ----------------------------------------------------------------- */
+.notice {
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  margin: 0.75rem 0;
+  background: var(--surface);
+}
+.notice--error {
+  border-left-color: var(--deny);
+}
+.notice--ok {
+  border-left-color: var(--allow);
+}
+.notice__title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+.notice__meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0 0.75rem;
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.85rem;
+}
+.notice__meta dt {
+  color: var(--muted);
+}
+.notice__meta dd {
+  margin: 0;
+}
+
+/* Sign in ----------------------------------------------------------------- */
+.signin {
+  max-width: 24rem;
+  margin: 8vh auto;
+  padding: 0 1rem;
+}
+.signin form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+.signin .muted {
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}

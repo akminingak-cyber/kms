@@ -8,7 +8,7 @@ COMPOSE := docker compose -f infrastructure/docker/compose.yaml
 API := services/core-api
 
 .DEFAULT_GOAL := help
-.PHONY: help up down reset seed migrate test test-unit test-feature lint format analyse boundaries spec check
+.PHONY: help up down reset seed migrate test test-unit test-feature lint format analyse boundaries spec contracts admin web check
 
 help: ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -31,7 +31,7 @@ migrate: ## Run migrations
 seed: ## Load the seed dataset
 	$(COMPOSE) exec -T core-api php artisan db:seed --force
 
-test: ## Everything CI runs
+test: ## Backend test suite
 	cd $(API) && php artisan test
 
 test-unit: ## Unit tests only
@@ -52,7 +52,21 @@ analyse: ## Static analysis
 boundaries: ## Enforce module boundaries (ADR-0001)
 	php tools/check-module-boundaries.php
 
-spec: ## Validate the OpenAPI contract against the implementation
+spec: ## Validate both OpenAPI contracts against the implementation
 	cd $(API) && php artisan test --filter=OpenApiConformance
 
-check: boundaries lint analyse test ## Everything, in the order CI runs it
+contracts: ## Regenerate the TypeScript client from the contracts
+	pnpm contracts:generate
+
+admin: ## Run the operator panel against a local API
+	pnpm --filter @kms/admin dev
+
+web: ## Everything CI runs for the JavaScript workspace
+	pnpm contracts:verify
+	pnpm format:check
+	pnpm lint
+	pnpm typecheck
+	pnpm test
+	pnpm build
+
+check: boundaries lint analyse test web ## Everything, in the order CI runs it

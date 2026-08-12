@@ -1,0 +1,16 @@
+# The PHP half of the monorepo has its own formatter (Pint).
+services/
+# Generated from the OpenAPI contracts; regeneration would undo any formatting.
+packages/ts-api-client/src/types/
+# Quarantined and does not build (legacy/README.md, OQ-17).
+legacy/
+**/dist/
+pnpm-lock.yaml
+
+# Documentation and contracts are authored, not generated. Reflowing them
+# produces a diff nobody asked for and buries the one that matters — and
+# reformatting an OpenAPI document risks changing a spec while reviewing a
+# whitespace change.
+**/*.md
+**/*.yaml
+**/*.yml

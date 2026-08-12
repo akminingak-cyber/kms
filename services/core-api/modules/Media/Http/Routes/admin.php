@@ -20,7 +20,10 @@ Route::middleware(['staff.auth', 'throttle:admin', 'staff.role:platform_engineer
         Route::post('/ladders', [AdminMediaController::class, 'storeLadder']);
         Route::post('/ladders/{ladderId}/ffmpeg-command', [AdminMediaController::class, 'ffmpegCommand']);
 
+        Route::get('/packaging-profiles', [AdminMediaController::class, 'listPackagingProfiles']);
         Route::post('/packaging-profiles', [AdminMediaController::class, 'storePackagingProfile']);
+
+        Route::get('/publications', [AdminMediaController::class, 'listPublications']);
 
         Route::post('/publications', [AdminMediaController::class, 'storePublication']);
         Route::post('/publications/{publicationId}/publish', [AdminMediaController::class, 'publish']);

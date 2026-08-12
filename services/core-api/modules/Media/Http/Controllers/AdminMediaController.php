@@ -30,6 +30,7 @@ use Modules\Media\Infrastructure\Eloquent\EncodingLadder;
 use Modules\Media\Infrastructure\Eloquent\PackagingProfileRow;
 use Modules\Media\Infrastructure\Eloquent\Publication;
 use Modules\Shared\Http\ApiProblem;
+use Modules\Shared\Http\CursorList;
 use Modules\Shared\Http\ErrorCode;
 
 /**
@@ -178,6 +179,60 @@ final class AdminMediaController
         return new JsonResponse([
             'data' => $ladders->map(fn (EncodingLadder $ladder): array => $this->ladderPayload($ladder))->all(),
         ]);
+    }
+
+    public function listPackagingProfiles(Request $request): JsonResponse
+    {
+        $query = PackagingProfileRow::query()->orderBy('slug')->orderBy('id');
+
+        return new JsonResponse(CursorList::respond($request, $query, $this->packagingPayload(...)));
+    }
+
+    public function listPublications(Request $request): JsonResponse
+    {
+        $request->validate([
+            'subject_id' => ['sometimes', 'uuid'],
+            'status' => ['sometimes', 'string', 'max:20'],
+        ]);
+
+        $query = Publication::query()->with(['ladder', 'packaging', 'manifests'])->orderByDesc('id');
+
+        if ($request->filled('subject_id')) {
+            $query->where('subject_ref', $request->string('subject_id')->toString());
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        return new JsonResponse(CursorList::respond($request, $query, function (Publication $publication): array {
+            return $this->publicationPayload($publication) + [
+                'ladder' => $publication->ladder === null ? null : [
+                    'id' => $publication->ladder->uuid,
+                    'slug' => $publication->ladder->slug,
+                ],
+                'packaging_profile' => $publication->packaging === null ? null : [
+                    'id' => $publication->packaging->uuid,
+                    'slug' => $publication->packaging->slug,
+                    'container' => $publication->packaging->container,
+                ],
+                /*
+                 * The manifests that were actually written, with their content
+                 * hashes. An operator asking "did that republish change
+                 * anything?" is answered from the hash rather than by diffing
+                 * two manifests by eye.
+                 */
+                'manifests' => $publication->manifests
+                    ->sortBy(['policy', 'format'])
+                    ->map(static fn ($manifest): array => [
+                        'policy' => $manifest->policy,
+                        'format' => $manifest->format,
+                        'content_hash' => $manifest->content_hash,
+                        'byte_size' => (int) $manifest->byte_size,
+                        'generated_at' => $manifest->generated_at?->format(DATE_RFC3339),
+                    ])->values()->all(),
+            ];
+        }));
     }
 
     public function storePackagingProfile(Request $request): JsonResponse

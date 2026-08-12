@@ -62,27 +62,37 @@ recorded as verified.
 
 | Package | Latest | Licence | Node engines | Status |
 |---|---|---|---|---|
-| `next` | 16.3.0 | MIT | `>=20.9.0` | Web + admin apps |
-| `react` / `react-dom` | 19.2.8 | MIT | — | With Next |
-| `typescript` | 7.0.2 | Apache-2.0 | `>=16.20.0` | **Pin explicitly** and validate against the chosen Next version before adopting a new major |
+| `next` | 16.3.0 | MIT | `>=20.9.0` | **Not adopted for `apps/admin`** — ADR-0013. Still the candidate for `apps/web` |
+| `react` / `react-dom` | 19.2.8 | MIT | — | **Adopted** — `apps/admin` |
+| `typescript` | 7.0.2 | Apache-2.0 | `>=16.20.0` | **Pinned at 5.9.3, not 7.** The 7.x line is the native port and the surrounding tooling has not been validated against it here; moving is a deliberate change, not a version bump |
 | `hls.js` | 1.6.17 | Apache-2.0 | — | Web HLS candidate |
 | `shaka-player` | 5.2.4 | Apache-2.0 | `>=18` | Web DASH+HLS+multi-DRM candidate — likely primary |
 | `dashjs` | 5.2.0 | BSD-3-Clause | `>=20` | Web DASH alternative |
 | `video.js` | 8.23.9 | Apache-2.0 | — | Only if a UI framework is wanted on top |
-| `@tanstack/react-query` | 5.101.4 | MIT | — | Candidate — server state |
-| `zod` | 4.4.3 | MIT | — | Candidate — runtime validation at the API edge |
+| `@tanstack/react-query` | 5.101.4 | MIT | — | **Not adopted** — ADR-0013. The panel has no cache-invalidation problem, and a stale list is a worse failure there than a refetch |
+| `zod` | 4.4.3 | MIT | — | **Not adopted.** The only untyped data crossing the boundary is the problem document, validated by ~40 lines in `@kms/ts-api-client`. Revisit if a second shape needs it |
 | `vitest` | 4.1.10 | MIT | `^20 \|\| ^22 \|\| >=24` | Unit tests |
 | `@playwright/test` | 1.62.1 | Apache-2.0 | `>=20` | E2E; browser preinstalled in this environment |
 | `eslint` | 10.8.1 | MIT | `^20.19 \|\| ^22.13 \|\| >=24` | Linting |
 | `prettier` | 3.9.6 | MIT | — | Formatting |
-| `tailwindcss` | 4.3.3 | MIT | — | Styling — note the v3→v4 configuration change from the existing scaffold |
+| `tailwindcss` | 4.3.3 | MIT | — | **Not adopted** — ADR-0013. It was present in this repository attached to a starter that did not build, and used by nothing; that is a dependency without a stated need |
 | `turbo` | 2.10.9 | MIT | — | Task graph — **defer** until build times justify it |
 | `nx` | 23.1.1 | MIT | — | Alternative to Turborepo — not selected |
-| `openapi-typescript` | 7.13.0 | MIT | — | Spec → TS types |
-| `orval` | 8.24.0 | MIT | — | Spec → typed client |
+| `openapi-typescript` | 7.13.0 | MIT | — | **Adopted** — generates `packages/ts-api-client/src/types` |
+| `openapi-fetch` | 0.17.0 | MIT | — | **Adopted** — the typed client itself, ~6 kB, by the same author as `openapi-typescript` |
+| `orval` | 8.24.0 | MIT | — | **Not adopted** — ADR-0013. It generates a client *and* query hooks; we needed the client, and did not want the hooks |
+| `vite` | 8.2.1 | MIT | `^20.19 \|\| >=22.12` | **Adopted** — bundler for `apps/admin` |
+| `@vitejs/plugin-react` | 6.0.5 | MIT | — | **Adopted** |
+| `react-router-dom` | 7.18.2 | MIT | — | **Adopted** — routing only; no data loaders, so the router stays replaceable |
+| `@testing-library/react` | 16.3.2 | MIT | — | **Adopted** — component tests against the real API client |
+| `@testing-library/user-event` | 14.6.4 | MIT | — | **Adopted** |
+| `jsdom` | 30.0.1 | MIT | — | **Adopted** — test environment |
+| `typescript-eslint` | 8.67.0 | MIT | — | **Adopted** |
+| `eslint-plugin-react-hooks` | 7.1.1 | MIT | — | **Adopted** — it caught three real defects on first run, see below |
+| `@types/node`, `@types/react`, `@types/react-dom` | 26.2.0 / 19.2.18 / 19.2.4 | MIT | — | **Adopted** |
 | `@redocly/cli` | 2.46.0 | MIT | — | Spec linting/bundling/docs |
 | `@stoplight/spectral-cli` | 6.16.3 | Apache-2.0 | — | Spec style rules in CI |
-| `msw` | 2.15.0 | MIT | — | Network-level fakes for client tests |
+| `msw` | 2.15.0 | MIT | — | **Not adopted.** A ~30-line `fetch` stub covers what the panel's tests need; msw earns its keep when many suites share handlers |
 | `@types/node` | 26.2.0 | MIT | — | |
 | `@supabase/supabase-js` | 2.112.2 | MIT | — | **Present in the existing scaffold. Not part of this architecture** — see OQ-17 |
 
@@ -116,6 +126,14 @@ Found by reading the constraints against each other rather than individually:
 | **FFmpeg** | *"Most files in FFmpeg are under the GNU Lesser General Public License version 2.1 or later (LGPL v2.1+) … Some optional parts of FFmpeg are licensed under the GNU General Public License version 2 or later (GPL v2+) … None of these parts are used by default, you have to explicitly pass `--enable-gpl` to configure to activate them. In this case, FFmpeg's license changes to GPL v2+."* | **The build configuration determines the licence.** Server-side use we do not distribute is low-risk either way, but any FFmpeg code shipped inside a mobile or TV application, or in a publicly distributed container image, must be reviewed by counsel. **Record the exact build flags of the FFmpeg image we use.** See the note below — the encoders normally reached for are precisely the ones that require `--enable-gpl`. |
 | **Shaka Packager** | Google, 2014 — three-clause BSD-style permissive terms (redistribution in source and binary permitted with notice retention) | Permissive; suitable. Confirm the current file for any change before adoption. |
 | **Bento4** | *"Bento4 is available under two different licenses … For applications that are entirely distributable under the terms of the GPL, the Bento4 GPL license applies. For applications that cannot be entirely distributable under the terms of the GPL … a non-GPL commercial license is available from Axiomatic Systems LLC."* | **Dual GPL/commercial.** Using it in a proprietary platform likely requires a commercial licence. Legal review required before adoption. |
+
+### A note on what the linter is for
+
+`eslint-plugin-react-hooks` was adopted after it found three genuine defects on its first run
+against `apps/admin` — a ref read during render, a dependency array the compiler could not check,
+and a `setState` inside an effect body that would have shown an operator the previous request's rows
+as though they were current. Each was fixed rather than suppressed. A linting rule that only ever
+produces disable comments is a rule to remove; these were not that.
 
 ### Two licensing distinctions that are easy to blur
 

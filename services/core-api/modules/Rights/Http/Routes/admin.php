@@ -12,6 +12,10 @@ use Modules\Rights\Http\Controllers\AdminRightsController;
 Route::middleware(['staff.auth', 'throttle:admin', 'staff.role:rights_manager,platform_engineer'])
     ->prefix('rights')
     ->group(function (): void {
+        Route::get('/agreements', [AdminRightsController::class, 'agreements']);
+        Route::get('/rights', [AdminRightsController::class, 'rights']);
+        Route::get('/blackouts', [AdminRightsController::class, 'blackouts']);
+
         Route::post('/agreements', [AdminRightsController::class, 'storeAgreement']);
         Route::post('/rights', [AdminRightsController::class, 'storeRight']);
         Route::post('/blackouts', [AdminRightsController::class, 'storeBlackout']);

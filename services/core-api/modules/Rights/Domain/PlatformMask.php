@@ -89,6 +89,48 @@ final class PlatformMask
         return $bit !== null && ($mask & $bit) === $bit;
     }
 
+    /**
+     * The inverse of `forPlatforms()`: a stored mask back into names.
+     *
+     * Needed wherever a right is shown to a human. "platform_mask: 41" is not
+     * something anyone should be decoding by hand while a licensor is on the
+     * phone, and a person doing that arithmetic in their head is a person about
+     * to get it wrong.
+     *
+     * A bit with no name is dropped rather than rendered as a number. It can
+     * only mean a mask written by a newer version than this one, and inventing
+     * a label for it would be worse than omitting it.
+     *
+     * @return list<string>
+     */
+    public static function platformsFrom(int $mask): array
+    {
+        return self::namesFrom(self::PLATFORMS, $mask);
+    }
+
+    /** @return list<string> */
+    public static function monetizationFrom(int $mask): array
+    {
+        return self::namesFrom(self::MONETIZATION, $mask);
+    }
+
+    /**
+     * @param  array<string,int>  $bits
+     * @return list<string>
+     */
+    private static function namesFrom(array $bits, int $mask): array
+    {
+        $names = [];
+
+        foreach ($bits as $name => $bit) {
+            if (($mask & $bit) === $bit) {
+                $names[] = $name;
+            }
+        }
+
+        return $names;
+    }
+
     /** @return list<string> */
     public static function platformNames(): array
     {

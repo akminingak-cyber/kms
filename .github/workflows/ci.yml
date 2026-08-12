@@ -129,6 +129,58 @@ jobs:
         # Includes the OpenAPI conformance check in both directions (ADR-0010).
         run: php artisan test
 
+  web:
+    name: web workspace
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        # Frozen: a lockfile that CI is allowed to update is a lockfile that
+        # stops describing what was tested.
+        run: pnpm install --frozen-lockfile
+
+      # ---------------- Stage 1: static ----------------
+
+      - name: Generated client is up to date with the contracts
+        # The gate that keeps the generated client honest. A spec change nobody
+        # regenerated for produces a client that compiles against an API which
+        # no longer exists — and nothing else would catch it, because both
+        # sides still type-check on their own.
+        run: pnpm contracts:verify
+
+      - name: Formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Types
+        run: pnpm typecheck
+
+      # ---------------- Stage 2: tests and build ----------------
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Build
+        # `tsc --noEmit && vite build`. A panel that type-checks but does not
+        # bundle is a panel nobody can deploy.
+        run: pnpm build
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level moderate
+
   docker:
     name: container builds
     runs-on: ubuntu-latest

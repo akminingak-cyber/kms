@@ -2,15 +2,20 @@
 
 Deployable end-user applications — one directory per client platform.
 
-**Nothing here yet.** No application directory is created before the phase that builds it; empty
-scaffolding invites premature dependencies and dead configuration.
+No application directory is created before the phase that builds it; empty scaffolding invites
+premature dependencies and dead configuration.
+
+## Built
+
+| Directory | Stack | Phase |
+|---|---|---|
+| [`admin/`](admin/) | React, TypeScript, Vite — a static SPA over the admin API ([ADR-0013](../docs/architecture/adr/ADR-0013-admin-panel-stack.md)) | 4 |
 
 ## Planned
 
 | Directory | Stack | Phase |
 |---|---|---|
-| `web/` | Next.js, React, TypeScript | 5 |
-| `admin/` | Next.js, React, TypeScript — Admin Control Center | 2 |
+| `web/` | Next.js, React, TypeScript — **not** bound by ADR-0013; server rendering earns its keep for a viewer-facing app | 5 |
 | `android/` | Kotlin, AndroidX Media3 | 8 |
 | `androidtv/` | Kotlin, Media3, Leanback | 9 |
 | `ios/` | Swift, AVFoundation — iOS + iPadOS (may move to its own repository, OQ-15) | 8 |

@@ -1,37 +1,27 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "kms-tv",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+  "description": "KMS TV monorepo \u2014 JavaScript/TypeScript workspaces. Backend services are PHP and live outside this workspace.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
-    "@types/react-router-dom": "^5.3.3",
-    "lucide-react": "^0.344.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^7.18.1"
+  "scripts": {
+    "build": "pnpm -r run build",
+    "contracts:generate": "pnpm --filter @kms/ts-api-client run generate",
+    "contracts:verify": "pnpm --filter @kms/ts-api-client run verify",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.18",
-    "eslint": "^9.9.1",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.11",
-    "globals": "^15.9.0",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "@eslint/js": "10.0.1",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.10.0",
+    "prettier": "3.9.6",
+    "typescript-eslint": "8.67.0"
   }
 }

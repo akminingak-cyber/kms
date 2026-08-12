@@ -1,0 +1,8 @@
+# The JavaScript/TypeScript half of the monorepo.
+#
+# `legacy/` is deliberately absent: what is in there is quarantined, does not
+# build, and must not be resolved, installed or type-checked as part of this
+# workspace (see legacy/README.md and OQ-17).
+packages:
+  - 'apps/*'
+  - 'packages/ts-*'

@@ -1,0 +1,1771 @@
+openapi: 3.1.0
+info:
+  title: KMS TV — Admin API
+  version: 1.0.0
+  description: |
+    The internal operator surface, called by `apps/admin` and by operational
+    tooling. Served on a separate hostname and network policy from the client
+    API (docs/api/surfaces.md).
+
+    **This document is the contract, not a description of the implementation**
+    (ADR-0010). Conformance runs in both directions in
+    `tests/Feature/Contract/OpenApiConformanceTest.php`, so an endpoint that
+    exists without appearing here fails the build.
+
+    ## How this surface differs from the client surface
+
+    - **Authentication alone grants nothing.** Every operation names the staff
+      roles that may reach it, and a route that names none is closed rather than
+      open. The role matrix below is part of the contract.
+    - **Multi-factor is mandatory, unconditionally.** There is no branch of
+      sign-in that issues a staff token without a TOTP code.
+    - **It is not append-only.** Unlike the client surface — where a breaking
+      change is a population of televisions that stops working — the only
+      consumer here is a web application deployed alongside the API. Breaking
+      changes are permitted, and are still reviewed.
+    - **Read access is deliberately wider than write access.** A support agent
+      needs to see a plan to answer a question about it, and must not be able to
+      price one.
+
+    ## Roles
+
+    | Role | Reads | Writes |
+    |---|---|---|
+    | `platform_engineer` | everything | everything |
+    | `content_operator` | catalog, schedule | channels, categories, schedule ingest |
+    | `commercial_operator` | catalog, packages, plans | packages, plans |
+    | `rights_manager` | catalog, rights, playback decisions | agreements, rights, blackouts |
+    | `support_agent` | catalog, packages, plans, playback decisions and sessions | nothing |
+    | `auditor` | almost everything, including the staff list | nothing |
+
+    ## Pagination
+
+    Every list is cursor-paginated with the same shape. Offset pagination on
+    tables with continuous inserts shifts rows between pages, so an operator
+    paging through the audit trail or the decision log can miss an entry
+    entirely — which is how an investigation reaches the wrong conclusion.
+
+    No total count is returned: counting a growing table on every page load is a
+    cost with no reader.
+  license:
+    name: Proprietary
+servers:
+  - url: /api/admin/v1
+
+security:
+  - staffAuth: []
+
+tags:
+  - name: Authentication
+  - name: Catalog
+  - name: Schedule
+  - name: Commerce
+  - name: Rights
+  - name: Media
+  - name: Playback
+  - name: Administration
+
+paths:
+  /auth/sign-in:
+    post:
+      tags: [Authentication]
+      operationId: staffSignIn
+      security: []
+      summary: Sign in with password and TOTP
+      description: |
+        **The TOTP code is mandatory and unconditional.** There is no branch of
+        this operation that issues a staff token without one — no "remembered
+        device", no grace period, no first-login exemption. Staff credentials
+        reach rights, pricing and the personal data of every subscriber, and a
+        conditional second factor is a second factor that will eventually not be
+        applied.
+
+        Failures are deliberately indistinguishable: a wrong password, a wrong
+        code and an unknown account all return `AUTH_INVALID_CREDENTIALS`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, totp_code]
+              properties:
+                email: { type: string, format: email, maxLength: 320 }
+                password: { type: string, maxLength: 4096 }
+                totp_code:
+                  type: string
+                  pattern: '^\d{6}$'
+      responses:
+        '200':
+          description: Signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string, enum: [Bearer] }
+                  expires_in: { type: integer }
+                  staff:
+                    type: object
+                    properties:
+                      id: { $ref: '#/components/schemas/Identifier' }
+                      name: { type: string }
+                      role: { $ref: '#/components/schemas/StaffRole' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /me:
+    get:
+      tags: [Administration]
+      operationId: getCurrentStaff
+      summary: The signed-in staff member
+      description: |
+        Roles: every authenticated staff member. This is the one operation with
+        no role restriction beyond holding a token, because the panel cannot
+        render its navigation without knowing the caller's role, and the
+        response discloses nothing the caller does not already hold a token for.
+
+        Hiding a link the caller may not use is a **usability** measure only.
+        Every route enforces its own roles, and hiding a link has never stopped
+        anyone typing a URL.
+      responses:
+        '200':
+          description: The caller
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/StaffMember' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /staff:
+    get:
+      tags: [Administration]
+      operationId: listStaff
+      summary: Who has access
+      description: |
+        Roles: `auditor`, `platform_engineer`. Support agents are excluded —
+        knowing who else has access is not part of answering a viewer's
+        question.
+
+        Password hashes and TOTP secrets are never selected, so they cannot be
+        returned by accident.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Staff members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/StaffMember' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /audit:
+    get:
+      tags: [Administration]
+      operationId: listAuditEntries
+      summary: The audit trail
+      description: |
+        Roles: `auditor`, `platform_engineer`, `support_agent`.
+
+        Append-only and cursor-paginated. For an audit trail, offset pagination
+        does not merely reorder results — it lets an investigator page past an
+        entry without ever seeing it.
+      parameters:
+        - { name: action, in: query, schema: { type: string, maxLength: 80 } }
+        - { name: actor_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: subject_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditEntry' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /categories:
+    get:
+      tags: [Catalog]
+      operationId: listAdminCategories
+      description: 'Roles: `content_operator`, `platform_engineer`, `support_agent`, `rights_manager`, `auditor`.'
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Category' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Catalog]
+      operationId: createCategory
+      description: 'Roles: `content_operator`, `platform_engineer`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, name]
+              properties:
+                slug: { type: string, maxLength: 60 }
+                name: { type: string, maxLength: 120 }
+                parent_id: { type: [integer, 'null'] }
+                sort_order: { type: integer }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Category' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /channels:
+    get:
+      tags: [Schedule]
+      operationId: listAdminChannels
+      summary: Every channel, including those a viewer cannot see
+      description: |
+        Roles: `content_operator`, `platform_engineer`, `support_agent`,
+        `rights_manager`, `commercial_operator`, `auditor`.
+
+        Deliberately not the client endpoint with a staff token on it. The
+        client list is filtered to what is playable, and an operator asking
+        "why is this channel missing from the app?" needs to see precisely the
+        rows that filter removes.
+      parameters:
+        - { name: status, in: query, schema: { type: string, maxLength: 20 } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AdminChannel' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Schedule]
+      operationId: createChannel
+      description: |
+        Roles: `content_operator`, `platform_engineer`.
+
+        `catchup_enabled` defaults to **false**: a channel may not be recorded
+        until somebody says the recording right exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, name]
+              properties:
+                slug: { type: string, maxLength: 60 }
+                name: { type: string, maxLength: 120 }
+                number: { type: [integer, 'null'], minimum: 1, maximum: 9999 }
+                category_id:
+                  { oneOf: [{ $ref: '#/components/schemas/Identifier' }, { type: 'null' }] }
+                catchup_enabled: { type: boolean, default: false }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { $ref: '#/components/schemas/Identifier' }
+                      slug: { type: string }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /channels/{channelId}:
+    parameters:
+      - name: channelId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    get:
+      tags: [Schedule]
+      operationId: getAdminChannel
+      description: |
+        Roles: as for the channel list.
+
+        Includes a sample of recently ingested programmes, because "the EPG
+        looks wrong" is answered by looking at rows rather than at a count of
+        them.
+      responses:
+        '200':
+          description: Channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/AdminChannel'
+                      - type: object
+                        properties:
+                          recent_programmes:
+                            type: array
+                            items: { $ref: '#/components/schemas/ProgrammeSummary' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /schedule/ingest:
+    post:
+      tags: [Schedule]
+      operationId: ingestSchedule
+      summary: Ingest a schedule feed
+      description: |
+        Roles: `content_operator`, `platform_engineer`.
+
+        Reconciled by `(source, source_ref)` and revision-aware rather than
+        last-write-wins: providers correct history, and a schedule model that
+        overwrites silently makes catch-up recordings point at the wrong
+        content.
+
+        A malformed row is rejected individually with a reason. One bad entry
+        must not discard a whole feed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source, programmes]
+              properties:
+                source: { type: string, maxLength: 60 }
+                programmes:
+                  type: array
+                  items: { type: object }
+      responses:
+        '200':
+          description: Ingest result, including per-row rejections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      accepted: { type: integer }
+                      rejected: { type: integer }
+                      rejections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            source_ref: { type: [string, 'null'] }
+                            reason: { type: string }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /packages:
+    get:
+      tags: [Commerce]
+      operationId: listAdminPackages
+      description: 'Roles: `commercial_operator`, `platform_engineer`, `support_agent`, `auditor`.'
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Packages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AdminPackage' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Commerce]
+      operationId: createPackage
+      description: 'Roles: `commercial_operator`, `platform_engineer`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, name]
+              properties:
+                slug: { type: string, maxLength: 60 }
+                name: { type: string, maxLength: 120 }
+                description: { type: [string, 'null'] }
+                channel_ids:
+                  type: array
+                  items: { $ref: '#/components/schemas/Identifier' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/AdminPackage' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /plans:
+    get:
+      tags: [Commerce]
+      operationId: listAdminPlans
+      description: |
+        Roles: `commercial_operator`, `platform_engineer`, `support_agent`,
+        `auditor`.
+
+        Carries the price that applies **now**, not every price ever set.
+        Historical prices matter to finance and to a dispute; they are not what
+        an operator is looking at when they ask what a plan costs.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AdminPlan' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Commerce]
+      operationId: createPlan
+      description: 'Roles: `commercial_operator`, `platform_engineer`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, name, package_id, billing_period]
+              properties:
+                slug: { type: string, maxLength: 60 }
+                name: { type: string, maxLength: 120 }
+                package_id: { $ref: '#/components/schemas/Identifier' }
+                billing_period: { type: string, enum: [monthly, annual] }
+                trial_days: { type: integer, minimum: 0 }
+                device_limit: { type: integer, minimum: 1 }
+                concurrency_limit: { type: integer, minimum: 1, maximum: 20 }
+                max_resolution: { type: [string, 'null'] }
+                price: { $ref: '#/components/schemas/MoneyInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/AdminPlan' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /rights/agreements:
+    get:
+      tags: [Rights]
+      operationId: listAgreements
+      description: 'Roles: `rights_manager`, `platform_engineer`.'
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Agreements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Agreement' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Rights]
+      operationId: createAgreement
+      description: 'Roles: `rights_manager`, `platform_engineer`. Audited.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [counterparty, reference]
+              properties:
+                counterparty: { type: string, maxLength: 160 }
+                reference: { type: string, maxLength: 80 }
+                term_start: { type: [string, 'null'], format: date-time }
+                term_end: { type: [string, 'null'], format: date-time }
+                reporting_obligation: { type: [string, 'null'] }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Agreement' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /rights/rights:
+    get:
+      tags: [Rights]
+      operationId: listRights
+      summary: Rights, with their bitmasks decoded
+      description: |
+        Roles: `rights_manager`, `platform_engineer`.
+
+        Superseded rights are included by default and marked as such. Rights are
+        superseded rather than edited precisely so that "why was this denied on
+        the 3rd?" stays answerable — filtering history out by default would
+        defeat that.
+      parameters:
+        - { name: subject_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: agreement_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: exploitation, in: query, schema: { type: string, maxLength: 20 } }
+        - { name: active_only, in: query, schema: { type: boolean } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Rights
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Right' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Rights]
+      operationId: createRight
+      description: |
+        Roles: `rights_manager`, `platform_engineer`. Audited.
+
+        Absence is a prohibition: a right that names no territories permits
+        none, and an unrecognised platform contributes nothing rather than
+        everything.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agreement_id, subject_type, subject_id, exploitation, window_start]
+              properties:
+                agreement_id: { $ref: '#/components/schemas/Identifier' }
+                subject_type: { type: string, enum: [channel] }
+                subject_id: { $ref: '#/components/schemas/Identifier' }
+                exploitation: { type: string, enum: [live, restart, catchup, vod] }
+                window_start: { type: string, format: date-time }
+                window_end: { type: [string, 'null'], format: date-time }
+                platforms:
+                  type: array
+                  items: { type: string }
+                monetization:
+                  type: array
+                  items: { type: string }
+                territory_rules:
+                  type: array
+                  items: { $ref: '#/components/schemas/TerritoryRule' }
+                usage: { $ref: '#/components/schemas/UsageRules' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Right' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /rights/blackouts:
+    get:
+      tags: [Rights]
+      operationId: listBlackouts
+      description: 'Roles: `rights_manager`, `platform_engineer`.'
+      parameters:
+        - { name: subject_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: active_only, in: query, schema: { type: boolean } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Blackouts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Blackout' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Rights]
+      operationId: createBlackout
+      description: |
+        Roles: `rights_manager`, `platform_engineer`. Audited.
+
+        Blackouts are never projected — they are read live at decision time, so
+        one takes effect immediately for new sessions and within the
+        revalidation interval for sessions already playing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject_type, subject_id, starts_at, ends_at, reason]
+              properties:
+                subject_type: { type: string, enum: [channel] }
+                subject_id: { $ref: '#/components/schemas/Identifier' }
+                starts_at: { type: string, format: date-time }
+                ends_at: { type: string, format: date-time }
+                reason: { type: string, maxLength: 200 }
+                territory_rules:
+                  type: array
+                  items: { $ref: '#/components/schemas/TerritoryRule' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Blackout' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /rights/availability/preview:
+    post:
+      tags: [Rights]
+      operationId: previewAvailability
+      summary: Resolve availability without recording a decision
+      description: |
+        Roles: `rights_manager`, `platform_engineer`.
+
+        Preview before commit, because a rights mistake is a contract breach.
+        This runs the same resolver playback uses and returns the same verdict
+        and reason — a separate "simulation" path that could drift from the real
+        one would be worse than having none.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject_type, subject_id, exploitation, territory, platform]
+              properties:
+                subject_type: { type: string, enum: [channel] }
+                subject_id: { $ref: '#/components/schemas/Identifier' }
+                exploitation: { type: string, enum: [live, restart, catchup, vod] }
+                territory: { type: string, minLength: 2, maxLength: 2 }
+                platform: { type: string }
+                monetization: { type: string }
+                at: { type: [string, 'null'], format: date-time }
+      responses:
+        '200':
+          description: Verdict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      permitted: { type: boolean }
+                      reason: { type: [string, 'null'] }
+                      availability_version: { type: [integer, 'null'] }
+                      source_rule_ids:
+                        type: array
+                        items: { $ref: '#/components/schemas/Identifier' }
+                      usage_rules:
+                        { oneOf: [{ $ref: '#/components/schemas/UsageRules' }, { type: 'null' }] }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /media/ladders:
+    get:
+      tags: [Media]
+      operationId: listLadders
+      description: 'Roles: `platform_engineer`.'
+      responses:
+        '200':
+          description: Encoding ladders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Ladder' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Media]
+      operationId: createLadder
+      summary: Define an encoding ladder
+      description: |
+        Roles: `platform_engineer`. A ladder change alters encoding cost,
+        storage cost and picture quality simultaneously; it is not the same
+        authority as editing a programme description.
+
+        **Refused unless the encoder has a recorded licence clearance.** The
+        permitted-encoder list is empty by default and an empty list permits
+        nothing, so a fresh deployment cannot create a ladder at all until
+        somebody records a decision. FFmpeg's licence follows its build flags
+        and the usual AVC/HEVC encoders are GPL-or-commercial.
+
+        Ladder invariants are enforced here rather than discovered from a
+        player: bitrates must increase, aspect ratios must match, and frame
+        rates must be integer divisors of the ladder's highest. Each describes a
+        defect that appears only at rendition switches — invisible on a fast
+        connection, broken for viewers on variable networks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LadderInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Ladder' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422':
+          description: |
+            Includes `MEDIA_ENCODER_NOT_PERMITTED` (no recorded licence
+            clearance) and `MEDIA_LADDER_INVALID` (the ladder could not be
+            encoded as described).
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+
+  /media/ladders/{ladderId}/ffmpeg-command:
+    parameters:
+      - name: ladderId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Media]
+      operationId: getFfmpegCommand
+      summary: The exact encode arguments for a ladder
+      description: |
+        Roles: `platform_engineer`.
+
+        Answers "what will actually run for this channel?" from the same code
+        path the pipeline uses, so the answer cannot drift from the behaviour.
+
+        `output_stage` is **null**, and that is not an omission. Packager
+        selection is an open decision with a licence gate on it, so these
+        arguments are the encode stage only and are not runnable without a
+        muxer. The response says so rather than leaving an operator to discover
+        it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [packaging_profile_id, input_url]
+              properties:
+                packaging_profile_id: { $ref: '#/components/schemas/Identifier' }
+                input_url: { type: string, maxLength: 500 }
+      responses:
+        '200':
+          description: Encode arguments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      arguments:
+                        type: array
+                        items: { type: string }
+                      output_stage: { type: 'null' }
+                      output_stage_note: { type: string }
+                      requires_gpl_build: { type: boolean }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /media/packaging-profiles:
+    get:
+      tags: [Media]
+      operationId: listPackagingProfiles
+      description: 'Roles: `platform_engineer`.'
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Packaging profiles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PackagingProfile' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Media]
+      operationId: createPackagingProfile
+      description: |
+        Roles: `platform_engineer`.
+
+        The segment duration must be a whole number of GOPs, or segment
+        boundaries would not land on IDR frames in every rendition. That is a
+        correctness requirement rather than a tuning knob, so it is refused here
+        rather than tolerated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PackagingProfileInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/PackagingProfile' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /media/publications:
+    get:
+      tags: [Media]
+      operationId: listPublications
+      description: |
+        Roles: `platform_engineer`.
+
+        Carries the content hash of every manifest actually written, so "did
+        that republish change anything?" is answered from a hash rather than by
+        diffing two manifests by eye.
+      parameters:
+        - { name: subject_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: status, in: query, schema: { type: string, maxLength: 20 } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Publications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Publication' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Media]
+      operationId: createPublication
+      description: 'Roles: `platform_engineer`. Binds a channel to a ladder and a packaging profile.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject_type, subject_id, ladder_id, packaging_profile_id]
+              properties:
+                subject_type: { type: string, enum: [channel] }
+                subject_id: { $ref: '#/components/schemas/Identifier' }
+                ladder_id: { $ref: '#/components/schemas/Identifier' }
+                packaging_profile_id: { $ref: '#/components/schemas/Identifier' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Publication' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /media/publications/{publicationId}/publish:
+    parameters:
+      - name: publicationId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Media]
+      operationId: publishPublication
+      summary: Generate manifests and publish
+      description: |
+        Roles: `platform_engineer`.
+
+        Generates one manifest per quality class per format (ADR-0012), so a
+        licensor's resolution cap is enforced by serving a manifest that does not
+        mention the rungs a viewer may not have — while remaining cacheable
+        across every viewer sharing that cap.
+
+        Refuses with `MEDIA_SEGMENT_ALIGNMENT_INVALID` if the GOP is not a whole
+        number of frames at the ladder's frame rate. That defect is invisible
+        until players start switching rendition.
+      responses:
+        '201':
+          description: Published
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/Publication'
+                      - type: object
+                        properties:
+                          manifests:
+                            type: array
+                            items: { $ref: '#/components/schemas/ManifestRecord' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /media/publications/{publicationId}/retire:
+    parameters:
+      - name: publicationId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+    post:
+      tags: [Media]
+      operationId: retirePublication
+      description: |
+        Roles: `platform_engineer`.
+
+        Removes the manifests; the media itself is kept. The origin is the
+        system of record for media and a retired channel is frequently
+        un-retired, so deleting segments on a status change would make that
+        unrecoverable.
+      responses:
+        '204': { description: Retired }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /media/publications/{publicationId}/manifests/{policy}/{format}:
+    parameters:
+      - name: publicationId
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/Identifier' }
+      - name: policy
+        in: path
+        required: true
+        schema: { type: string, enum: [h576, h720, h1080, h2160, full] }
+      - name: format
+        in: path
+        required: true
+        schema: { type: string, enum: [hls, dash] }
+    get:
+      tags: [Media]
+      operationId: getManifest
+      summary: The exact bytes a player will receive
+      description: |
+        Roles: `platform_engineer`.
+
+        Returned verbatim rather than as a rendering of it. A manifest is a
+        client contract and is reviewed as one, and a resolution cap is expressed
+        by **absence** — which can only be checked by reading what is actually
+        there.
+      responses:
+        '200':
+          description: The manifest
+          content:
+            application/vnd.apple.mpegurl:
+              schema: { type: string }
+            application/dash+xml:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /media/device-profiles/{deviceClass}:
+    parameters:
+      - name: deviceClass
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Media]
+      operationId: upsertDeviceProfile
+      description: |
+        Roles: `platform_engineer`.
+
+        Data rather than code, because it is corrected as device-lab results
+        arrive. This table **narrows** what a device class is offered; it does
+        not gate access. Gating is a rights decision and belongs where it can be
+        audited against an agreement.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [container, formats]
+              properties:
+                container: { type: string, enum: [cmaf, ts] }
+                formats:
+                  type: array
+                  minItems: 1
+                  items: { type: string, enum: [hls, dash] }
+                  description: Ordered by preference — an empirical result from the device lab.
+                max_height: { type: [integer, 'null'], minimum: 144, maximum: 4320 }
+                note: { type: [string, 'null'], maxLength: 255 }
+      responses:
+        '200':
+          description: Stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/DeviceProfile' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /playback/decisions:
+    get:
+      tags: [Playback]
+      operationId: listDecisions
+      summary: Why a viewer was allowed or refused
+      description: |
+        Roles: `support_agent`, `platform_engineer`, `auditor`, `rights_manager`.
+
+        The most common support question an OTT platform receives is "why could
+        this person not watch?", and without a record it is answered by
+        guesswork — an engineer cannot reproduce a viewer's territory, device,
+        subscription and moment. Every decision was recorded with the inputs
+        that produced it, so the answer is a row.
+
+        **No personal data.** Accounts, profiles and devices appear as
+        identifiers only. Searching this log by email address would turn a
+        diagnostic tool into a viewing-history search engine over the whole
+        subscriber base.
+
+        Read-only by construction: nothing on this surface can change a
+        decision or grant access.
+      parameters:
+        - { name: account_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: content_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: session_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: outcome, in: query, schema: { type: string, enum: [allow, deny] } }
+        - { name: reason_code, in: query, schema: { type: string, maxLength: 60 } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Decision' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /playback/sessions:
+    get:
+      tags: [Playback]
+      operationId: listAdminSessions
+      summary: Playback sessions, live by default
+      description: |
+        Roles: `support_agent`, `platform_engineer`, `auditor`, `rights_manager`.
+
+        Answers the other half of a concurrency complaint: a viewer told they
+        have too many streams needs someone to be able to see what those streams
+        actually are.
+      parameters:
+        - { name: account_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: content_id, in: query, schema: { $ref: '#/components/schemas/Identifier' } }
+        - { name: include_ended, in: query, schema: { type: boolean } }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/AdminSession' }
+                  page: { $ref: '#/components/schemas/Page' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+components:
+  securitySchemes:
+    staffAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A short-lived staff access token, obtained from `/auth/sign-in` with a
+        password **and** a TOTP code. Authentication alone grants nothing: every
+        operation names the roles that may reach it.
+
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      description: Page size, 1–100. Bounded so a client cannot ask for a page costing more than the request is worth.
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor from a previous response's `page.next_cursor`.
+      schema: { type: string, maxLength: 255 }
+
+  responses:
+    Problem:
+      description: RFC 9457 problem document
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Identifier:
+      type: string
+      format: uuid
+      description: UUIDv7. Sequential integers are never exposed.
+
+    Page:
+      type: object
+      properties:
+        next_cursor:
+          type: [string, 'null']
+          description: |
+            Null means this is the last page. No total is returned: counting a
+            growing table on every page load is a cost with no reader.
+
+    StaffRole:
+      type: string
+      enum:
+        [
+          platform_engineer,
+          content_operator,
+          commercial_operator,
+          rights_manager,
+          support_agent,
+          auditor,
+        ]
+
+    StaffMember:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/StaffRole' }
+        status: { type: string, enum: [active, suspended] }
+        mfa_enrolled:
+          type: boolean
+          description: Staff MFA is mandatory, so a false here is an anomaly worth seeing.
+        last_login_at: { type: [string, 'null'], format: date-time }
+
+    AuditEntry:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        actor_type: { type: string, enum: [staff, account, system] }
+        actor_id: { type: [string, 'null'], format: uuid }
+        action: { type: string }
+        subject_type: { type: [string, 'null'] }
+        subject_id: { type: [string, 'null'] }
+        context:
+          type: object
+          additionalProperties: true
+          description: |
+            The facts that changed. Never a secret, a token, a password or a
+            hash — the audit trail is read by support staff, so anything in it
+            is effectively disclosed to them.
+        occurred_at: { type: string, format: date-time }
+
+    Category:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        parent_id: { type: [integer, 'null'] }
+        sort_order: { type: integer }
+
+    AdminChannel:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        number: { type: [integer, 'null'] }
+        status: { type: string }
+        category_id: { type: [string, 'null'], format: uuid }
+        catchup_enabled:
+          type: boolean
+          description: False until somebody says the recording right exists.
+        created_at: { type: [string, 'null'], format: date-time }
+
+    ProgrammeSummary:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        title: { type: string }
+        starts_at: { type: [string, 'null'], format: date-time }
+        ends_at: { type: [string, 'null'], format: date-time }
+        revision:
+          type: integer
+          description: Providers correct history; the schedule model is revision-aware rather than last-write-wins.
+        source: { type: [string, 'null'] }
+
+    AdminPackage:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        status: { type: string }
+        channel_ids:
+          type: array
+          items: { $ref: '#/components/schemas/Identifier' }
+
+    MoneyInput:
+      type: object
+      required: [amount_minor, currency]
+      properties:
+        amount_minor:
+          type: integer
+          minimum: 0
+          description: Minor units. Never a float.
+        currency: { type: string, minLength: 3, maxLength: 3 }
+      description: Money is always an amount **and** a currency. An integer alone is not money.
+
+    AdminPlan:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        status: { type: string }
+        billing_period: { type: string }
+        trial_days: { type: integer }
+        device_limit: { type: integer }
+        concurrency_limit: { type: integer }
+        max_resolution:
+          type: [string, 'null']
+          description: |
+            Null means the plan places no cap of its own. A licensor's cap still
+            applies on top of it at playback, and the stricter of the two wins.
+        package:
+          type: [object, 'null']
+          properties:
+            id: { $ref: '#/components/schemas/Identifier' }
+            name: { type: string }
+        price:
+          type: [object, 'null']
+          properties:
+            amount_minor: { type: integer }
+            currency: { type: string }
+            territory: { type: [string, 'null'] }
+
+    Agreement:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        counterparty: { type: string }
+        reference: { type: string }
+        term_start: { type: [string, 'null'], format: date-time }
+        term_end: { type: [string, 'null'], format: date-time }
+        reporting_obligation: { type: [string, 'null'] }
+
+    TerritoryRule:
+      type: object
+      required: [effect, territories]
+      properties:
+        effect: { type: string, enum: [include, exclude] }
+        territories:
+          type: array
+          items: { type: string, minLength: 2, maxLength: 2 }
+      description: |
+        Ordered, and later rules win, so a correction appended to an agreement
+        takes effect without rewriting what came before. Default deny: a subject
+        with no include rule is permitted nowhere.
+
+    UsageRules:
+      type: object
+      properties:
+        max_resolution: { type: [string, 'null'] }
+        hdcp: { type: [string, 'null'] }
+        security_level: { type: [string, 'null'] }
+        concurrency_cap:
+          type: [integer, 'null']
+          description: |
+            Contractual rather than commercial. Unlike a plan limit it may never
+            fail open — exceeding it is a breach, exactly like ignoring a
+            territory.
+
+    Right:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        agreement:
+          type: [object, 'null']
+          properties:
+            id: { $ref: '#/components/schemas/Identifier' }
+            counterparty: { type: string }
+            reference: { type: string }
+        subject_type: { type: string }
+        subject_id: { $ref: '#/components/schemas/Identifier' }
+        exploitation: { type: string }
+        window_start: { type: [string, 'null'], format: date-time }
+        window_end:
+          type: [string, 'null']
+          format: date-time
+          description: Null is an open-ended window, not a missing value.
+        platforms:
+          type: array
+          items: { type: string }
+          description: Decoded from the stored bitmask. A bit with no name is dropped rather than rendered as a number.
+        monetization:
+          type: array
+          items: { type: string }
+        territory_rules:
+          type: [array, 'null']
+          items: { $ref: '#/components/schemas/TerritoryRule' }
+        usage_rules: { oneOf: [{ $ref: '#/components/schemas/UsageRules' }, { type: 'null' }] }
+        superseded_at:
+          type: [string, 'null']
+          format: date-time
+          description: Rights are superseded rather than edited, so a past decision stays explainable.
+
+    Blackout:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        subject_type: { type: string }
+        subject_id: { $ref: '#/components/schemas/Identifier' }
+        starts_at: { type: [string, 'null'], format: date-time }
+        ends_at: { type: [string, 'null'], format: date-time }
+        reason: { type: [string, 'null'] }
+        lifted_at: { type: [string, 'null'], format: date-time }
+
+    LadderInput:
+      type: object
+      required: [slug, name, content_class, rungs, audio]
+      properties:
+        slug: { type: string, maxLength: 60, pattern: '^[a-z0-9][a-z0-9-]*$' }
+        name: { type: string, maxLength: 120 }
+        content_class: { type: string, enum: [news, sport, film, series, generic] }
+        rungs:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              [
+                label,
+                width,
+                height,
+                video_bitrate_kbps,
+                max_bitrate_kbps,
+                codec,
+                encoder,
+                profile,
+                level,
+                frame_rate,
+              ]
+            properties:
+              label: { type: string, maxLength: 40 }
+              width: { type: integer }
+              height: { type: integer }
+              video_bitrate_kbps: { type: integer, minimum: 1 }
+              max_bitrate_kbps: { type: integer, minimum: 1 }
+              codec: { type: string, enum: [avc, hevc, av1, vp9] }
+              encoder:
+                type: string
+                description: Must appear in the deployment's recorded licence clearances.
+              profile: { type: string }
+              level:
+                {
+                  type: integer,
+                  minimum: 10,
+                  maximum: 62,
+                  description: 'Level × 10, so 4.0 is 40.',
+                }
+              frame_rate:
+                type: string
+                description: |
+                  An integer or an exact rational such as `30000/1001`. Broadcast
+                  rates are not decimals, and a GOP computed from 29.97 drifts
+                  against one computed from 30000/1001.
+              codec_string:
+                type: [string, 'null']
+                description: |
+                  Required for codecs whose RFC 6381 string this platform does
+                  not derive. HEVC, AV1 and VP9 encode profile, tier, level and
+                  constraint bytes whose values depend on the encoder's output;
+                  guessing them would be inventing a capability.
+        audio:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              [
+                label,
+                language,
+                role,
+                codec,
+                bitrate_kbps,
+                channels,
+                sample_rate_hz,
+                source_stream_index,
+                is_default,
+              ]
+            properties:
+              label: { type: string, maxLength: 40 }
+              language: { type: string, description: BCP 47. }
+              role: { type: string, enum: [main, description, commentary, dub] }
+              codec: { type: string }
+              bitrate_kbps: { type: integer, minimum: 1 }
+              channels: { type: integer, minimum: 1, maximum: 16 }
+              sample_rate_hz: { type: integer, enum: [44100, 48000] }
+              source_stream_index:
+                type: integer
+                minimum: 0
+                description: |
+                  Which audio stream of the contribution feed carries this
+                  rendition. Declared rather than inferred: a wrong guess
+                  silently produces a channel whose "English" track is the
+                  Spanish commentary.
+              is_default:
+                type: boolean
+                description: |
+                  Exactly one rendition in the ladder may be default — an HLS
+                  rendition group permits one, and a playlist with two is
+                  malformed.
+              codec_string: { type: [string, 'null'] }
+
+    Ladder:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        content_class: { type: string }
+        status: { type: string }
+        rungs:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              width: { type: integer }
+              height: { type: integer }
+              video_bitrate_kbps: { type: integer }
+              max_bitrate_kbps: { type: integer }
+              codec: { type: string }
+              encoder: { type: string }
+              frame_rate: { type: string }
+        audio:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+              language: { type: string }
+              role: { type: string }
+              bitrate_kbps: { type: integer }
+              channels: { type: integer }
+              is_default: { type: boolean }
+
+    PackagingProfileInput:
+      type: object
+      required:
+        [
+          slug,
+          name,
+          container,
+          segment_duration_ms,
+          gop_duration_ms,
+          timescale,
+          playlist_window_segments,
+          time_shift_buffer_seconds,
+          suggested_presentation_delay_ms,
+        ]
+      properties:
+        slug: { type: string, maxLength: 60, pattern: '^[a-z0-9][a-z0-9-]*$' }
+        name: { type: string, maxLength: 120 }
+        container: { type: string, enum: [cmaf, ts] }
+        segment_duration_ms:
+          type: integer
+          minimum: 200
+          maximum: 30000
+          description: Must be a whole number of GOPs, or segment boundaries miss IDR frames.
+        gop_duration_ms: { type: integer, minimum: 200, maximum: 30000 }
+        timescale: { type: integer, minimum: 1 }
+        playlist_window_segments: { type: integer, minimum: 3, maximum: 600 }
+        time_shift_buffer_seconds:
+          type: integer
+          minimum: 1
+          description: Must cover at least the advertised window, or players request segments already removed.
+        suggested_presentation_delay_ms: { type: integer, minimum: 0 }
+
+    PackagingProfile:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        slug: { type: string }
+        name: { type: string }
+        container: { type: string }
+        segment_duration_ms: { type: integer }
+        gop_duration_ms: { type: integer }
+        encryption_scheme:
+          type: [string, 'null']
+          description: Null means unencrypted — absent rather than a plausible placeholder. DRM is a later phase.
+
+    ManifestRecord:
+      type: object
+      properties:
+        policy: { type: string, enum: [h576, h720, h1080, h2160, full] }
+        format: { type: string, enum: [hls, dash] }
+        path: { type: string }
+        content_hash: { type: string }
+        byte_size: { type: integer }
+        generated_at: { type: [string, 'null'], format: date-time }
+
+    Publication:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        subject_type: { type: string }
+        subject_id: { $ref: '#/components/schemas/Identifier' }
+        origin_prefix:
+          type: string
+          description: Vendor-neutral and derived from identifiers, so a CDN can be pointed at the same origin without re-deriving URLs.
+        status: { type: string }
+        revision: { type: integer }
+        available_from: { type: [string, 'null'], format: date-time }
+        published_at: { type: [string, 'null'], format: date-time }
+        ladder:
+          type: [object, 'null']
+          properties:
+            id: { $ref: '#/components/schemas/Identifier' }
+            slug: { type: string }
+        packaging_profile:
+          type: [object, 'null']
+          properties:
+            id: { $ref: '#/components/schemas/Identifier' }
+            slug: { type: string }
+            container: { type: string }
+        manifests:
+          type: array
+          items: { $ref: '#/components/schemas/ManifestRecord' }
+
+    DeviceProfile:
+      type: object
+      properties:
+        device_class: { type: string }
+        container: { type: string }
+        formats:
+          type: array
+          items: { type: string }
+        max_height: { type: [integer, 'null'] }
+
+    Decision:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        outcome: { type: string, enum: [allow, deny] }
+        reason_code:
+          type: [string, 'null']
+          description: |
+            The specific reason, never a generic "not available". A generic
+            denial makes support impossible and hides bugs.
+        account_id: { type: [string, 'null'], format: uuid }
+        profile_id: { type: [string, 'null'], format: uuid }
+        device_id: { type: [string, 'null'], format: uuid }
+        device_class: { type: [string, 'null'] }
+        session_id: { type: [string, 'null'], format: uuid }
+        content_id: { type: [string, 'null'], format: uuid }
+        mode: { type: [string, 'null'] }
+        availability_version: { type: [integer, 'null'] }
+        rights_rule_ids:
+          type: [array, 'null']
+          items: { type: string }
+        entitlement_grant_ids:
+          type: [array, 'null']
+          items: { type: string }
+        territory: { type: [string, 'null'] }
+        territory_method:
+          type: [string, 'null']
+          description: |
+            How the territory was concluded. A licensor asking how we decided a
+            viewer was in a given country must be answered from a record.
+        applied_restrictions:
+          type: [object, 'null']
+          additionalProperties: true
+        concurrency_source: { type: [string, 'null'], enum: [plan, licensor, null] }
+        correlation_id: { type: [string, 'null'] }
+        client: { type: [string, 'null'] }
+        client_version: { type: [string, 'null'] }
+        decided_at: { type: [string, 'null'], format: date-time }
+
+    AdminSession:
+      type: object
+      properties:
+        id: { $ref: '#/components/schemas/Identifier' }
+        account_id: { $ref: '#/components/schemas/Identifier' }
+        profile_id: { $ref: '#/components/schemas/Identifier' }
+        device_id: { $ref: '#/components/schemas/Identifier' }
+        device_class: { type: string }
+        content_id: { $ref: '#/components/schemas/Identifier' }
+        mode: { type: string }
+        started_at: { type: string, format: date-time }
+        last_heartbeat_at: { type: string, format: date-time }
+        ended_at: { type: [string, 'null'], format: date-time }
+        end_reason: { type: [string, 'null'] }
+        heartbeat_lapsed:
+          type: boolean
+          description: |
+            A session still marked live whose heartbeat lapsed is what a leaked
+            concurrency slot looks like — invisible if only a timestamp is shown.
+
+    Problem:
+      type: object
+      required: [type, title, status, code, correlation_id]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        code:
+          type: string
+          description: Stable machine-readable code. Clients switch on this, never on prose.
+        detail: { type: [string, 'null'] }
+        instance: { type: [string, 'null'] }
+        correlation_id: { type: string }
+        errors:
+          type: [object, 'null']
+          additionalProperties: true

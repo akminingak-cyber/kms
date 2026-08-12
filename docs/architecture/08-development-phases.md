@@ -222,6 +222,54 @@ renewal on heartbeat, session listing and a stale-session reaper.
 
 ---
 
+## Operator panel — delivered as "Phase 4" *(2026-08-12)*
+
+> **Scope note.** The product owner asked for an admin panel. Two things had to
+> exist before one could be built honestly, and both were done first:
+>
+> - **The admin API had no OpenAPI contract.** The client surface has been
+>   conformance-tested since Phase 1; the admin surface had never been. Building
+>   a panel against an unspecified API would breach the rule that the spec *is*
+>   the contract, and would make the generated-client rule unsatisfiable.
+> - **The admin API was write-only** — 20 routes, almost all `POST`. A panel over
+>   that is a set of forms with no way to see what they produced.
+>
+> The Vite/React/Supabase starter at the repository root (**OQ-17**, risk R14)
+> was also moved to `legacy/`, because Phase 4 needed the root to become a real
+> workspace and could not leave a second, broken front-end root in it. Nothing
+> was deleted; deletion remains the product owner's decision.
+
+**Scope delivered:** 14 admin read endpoints with role gating; the admin
+OpenAPI contract, conformance-tested in both directions alongside the client
+one; `packages/ts-api-client` generated from both specs with a CI drift gate;
+`apps/admin` — a static SPA with staff sign-in, role-aware navigation, and
+screens for channels, categories, plans, rights, media, playback decisions,
+sessions, audit and staff.
+
+**Exit criteria**
+- [x] Every admin endpoint is in the contract, verified in **both** directions —
+      an endpoint that ships without contract review is how a spec becomes
+      fiction
+- [x] Every admin operation states the roles that may reach it, checked by a
+      test — an operation whose access rules were never written down is very
+      likely open to every signed-in staff member
+- [x] Read access is wider than write access, and a role that was not named is
+      refused — proved per route
+- [x] The panel makes **no hand-written call** to our own API; a contract change
+      that nobody regenerated for fails CI
+- [x] A staff token is never written to any browser storage, asserted by a test
+      ([ADR-0013](adr/ADR-0013-admin-panel-stack.md))
+- [x] Failures show the stable error code and the correlation id, so a
+      screenshot is enough to find the request
+- [x] The decision log is reachable by support without exposing personal data —
+      identifiers only, and no search by name or email
+- [ ] Used by real operators against real data — *not yet; the panel has been
+      built and tested but nobody has run a shift on it, and that is the only
+      test that finds what an admin tool actually lacks*
+- [ ] `apps/web` — *out of scope here, and not bound by ADR-0013*
+
+---
+
 ## Phase 5 — VOD pipeline and web application
 
 **Scope:** `MediaAsset` context, `media-pipeline` service (FFmpeg ladder, packaging, QC),

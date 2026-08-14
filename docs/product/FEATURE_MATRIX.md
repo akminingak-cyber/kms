@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.2
-**Date:** 2026-08-13 (rev. 1.2 — PD-004 and PD-008 approved)
+**Version:** 1.3
+**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved: launch scope resolved)
 **Source:** `PRODUCT_SPEC.md` · `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -38,16 +38,28 @@
 `P0` mandatory for initial production · `P1` important · `P2` later ·
 `P3` optional/future. Defined in `REQUIREMENTS.md` §0.2.
 
-### 0.4 The launch-scope caveat
+### 0.4 Launch scope — **RESOLVED, PD-092 APPROVED**
 
-**Which platforms ship at launch is [OPEN — PD-092] and is not decided here.** This matrix
-states what each platform must eventually provide and at what priority. A `P0` in a
-platform column means *"P0 for that platform when that platform ships"*, not *"that
-platform ships first"*.
+| Column | Platform | Release |
+|---|---|---|
+| **WEB** | Browser | **v1.0 — LAUNCH** |
+| **AND** | Android phone/tablet | **v1.0 — LAUNCH** |
+| **ATV** | Android TV / Google TV | **v1.0 — LAUNCH** |
+| iOS | iPhone / iPad | v1.x — subsequent |
+| TIZ | Samsung Tizen | v1.x — subsequent |
+| WOS | LG webOS | v1.x — subsequent |
+| ADM | Admin Control Center | v1.0 — required to operate the service |
+| BE | Backend | v1.0 — required by every client |
 
-**[PROPOSED]** launch order — Web → Android → Android TV → iOS → Tizen → webOS — reflects
-build cost, certification lead time, and the fact that Tizen and webOS share technology
-with the web client and benefit from it settling first. **Requires approval (PD-092).**
+Exact version numbers are **not fixed**.
+
+A `P0` in a **v1.0** column is a **launch requirement**. A `P0` in a **v1.x** column means
+*"P0 for that platform when that platform ships"* — those rows are specified now so the
+architecture accommodates them, and are **not implemented at launch** (FR-PLT-08: no
+placeholder applications).
+
+**No platform is production-ready until it passes all ten gates** in `PRODUCT_SPEC.md`
+§1.3 (FR-PLT-02). *Three production-quality clients are preferable to six incomplete ones.*
 
 ---
 
@@ -463,13 +475,13 @@ The attribution screen is a **license obligation** (`CLAUDE.md` §3.2), not a ni
 | Platform | P0 features required | Principal risk |
 |---|---:|---|
 | Backend (BE) | ~120 | Authorization correctness and rights enforcement — the whole product rests here |
-| Admin (ADM) | ~45 | Permission gating, audit immutability, no credential exposure |
-| Web (WEB) | ~60 | Broad browser matrix; token storage strategy |
-| Android (AND) | ~58 | Device fragmentation; network transitions |
-| iOS (iOS) | ~58 | **Toolchain unavailable in the current environment (B-004)** — a procurement blocker, not an engineering one |
-| Android TV (ATV) | ~55 | D-pad completeness; memory on constrained devices |
-| Tizen (TIZ) | ~53 | Oldest supported model performance; Georgian font coverage; certification lead time |
-| webOS (WOS) | ~53 | Dual input models; oldest supported model; certification lead time |
+| Admin (ADM) | ~45 | **v1.0.** Permission gating, audit immutability, no credential exposure |
+| Web (WEB) | ~60 | **v1.0 LAUNCH.** Broad browser matrix; token storage strategy |
+| Android (AND) | ~58 | **v1.0 LAUNCH.** Device fragmentation; network transitions. **Blocker B-005 (Android SDK absent) is now on the launch critical path** |
+| iOS (iOS) | ~58 | **v1.x.** Toolchain unavailable in the current environment (B-004) — a procurement blocker, not an engineering one. **No longer on the launch critical path**, but its lead time is unchanged |
+| Android TV (ATV) | ~55 | **v1.0 LAUNCH.** D-pad completeness; memory on constrained devices. The launch platform that carries the product's primary use case |
+| Tizen (TIZ) | ~53 | **v1.x.** Oldest supported model performance; Georgian font coverage; certification lead time — **deferred, but registration is calendar time and should still begin in Phase 3** |
+| webOS (WOS) | ~53 | **v1.x.** Dual input models; oldest supported model; certification lead time — same registration caveat as Tizen |
 
 Counts are indicative, derived from the ● cells above. They are a planning signal, not a
 commitment, and will firm up once launch scope (PD-092) is decided.
@@ -504,7 +516,7 @@ finalized until at least the following are resolved:
 | ~~PD-004~~ | **APPROVED** — Georgia launch, multi-territory architecture, future territories configurable |
 | PD-094 | App distribution scope — which territories the app is listed in, distinct from service availability |
 | PD-095 | Travelling-subscriber policy — home vs. current territory in authorization |
-| PD-092 | Launch platform scope — the column set that matters first |
+| ~~PD-092~~ | **APPROVED** — Option B. v1.0 = Web + Android + Android TV; iOS, Tizen, webOS in v1.x |
 | PD-005 / PD-006 | Free tier and advertising — several rows exist only if approved |
 | PD-015 / PD-016 | Recording and download rows |
 | PD-036 / PD-038 / PD-040 | Limit enforcement values |

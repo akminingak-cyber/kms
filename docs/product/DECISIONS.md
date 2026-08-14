@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **2 APPROVED (PD-004, PD-008)**
-**Version:** 1.2
-**Date:** 2026-08-13 (PD-008 approved and recorded)
+**Status:** OPEN — awaiting product owner decisions · **3 APPROVED (PD-004, PD-008, PD-092)**
+**Version:** 1.3
+**Date:** 2026-08-13 (PD-092 approved and recorded)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -57,19 +57,30 @@ approved, so the blocking and legal columns count **open** decisions only.
 | 8. Discovery and personalization | 7 | 0 | 1 |
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
-| 11. Platform and technical | 8 | 5 | 0 |
-| **Total (unique decisions)** | **95** | **24** | **25** |
+| 11. Platform and technical | 8 | 4 | 0 |
+| **Total (unique decisions)** | **95** | **23** | **25** |
 
-**Decided so far: 2 of 95.**
+**Decided so far: 3 of 95.**
 
 | ID | Decision | Status |
 |---|---|---|
 | **PD-004** | Target territories — **Georgia launch, multi-territory architecture, future territories configurable** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-008** | Multi-tenancy — **Option A, single-tenant. One operator, one product. Multi-tenancy, white-label, and SaaS operator platform all OUT OF SCOPE** | **APPROVED · FINAL** (2026-08-13) |
+| **PD-092** | Launch platform scope — **Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x** | **APPROVED · FINAL** (2026-08-13) |
+
+**All three Phase 3 blocking decisions are now approved.** Phase 3 (System architecture)
+has **no remaining blocking decisions**. Phase 4 still requires PD-035, PD-095, and the
+structural part of PD-013/PD-049.
 
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.3 changes.** PD-092 approved and recorded (§11): Option B, three launch
+clients. Open blocking 24 → 23; approved 2 → 3. The approval **confirms** the Option-B
+recommendation and adds four binding principles the brief did not propose — launch,
+quality, API neutrality, and shared server-authoritative business logic. No decision was
+added or removed.
 
 **Version 1.2 changes.** PD-008 approved and recorded (§2): Option A, single-tenant, one
 operator. Open blocking 25 → 24; approved 1 → 2. No decision was added or removed. The
@@ -785,17 +796,92 @@ aspirational.
 
 ## 11. Platform and technical
 
-### PD-092 — Launch platform scope **[BLOCKING — Phase 3]**
-Which of the six platforms ship at launch, and in what order.
-**Why it matters.** Determines the client build sequence, certification lead times, device
-procurement, and the QA matrix. It also determines whether the **Apple toolchain blocker
-(B-004)** is on the critical path — it cannot be resolved by installation and requires
-macOS hardware or hosted CI procurement.
-**PROPOSED:** Web → Android → Android TV → iOS → Tizen → webOS. Reasoning: Web validates
-the API contract fastest; Tizen and webOS share technology with the web client and benefit
-from it settling first; iOS carries a procurement dependency that should start early but
-need not gate the first release.
-**Status:** OPEN.
+### PD-092 — Launch platform scope — **APPROVED · FINAL**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-092** |
+| **Decision** | **Option B** |
+| **Status** | **APPROVED · FINAL** |
+| **Launch platforms** | **Web · Android · Android TV** |
+| **Subsequent platforms** | **iOS/iPadOS · Samsung Tizen · LG webOS** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-13 |
+| **Relationship to recommendation** | **Confirms it.** Option B was the recommended option; the approval adopts it and adds four binding principles the brief did not propose |
+
+**The decision as approved.** The initial production launch ships **three** clients:
+
+```
+v1.0    Web + Android + Android TV
+v1.x    iOS / iPadOS
+v1.x    Samsung Tizen
+v1.x    LG webOS
+```
+
+Exact version numbers are **not fixed**.
+
+**Launch principle (binding).** The first production release **must prioritize quality and
+stability over maximum platform count**. KMS TV MUST NOT attempt to launch all six clients
+simultaneously. The three launch clients MUST be production-quality and MUST pass the
+project's full acceptance, security, compatibility, and regression gates.
+
+**Quality principle (binding).** *Three production-quality clients are preferable to six
+incomplete clients.* **No platform may be declared production-ready until it passes all
+ten of:** functional acceptance tests · playback tests · authentication tests ·
+authorization tests · device/session tests · network failure tests · regression tests ·
+performance checks · security checks · platform-specific compatibility testing.
+
+**API principle (binding).** The backend API MUST remain **platform-neutral**.
+Platform-specific *business* APIs — `/api/android/`, `/api/android-tv/`, `/api/samsung/`,
+`/api/lg/` — MUST NOT be created. The model is a **shared versioned API** (`/api/v1/`),
+and **all clients consume the same authoritative business logic**. Platform-specific
+behaviour may exist at the **client/player layer** where genuinely required, never in the
+business API.
+
+**Shared business logic (binding).** The following remain **server-authoritative and
+platform-independent**, and **MUST NOT be duplicated independently inside any client**:
+
+authentication · authorization · users · profiles · devices · sessions · channels · EPG ·
+packages · subscriptions · entitlements · rights · playback authorization · payments ·
+account state
+
+This restates and strengthens `CLAUDE.md` §4.2 — *"Client applications MUST NOT contain
+business rules that determine entitlement"* — extending it from entitlement to the full
+list above.
+
+**TV product requirement.** Android TV is a launch platform **because KMS TV is
+fundamentally a television/OTT product**. The Android TV launch client MUST support the
+approved product requirements for: remote navigation · focus management · Live TV · EPG ·
+playback · profiles · search · VOD where included in the applicable release scope ·
+authentication · error handling · session and device management.
+
+**Future platform strategy.** The architecture MUST be designed from day one so that
+iOS/iPadOS, Samsung Tizen, and LG webOS can each be **added later without redesigning the
+core business architecture**. During architecture and API design their requirements MUST be
+explicitly considered — but those clients **MUST NOT be implemented during the initial
+launch phase**, and **no placeholder application may be created merely to claim platform
+support**.
+
+**Compatibility.** PD-092 is compatible with **PD-004** (Georgia launch territory,
+multi-territory architecture) and **PD-008** (single-tenant KMS TV). Neither is modified.
+The three decisions are orthogonal: PD-092 governs *which clients ship*, PD-004 *where the
+service operates and what may be served there*, PD-008 *how many operators exist*.
+
+**Consequences for open decisions and blockers.**
+- **PD-037** (minimum supported OS versions and model years) is now **narrowed to the three
+  launch platforms** for v1.0 purposes, and becomes correspondingly more urgent. Still open.
+- **PD-094** (app distribution scope) now has a concrete initial store set to reason about.
+  Still open.
+- **Blocker B-005** (Android SDK absent) moves **onto the launch critical path** — both
+  Android and Android TV are launch platforms.
+- **Blocker B-004** (Apple toolchain unavailable on Linux) moves **off the launch critical
+  path**, but macOS procurement still gates the v1.x iOS release and its lead time is
+  unchanged.
+- **Blocker B-006** (Tizen/webOS SDKs and developer registration) is deferred to v1.x, but
+  **registration lead time is calendar time** and should still begin during Phase 3.
+
+**Recorded in:** `PRODUCT_SPEC.md` §1.3 and §34 · `REQUIREMENTS.md` §A30 (FR-PLT-01…09) ·
+`FEATURE_MATRIX.md` §0.4 · `DECISION_BRIEF.md` Part 1 · `PROJECT_STATE.md` §7 D-020.
 
 ### PD-018 — Additional platforms
 Roku, Fire TV, Apple TV, Vidaa, operator set-top boxes. Each is a full client project with
@@ -855,7 +941,7 @@ practical output of this register.
 | Before | Must be resolved |
 |---|---|
 | **Phase 2** (Requirements) | PD-003, PD-077 — segments and language rationale shape priority |
-| **Phase 3** (Architecture) | ~~PD-004 (territories)~~ **APPROVED — Georgia, multi-territory architecture** · ~~PD-008 (multi-tenancy)~~ **APPROVED — Option A, single-tenant, one operator** · **PD-092** (launch scope) — the only Phase 3 blocker remaining |
+| **Phase 3** (Architecture) | ~~PD-004~~ **APPROVED** · ~~PD-008~~ **APPROVED** · ~~PD-092~~ **APPROVED — Option B, Web + Android + Android TV at launch** — ✅ **no blocking decisions remain for Phase 3** |
 | **Phase 4** (Database) — added | **PD-095** (travelling-subscriber policy — determines whether an account carries a home territory) |
 | **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
 | **Phase 4** (Database) | PD-035 (rating scheme), PD-049 (add-ons vs tiers), PD-013 (package structure) |
@@ -869,7 +955,7 @@ practical output of this register.
 | **Phase 15** (Playback authorization) | **PD-040** (concurrency), **PD-056** (expiry mid-play), PD-041, PD-047 |
 | **Phase 17** (Origin/CDN) | **PD-093** |
 | **Phase 18** (Admin) | PD-023, PD-068, PD-069, PD-070 |
-| **Phase 19** (Web TV) | **PD-037** (minimum devices), PD-079, D-009 |
+| **Phase 19** (Web TV) | **PD-037** (minimum devices — now narrowed to the three launch platforms), PD-079, D-009 |
 | **Phase 26** (Catch-up/Restart) | PD-058, PD-059 |
 | **Phase 27** (Payments) | **PD-074**, PD-075, PD-076, PD-053, PD-091, PD-073 |
 | **Phase 29** (Analytics) | PD-072, PD-071, PD-084 |

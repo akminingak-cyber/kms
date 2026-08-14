@@ -1,9 +1,9 @@
 # PRODUCT_SPEC.md — KMS TV Product Specification
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004 and PD-008 APPROVED**
-**Version:** 1.2
-**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved and propagated)
+**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092 APPROVED**
+**Version:** 1.3
+**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved and propagated)
 **Governing document:** `CLAUDE.md` (binding)
 **Companion documents:** `REQUIREMENTS.md`, `USER_FLOWS.md`, `FEATURE_MATRIX.md`, `DECISIONS.md`
 
@@ -43,6 +43,8 @@ marked **PROPOSED — REQUIRES VALIDATION** and carries a `PD-nnn` reference.
 | Product type | Production-grade IPTV / OTT platform | [CONFIRMED] |
 | Content modes | Live TV **and** on-demand | [CONFIRMED] |
 | Target platforms | Web · Android · Android TV · iOS/iPadOS · Samsung Tizen · LG webOS | [CONFIRMED] |
+| **Launch platforms (v1.0)** | **Web · Android · Android TV** | [CONFIRMED — PD-092 APPROVED] |
+| **Subsequent platforms (v1.x)** | **iOS/iPadOS · Samsung Tizen · LG webOS** | [CONFIRMED — PD-092 APPROVED] |
 | Commercial intent | A real commercial software product, not a demonstration or a player app | [CONFIRMED] |
 | Operating premise | A **licensed operator** distributing **licensed content** to **entitled subscribers** | [CONFIRMED] — `CLAUDE.md` §2 |
 | **Operator model** | **One operator. Single-tenant.** Multi-tenancy, white-label, and SaaS operator platform are **OUT OF SCOPE** | [CONFIRMED — PD-008 APPROVED] |
@@ -99,6 +101,81 @@ The two decisions are independent and both are approved. They must never be conf
 **One operator serving several territories is exactly the approved model, and it requires
 no tenancy concept at all.** Georgia today, further territories later — one operator, one
 catalogue, one rights domain, one admin control plane throughout.
+
+### 1.3 Launch platform scope [CONFIRMED — PD-092 APPROVED · FINAL]
+
+```
+v1.0    Web + Android + Android TV
+v1.x    iOS / iPadOS
+v1.x    Samsung Tizen
+v1.x    LG webOS
+```
+
+Exact version numbers are **not fixed**.
+
+**Launch principle.** The first production release **prioritizes quality and stability over
+maximum platform count**. KMS TV **MUST NOT** attempt to launch all six clients
+simultaneously. The three launch clients **MUST** be production-quality and **MUST** pass
+the project's full acceptance, security, compatibility, and regression gates.
+
+**Quality principle.** *Three production-quality clients are preferable to six incomplete
+clients.* **No platform may be declared production-ready until it passes all ten of:**
+
+| # | Gate | # | Gate |
+|---|---|---|---|
+| 1 | Functional acceptance tests | 6 | Network failure tests |
+| 2 | Playback tests | 7 | Regression tests |
+| 3 | Authentication tests | 8 | Performance checks |
+| 4 | Authorization tests | 9 | Security checks |
+| 5 | Device/session tests | 10 | Platform-specific compatibility testing |
+
+**Why Android TV is a launch platform.** KMS TV is fundamentally a **television/OTT
+product**. A launch without a living-room client would omit the primary use case (UC-01).
+The Android TV launch client must support the approved product requirements for remote
+navigation, focus management, Live TV, EPG, playback, profiles, search, VOD where included
+in the applicable release scope, authentication, error handling, and session/device
+management.
+
+#### 1.3.1 Platform-neutral API [CONFIRMED — PD-092 APPROVED]
+
+The backend API **MUST remain platform-neutral**.
+
+- **Prohibited:** platform-specific *business* APIs such as `/api/android/`,
+  `/api/android-tv/`, `/api/samsung/`, `/api/lg/`.
+- **Required:** a **shared versioned API** (`/api/v1/`), consumed by every client.
+- **All clients consume the same authoritative business logic.**
+- Platform-specific behaviour **may** exist at the **client/player layer** where genuinely
+  required — never in the business API.
+
+This is a product constraint, not an API design. The specification of the API itself is
+Phase 5.
+
+#### 1.3.2 Shared, server-authoritative business logic [CONFIRMED — PD-092 APPROVED]
+
+The following **remain server-authoritative and platform-independent**, and **MUST NOT be
+duplicated independently inside any client**:
+
+| | | | |
+|---|---|---|---|
+| authentication | authorization | users | profiles |
+| devices | sessions | channels | EPG |
+| packages | subscriptions | entitlements | rights |
+| playback authorization | payments | account state | |
+
+This extends `CLAUDE.md` §4.2 — *"Client applications MUST NOT contain business rules that
+determine entitlement"* — from entitlement alone to the full list above. A client renders
+what the backend decides, for all fifteen.
+
+#### 1.3.3 Future platform preparation
+
+The architecture **MUST** be designed from day one so that iOS/iPadOS, Samsung Tizen, and
+LG webOS can each be **added later without redesigning the core business architecture**.
+Their requirements **MUST** be explicitly considered during architecture and API design
+(Phases 3 and 5).
+
+**But those clients MUST NOT be implemented during the initial launch phase, and no
+placeholder application may be created merely to claim platform support.** Considering a
+platform's requirements is design work; shipping an empty shell is not support.
 
 ### 1.1 Product identity conflict inherited from the repository
 
@@ -1683,7 +1760,12 @@ control, in analytics, in support tooling, and in retention.
 For each platform: navigation · authentication · playback · EPG · search · VOD ·
 profiles · settings · error handling.
 
-### 34.1 Web
+**Release scope (PD-092 APPROVED):** §34.1 Web, §34.2 Android, and §34.3 Android TV are
+**v1.0 launch clients**. §34.4 iOS/iPadOS, §34.5 Samsung Tizen, and §34.6 LG webOS are
+**v1.x subsequent clients** — specified now so the architecture accommodates them, **not
+implemented at launch**. §34.7 cross-platform invariants apply to all six.
+
+### 34.1 Web — **v1.0 LAUNCH**
 - **Navigation** — persistent header; responsive from mobile to large desktop; deep-linkable
   and browser-history correct
 - **Authentication** — full account lifecycle; tokens stored per the Phase 6 strategy
@@ -1696,7 +1778,7 @@ profiles · settings · error handling.
 - **Settings** — account, devices, sessions, language, notifications, privacy
 - **Errors** — full §31 set; graceful offline handling
 
-### 34.2 Android (phone / tablet)
+### 34.2 Android (phone / tablet) — **v1.0 LAUNCH**
 - **Navigation** — native patterns; correct back-stack; tablet layouts
 - **Authentication** — full lifecycle; tokens in platform secure storage
 - **Playback** — adaptive; background/foreground transitions; audio focus; interruption
@@ -1707,7 +1789,7 @@ profiles · settings · error handling.
 - **Profiles / Settings** — full
 - **Errors** — full set plus offline and network-transition states
 
-### 34.3 Android TV / Google TV
+### 34.3 Android TV / Google TV — **v1.0 LAUNCH**
 - **Navigation** — 10-foot UI, D-pad only, focus management, no focus traps
 - **Authentication** — TV-appropriate entry; **[PROPOSED]** second-screen or code-based
   sign-in, since typing on a TV remote is punishing
@@ -1720,7 +1802,7 @@ profiles · settings · error handling.
 - **Settings** — reduced set appropriate to TV
 - **Errors** — full set, remote-navigable, readable at distance
 
-### 34.4 iOS / iPadOS
+### 34.4 iOS / iPadOS — **v1.x SUBSEQUENT**
 - **Navigation** — native patterns; iPad multitasking layouts
 - **Authentication** — full lifecycle; tokens in platform secure storage
 - **Playback** — adaptive; backgrounding; PiP; AirPlay and casting **gated by rights
@@ -1728,7 +1810,7 @@ profiles · settings · error handling.
 - **EPG / Search / VOD / Profiles / Settings** — as Android, with platform-native patterns
 - **Errors** — full set plus interruption and route-change handling
 
-### 34.5 Samsung Tizen
+### 34.5 Samsung Tizen — **v1.x SUBSEQUENT**
 - **Navigation** — remote-driven 10-foot UI; correct back and exit behaviour
 - **Authentication** — TV-appropriate; second-screen sign-in **[PROPOSED]**
 - **Playback** — platform media pipeline; long-session stability across model years
@@ -1739,13 +1821,15 @@ profiles · settings · error handling.
 - **Settings** — reduced set
 - **Errors** — full set, remote-navigable
 
-### 34.6 LG webOS
+### 34.6 LG webOS — **v1.x SUBSEQUENT**
 As Tizen, with one addition: **both Magic Remote pointer and directional-key navigation
 must be fully supported.** Neither may be a second-class input mode.
 
 ### 34.7 Cross-platform invariants
 - **No client contains entitlement logic.** Clients render what the backend authorizes.
-- All clients use the same API contract and the same reason codes.
+- **No client duplicates any of the fifteen server-authoritative domains in §1.3.2.**
+- All clients use the **same platform-neutral versioned API** (§1.3.1) and the same reason
+  codes. **No platform-specific business API exists.**
 - All clients report QoE telemetry: startup time, rebuffer ratio, bitrate distribution,
   failure reasons.
 - All clients externalize strings and support all four languages.
@@ -1860,6 +1944,7 @@ subscriber features. *"Internal only" is not an exemption.*
 | This section | Requirements | Flows | Decisions |
 |---|---|---|---|
 | §1.2 Operator model | FR-OPR-* | — | **PD-008 APPROVED** |
+| §1.3 Launch platform scope | FR-PLT-* | — | **PD-092 APPROVED**, PD-037, PD-094 |
 | §2.3, §2.3.1 Territories | FR-TER-* | UF-07, UF-13, UF-15, UF-18 | **PD-004 APPROVED**, PD-094, PD-095 |
 | §3 User types | FR-USR-* | UF-01…UF-05 | PD-022, PD-023 |
 | §4 Account | FR-ACC-* | UF-01, UF-02, UF-03, UF-05 | PD-020, PD-024…PD-033 |
@@ -1888,6 +1973,9 @@ Stated as clearly as what is (`CLAUDE.md` §21):
   multi-territory architecture, future territories configurable. **No territory beyond
   Georgia is named, planned, or assumed**, and no second territory's legal, tax, payment,
   or classification regime has been researched.
+- ~~**No launch platform scope.**~~ **RESOLVED — PD-092 APPROVED:** v1.0 ships Web,
+  Android, and Android TV; iOS/iPadOS, Samsung Tizen, and LG webOS follow in v1.x.
+  **Exact version numbers are not fixed**, and no v1.x date is assumed.
 - **No app distribution territories.** PD-094 — distinct from service availability.
 - **No travelling-subscriber policy.** PD-095 — required before Phase 4.
 - **No device, concurrency, profile, or catch-up limits.** PD-036, PD-038, PD-040, PD-058.

@@ -2,9 +2,9 @@
 
 **Prepared for:** Product owner
 **Phase:** 1 — Product specification (STEP 1 complete, awaiting decisions)
-**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004 and PD-008 APPROVED**
-**Version:** 1.2
-**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved and recorded)
+**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004, PD-008, PD-092 APPROVED**
+**Version:** 1.3
+**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved and recorded)
 **Source register:** `docs/product/DECISIONS.md` — IDs and wording taken from it verbatim
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -21,11 +21,17 @@ law, it is flagged **[LEGAL]** and must be verified by qualified advisors.
 **[UNVERIFIED]** marks a third-party fact not read from a primary source, per
 `CLAUDE.md` §1.
 
-### 0.1 Current state — 2 approved, 24 blocking decisions open
+### 0.1 Current state — 3 approved, 23 blocking decisions open
+
+**Revision 1.3.** **PD-092 is APPROVED — Option B.** v1.0 ships Web + Android + Android TV;
+iOS/iPadOS, Samsung Tizen, and LG webOS follow in v1.x. Blocking count 24 → **23 open**.
+**All three Phase 3 blocking decisions are now approved — Phase 3 has no remaining
+blockers.**
 
 **Revision 1.2.** **PD-008 is APPROVED — Option A, single-tenant.** One operator, one
 product. Multi-tenancy, white-label, and SaaS operator platform are **OUT OF SCOPE**.
-Blocking count 25 → **24 open**. **PD-092 is now the only remaining Phase 3 blocker.**
+Blocking count 25 → **24 open**. ~~PD-092 is now the only remaining Phase 3 blocker.~~
+*(superseded by rev 1.3 — PD-092 approved; Phase 3 has no remaining blockers.)*
 
 **Revision 1.1.** PD-004 is **APPROVED** (Georgia launch, multi-territory architecture,
 future territories configurable). Two consequential decisions arose from it and remain
@@ -40,13 +46,13 @@ correctly flagged in its own text and in `DECISIONS.md` §12 from the start.
 
 ### 0.2 The blocking decisions
 
-**Resolved (2):** ~~`PD-004`~~ · ~~`PD-008`~~ — both **APPROVED · FINAL**, 2026-08-13
+**Resolved (3):** ~~`PD-004`~~ · ~~`PD-008`~~ · ~~`PD-092`~~ — all **APPROVED · FINAL**, 2026-08-13
 
-**Open (24):**
+**Open (23):**
 `PD-001` · `PD-005` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
 `PD-035` · `PD-037` · `PD-038` · `PD-040` · `PD-044` · `PD-051` · `PD-055` · `PD-056` ·
-`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-092` · `PD-093` ·
-**`PD-094`** *(new)* · **`PD-095`** *(new)*
+`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-093` ·
+**`PD-094`** · **`PD-095`**
 
 ### 0.3 Confidence scale used in this brief
 
@@ -581,9 +587,42 @@ would be a major programme"* is a complete, useful decision. Silence is not.
 
 ---
 
-# PD-092 — LAUNCH PLATFORM SCOPE
+# PD-092 — LAUNCH PLATFORM SCOPE — ✅ **APPROVED · FINAL**
 
-**Register entry:** `DECISIONS.md` §11, *"PD-092 — Launch platform scope **[BLOCKING — Phase 3]**"*
+> ## OUTCOME
+>
+> | Field | Value |
+> |---|---|
+> | **Decision ID** | **PD-092** |
+> | **Decision** | **Option B** |
+> | **Status** | **APPROVED · FINAL** |
+> | **Launch platforms (v1.0)** | **Web · Android · Android TV** |
+> | **Subsequent platforms (v1.x)** | **iOS/iPadOS · Samsung Tizen · LG webOS** |
+> | **Approved on** | 2026-08-13 |
+>
+> **The approval confirms the recommendation.** Unlike PD-004 and PD-008, where the approval
+> went further or narrower, PD-092 adopts Option B as recommended — including the reasoning
+> that Web validates the API contract fastest, that Android and Android TV share a
+> toolchain, and that a TV client must ship at launch because this is a television product.
+>
+> **It adds four binding principles the brief did not propose:**
+> 1. **Launch principle** — quality and stability over platform count; never six at once.
+> 2. **Quality principle** — ten named gates; no platform production-ready until all pass.
+> 3. **API principle** — platform-neutral shared versioned API; no `/api/android/` and
+>    equivalents.
+> 4. **Shared business logic** — fifteen named domains stay server-authoritative and are
+>    never duplicated inside a client.
+>
+> **Blocker movement, which is the practical consequence:** **B-005** (Android SDK absent)
+> moves **onto** the launch critical path; **B-004** (Apple toolchain) moves **off** it,
+> though its procurement lead time is unchanged; **B-006** (Tizen/webOS registration) is
+> deferred to v1.x but remains calendar time and should still begin in Phase 3, exactly as
+> §5 recommended.
+>
+> Sections 5–7 are superseded by the approval. The analysis in 8–22 is retained as the
+> record of what was considered and now describes the approved path.
+
+**Register entry:** `DECISIONS.md` §11, *"PD-092 — Launch platform scope — **APPROVED · FINAL**"*
 
 ## 1. Exact question that must be decided
 
@@ -1057,7 +1096,7 @@ Every blocking decision classified **A**, **B**, or **C**.
 | ~~PD-004~~ | ~~Target territories~~ | ✅ **RESOLVED** — approved 2026-08-13 |
 | **PD-095** | Travelling-subscriber policy *(new, from PD-004)* | Determines whether an account carries a home territory distinct from its determined current territory — a Phase 4 data-model question |
 | ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **RESOLVED** — approved 2026-08-13, Option A single-tenant |
-| **PD-092** | Launch platform scope | Sequences all client work, settles D-009, and starts the procurement and certification clocks that cannot be compressed later |
+| ~~PD-092~~ | ~~Launch platform scope~~ | ✅ **RESOLVED** — approved 2026-08-13, Option B |
 | **PD-035** | Content rating / maturity scheme | The Phase 4 data model must carry a scheme identifier alongside the rating value. Retrofitting a second scheme into a single-scheme model is a migration across every rated asset |
 | **PD-081** | Applicable privacy regimes | Drives data classification, retention, and deletion design — all Phase 4 concerns, not Phase 6 afterthoughts |
 | **PD-031** | Deletion versus retention | Determines whether records are deletable, anonymizable, or immutable. That is a schema property, decided once |
@@ -1111,10 +1150,10 @@ It means only that the *later* answer does not invalidate *earlier* work.
 
 | Class | Count | IDs |
 |---|---:|---|
-| **A — before architecture** | 6 open | PD-001, ~~PD-004 (RESOLVED)~~, ~~PD-008 (RESOLVED)~~, PD-031, PD-035, PD-081, PD-092, **PD-095** |
+| **A — before architecture** | 5 open | PD-001, ~~PD-004 (RESOLVED)~~, ~~PD-008 (RESOLVED)~~, ~~PD-092 (RESOLVED)~~, PD-031, PD-035, PD-081, **PD-095** |
 | **B — before implementation** | 15 | PD-005, PD-013, PD-014, PD-026, PD-037, PD-038, PD-040, PD-044, PD-051, PD-055, PD-056, PD-074, PD-088, PD-093, **PD-094** |
 | **C — deferrable** | 3 | PD-087, PD-089, PD-090 |
-| **Total** | **24 open** (PD-004 and PD-008 resolved; PD-094 and PD-095 added) | |
+| **Total** | **23 open** (PD-004, PD-008, PD-092 resolved; PD-094 and PD-095 added) | |
 
 ---
 
@@ -1130,7 +1169,7 @@ the one resource that cannot be recovered later.
 |---|---|---|
 | 1 | ~~**PD-004 — Territories**~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable. Downstream decisions PD-081, PD-035, PD-054, PD-075 now have a determinate input |
 | 2 | ~~**PD-008 — Multi-tenancy**~~ | ✅ **APPROVED 2026-08-13** — Option A, single-tenant, one operator. The rewrite-class risk is closed by decision |
-| 3 | **PD-092 — Launch platform scope** | Informed by PD-004 (platform share by market) but should not wait long behind it; it starts the procurement clocks |
+| 3 | ~~**PD-092 — Launch platform scope**~~ | ✅ **APPROVED 2026-08-13** — Option B. Phase 3 now has **no remaining blocking decisions** |
 | 4 | **PD-001 — Scaffold** | Trivial to decide, and blocks nothing until code lands — but it costs one minute now and confusion later |
 
 ### Step 2 — Start the long-lead clocks (not decisions; actions)

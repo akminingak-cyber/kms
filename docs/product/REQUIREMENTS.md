@@ -1,9 +1,9 @@
 # REQUIREMENTS.md — KMS TV Requirements and Acceptance Criteria
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004 and PD-008 APPROVED**
-**Version:** 1.2
-**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved: operator-model domain added)
+**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092 APPROVED**
+**Version:** 1.3
+**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved: platform-scope domain added)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -39,7 +39,7 @@ with no recommendations engine is merely plainer.
 `PRODUCT_SPEC.md` §0.1.
 
 ### 0.4 Coverage rule
-**Acceptance criteria are provided for every P0 requirement**, per the brief — all 196 of
+**Acceptance criteria are provided for every P0 requirement**, per the brief — all 205 of
 them. They appear in two places:
 
 - **In the domain sections (Parts A and B)** for the P0 requirements whose criteria
@@ -89,7 +89,8 @@ estimated.
 | Errors (ERR) | 4 | 1 | 0 | 0 | 5 |
 | **Territories (TER)** — *added rev. 1.1* | **8** | **6** | **0** | **0** | **14** |
 | **Operator model (OPR)** — *added rev. 1.2* | **6** | **0** | **0** | **0** | **6** |
-| **Functional total** | **149** | **89** | **21** | **6** | **265** |
+| **Platform scope (PLT)** — *added rev. 1.3* | **9** | **0** | **0** | **0** | **9** |
+| **Functional total** | **158** | **89** | **21** | **6** | **274** |
 | Security (NFR-SEC) | 14 | 2 | 0 | 0 | 16 |
 | Privacy (NFR-PRV) | 8 | 2 | 1 | 0 | 11 |
 | Performance (NFR-PER) | 9 | 3 | 0 | 0 | 12 |
@@ -97,11 +98,11 @@ estimated.
 | Observability (NFR-OBS) | 7 | 2 | 0 | 0 | 9 |
 | Availability (NFR-AVL) | 3 | 1 | 0 | 0 | 4 |
 | **Non-functional total** | **47** | **12** | **1** | **0** | **60** |
-| **GRAND TOTAL** | **196** | **101** | **22** | **6** | **325** |
+| **GRAND TOTAL** | **205** | **101** | **22** | **6** | **334** |
 
 **Where the P0 weight sits.** Playback authorization (11), Rights (9), Security (14),
 Admin (12), Account (11), Privacy (8), and Territories (8) together account for 73 of the
-196 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
+205 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
 none. That distribution is the specification's central claim about this product: the
 launch-critical work is authorization, rights, and accountability, not features.
 
@@ -1252,6 +1253,85 @@ GIVEN the approved model of one operator serving multiple territories
 WHEN a second territory is added per FR-TER-07
 THEN it is added through territory configuration alone
 AND **no tenant is created, and no tenancy concept is required**.
+
+---
+
+## A30. Platform scope (PLT)
+
+Arising from **PD-092 — APPROVED · FINAL** (2026-08-13): Option B. v1.0 ships Web,
+Android, and Android TV; iOS/iPadOS, Samsung Tizen, and LG webOS follow in v1.x.
+`PRODUCT_SPEC.md` §1.3 governs.
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-PLT-01 | The v1.0 production release ships exactly three clients: **Web, Android, Android TV**. All six clients are **not** launched simultaneously. | **P0** |
+| FR-PLT-02 | No platform is declared production-ready until it passes all ten gates in `PRODUCT_SPEC.md` §1.3: functional acceptance, playback, authentication, authorization, device/session, network failure, regression, performance, security, and platform-specific compatibility testing. | **P0** |
+| FR-PLT-03 | The backend API is **platform-neutral**. No platform-specific business API path exists (`/api/android/`, `/api/android-tv/`, `/api/samsung/`, `/api/lg/` or equivalents). | **P0** |
+| FR-PLT-04 | All clients consume the **same shared versioned business API** and therefore the same authoritative business logic. | **P0** |
+| FR-PLT-05 | The fifteen domains listed in `PRODUCT_SPEC.md` §1.3.2 remain **server-authoritative and platform-independent**, and are not duplicated independently inside any client. | **P0** |
+| FR-PLT-06 | Platform-specific behaviour is confined to the **client/player layer** where genuinely required, and never appears in the business API. | **P0** |
+| FR-PLT-07 | Adding a future client (iOS/iPadOS, Samsung Tizen, LG webOS) does not require redesigning the core business architecture. | **P0** |
+| FR-PLT-08 | **No placeholder application** is created for any platform merely to claim platform support. | **P0** |
+| FR-PLT-09 | The Android TV launch client supports the approved product requirements for remote navigation, focus management, Live TV, EPG, playback, profiles, search, VOD where included in the applicable release scope, authentication, error handling, and session/device management. | **P0** |
+
+**Acceptance criteria**
+
+`AC-FR-PLT-01-1`
+GIVEN the v1.0 production release
+WHEN its shipped clients are enumerated
+THEN exactly Web, Android, and Android TV are present
+AND no iOS, Tizen, or webOS client is included.
+
+`AC-FR-PLT-02-1`
+GIVEN any client proposed for production release
+WHEN its release gate is evaluated
+THEN evidence exists that all ten gate categories passed
+AND a missing category blocks the release rather than being waived.
+
+`AC-FR-PLT-03-1`
+GIVEN the API surface
+WHEN its paths are enumerated
+THEN no path segment names a client platform
+AND the check is part of the CI gate.
+
+`AC-FR-PLT-04-1`
+GIVEN the same business operation requested from two different client platforms
+WHEN each request is served
+THEN both are handled by the same endpoint and the same business logic
+AND both receive the same decision for the same inputs.
+
+`AC-FR-PLT-05-1`
+GIVEN any client codebase
+WHEN it is inspected for the fifteen server-authoritative domains
+THEN it contains no independent implementation of authentication, authorization, users,
+profiles, devices, sessions, channels, EPG, packages, subscriptions, entitlements, rights,
+playback authorization, payments, or account state decisions.
+
+`AC-FR-PLT-06-1`
+GIVEN a behaviour that genuinely differs between platforms — a player capability, an input
+model, or a platform lifecycle event
+WHEN its implementation is located
+THEN it resides in the client or player layer
+AND the business API is identical for every platform, with no platform branch in it.
+
+`AC-FR-PLT-07-1`
+GIVEN a future client platform to be added
+WHEN it is introduced
+THEN it consumes the existing platform-neutral API unchanged
+AND no change to the core business architecture is required to accommodate it.
+
+`AC-FR-PLT-08-1`
+GIVEN every platform listed as supported in any release
+WHEN each is inspected
+THEN each is a functioning client meeting FR-PLT-02
+AND no shell or stub application is presented as platform support.
+
+`AC-FR-PLT-09-1`
+GIVEN the Android TV launch client
+WHEN each capability named in FR-PLT-09 is exercised using directional keys, OK, and Back
+only
+THEN every capability is reachable and operable
+AND each meets its approved product requirement.
 
 ---
 

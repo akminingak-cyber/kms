@@ -2,9 +2,9 @@
 
 **Prepared for:** Product owner
 **Phase:** 1 — Product specification (STEP 1 complete, awaiting decisions)
-**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004 APPROVED**
-**Version:** 1.1
-**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved and recorded)
+**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004 and PD-008 APPROVED**
+**Version:** 1.2
+**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved and recorded)
 **Source register:** `docs/product/DECISIONS.md` — IDs and wording taken from it verbatim
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -21,13 +21,15 @@ law, it is flagged **[LEGAL]** and must be verified by qualified advisors.
 **[UNVERIFIED]** marks a third-party fact not read from a primary source, per
 `CLAUDE.md` §1.
 
-### 0.1 Current state — 1 approved, 25 blocking decisions open
+### 0.1 Current state — 2 approved, 24 blocking decisions open
+
+**Revision 1.2.** **PD-008 is APPROVED — Option A, single-tenant.** One operator, one
+product. Multi-tenancy, white-label, and SaaS operator platform are **OUT OF SCOPE**.
+Blocking count 25 → **24 open**. **PD-092 is now the only remaining Phase 3 blocker.**
 
 **Revision 1.1.** PD-004 is **APPROVED** (Georgia launch, multi-territory architecture,
 future territories configurable). Two consequential decisions arose from it and remain
 open: **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy).
-
-Blocking count: 24 → **25 open** (PD-004 resolved, PD-094 and PD-095 added).
 
 *Original count correction, retained for the record.* The review request referred to 21
 blocking decisions. That figure came from my STEP 1 report, where the register's summary
@@ -38,10 +40,10 @@ correctly flagged in its own text and in `DECISIONS.md` §12 from the start.
 
 ### 0.2 The blocking decisions
 
-**Resolved (1):** ~~`PD-004`~~ — **APPROVED · FINAL**, 2026-08-13
+**Resolved (2):** ~~`PD-004`~~ · ~~`PD-008`~~ — both **APPROVED · FINAL**, 2026-08-13
 
-**Open (25):**
-`PD-001` · `PD-005` · `PD-008` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
+**Open (24):**
+`PD-001` · `PD-005` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
 `PD-035` · `PD-037` · `PD-038` · `PD-040` · `PD-044` · `PD-051` · `PD-055` · `PD-056` ·
 `PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-092` · `PD-093` ·
 **`PD-094`** *(new)* · **`PD-095`** *(new)*
@@ -332,9 +334,43 @@ negotiation stall behind it.
 
 ---
 
-# PD-008 — MULTI-TENANCY
+# PD-008 — MULTI-TENANCY — ✅ **APPROVED · FINAL**
 
-**Register entry:** `DECISIONS.md` §2, *"PD-008 — Multi-tenancy **[BLOCKING — Phase 3]**"*
+> ## OUTCOME
+>
+> | Field | Value |
+> |---|---|
+> | **Decision ID** | **PD-008** |
+> | **Decision** | **Option A — Single-tenant KMS TV** |
+> | **Status** | **APPROVED · FINAL** |
+> | **Operator model** | **One operator** |
+> | **Multi-tenancy** | **OUT OF SCOPE** |
+> | **White-label** | **OUT OF SCOPE** |
+> | **SaaS operator platform** | **OUT OF SCOPE** |
+> | **Future multi-tenancy** | Possible future architectural decision, not part of current implementation |
+> | **Approved on** | 2026-08-13 |
+>
+> **The approval is stricter than the recommendation below.** The recommendation was
+> **Option B** — single-tenant code with deployment-per-operator, which contemplated a
+> second deployment should a second operator appear. The approval selects **Option A**:
+> one operator, full stop. It additionally rules out *"tenant-specific deployments managed
+> by a shared control plane"* — which is the shape Option B would have grown into.
+> Option A is therefore narrower than Option B, not a variant of it.
+>
+> **This resolves the rewrite-class risk identified in §19 and §22 below.** Those sections
+> warned that B → C after Phase 4 is a rewrite. Under Option A that path is closed by
+> decision: any future multi-tenancy is a **new architectural decision with its own ADR**,
+> not a migration of this one.
+>
+> **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
+> independent and both approved. One operator serving several territories is exactly the
+> approved model and requires no tenancy concept at all.
+>
+> Sections 5–7 are superseded by the approval. The consequence analysis in 8–20 is retained
+> as the record of what was considered; its **Option A/B columns now describe the approved
+> path**, and its Option C/D columns describe paths that are out of scope.
+
+**Register entry:** `DECISIONS.md` §2, *"PD-008 — Multi-tenancy — **APPROVED · FINAL**"*
 
 ## 1. Exact question that must be decided
 
@@ -374,11 +410,15 @@ and per-operator branding in every client (Phases 19–24).
 
 ## 5. Recommended option
 
-### **RECOMMENDATION — NOT APPROVED**
+### ~~RECOMMENDATION — NOT APPROVED~~ → **SUPERSEDED BY APPROVAL**
 
-**Option B — single-tenant code with deployment-per-operator — *unless* the business has a
+~~**Option B — single-tenant code with deployment-per-operator — *unless* the business has a
 concrete plan to sell KMS TV wholesale or white-label, in which case Option C must be
-chosen now, not later.**
+chosen now, not later.**~~
+
+**Approved: Option A — single-tenant KMS TV. One operator, one product.** The conditional
+in the recommendation is resolved: there is no wholesale or white-label plan, and both are
+now explicitly out of scope.
 
 This recommendation is conditional on purpose, and the condition is the whole point. The
 decision is not really "how do we build it" but "what business are we in". If wholesale is
@@ -1016,7 +1056,7 @@ Every blocking decision classified **A**, **B**, or **C**.
 | **PD-001** | Product identity and the pre-existing scaffold | Repository must be coherent before any code lands beside it. Also gates D-009 (web framework), which is a Phase 3 output |
 | ~~PD-004~~ | ~~Target territories~~ | ✅ **RESOLVED** — approved 2026-08-13 |
 | **PD-095** | Travelling-subscriber policy *(new, from PD-004)* | Determines whether an account carries a home territory distinct from its determined current territory — a Phase 4 data-model question |
-| **PD-008** | Multi-tenancy | The only decision here whose deferral cost is a **rewrite**. Tenancy is a property of every table, query, cache key, and authorization check |
+| ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **RESOLVED** — approved 2026-08-13, Option A single-tenant |
 | **PD-092** | Launch platform scope | Sequences all client work, settles D-009, and starts the procurement and certification clocks that cannot be compressed later |
 | **PD-035** | Content rating / maturity scheme | The Phase 4 data model must carry a scheme identifier alongside the rating value. Retrofitting a second scheme into a single-scheme model is a migration across every rated asset |
 | **PD-081** | Applicable privacy regimes | Drives data classification, retention, and deletion design — all Phase 4 concerns, not Phase 6 afterthoughts |
@@ -1071,10 +1111,10 @@ It means only that the *later* answer does not invalidate *earlier* work.
 
 | Class | Count | IDs |
 |---|---:|---|
-| **A — before architecture** | 7 | PD-001, ~~PD-004 (RESOLVED)~~, PD-008, PD-031, PD-035, PD-081, PD-092, **PD-095** |
+| **A — before architecture** | 6 open | PD-001, ~~PD-004 (RESOLVED)~~, ~~PD-008 (RESOLVED)~~, PD-031, PD-035, PD-081, PD-092, **PD-095** |
 | **B — before implementation** | 15 | PD-005, PD-013, PD-014, PD-026, PD-037, PD-038, PD-040, PD-044, PD-051, PD-055, PD-056, PD-074, PD-088, PD-093, **PD-094** |
 | **C — deferrable** | 3 | PD-087, PD-089, PD-090 |
-| **Total** | **25 open** (PD-004 resolved; PD-094 and PD-095 added) | |
+| **Total** | **24 open** (PD-004 and PD-008 resolved; PD-094 and PD-095 added) | |
 
 ---
 
@@ -1089,7 +1129,7 @@ the one resource that cannot be recovered later.
 | # | Item | Note |
 |---|---|---|
 | 1 | ~~**PD-004 — Territories**~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable. Downstream decisions PD-081, PD-035, PD-054, PD-075 now have a determinate input |
-| 2 | **PD-008 — Multi-tenancy** | Independent of PD-004 and can be decided in parallel. The only rewrite-class risk in the register |
+| 2 | ~~**PD-008 — Multi-tenancy**~~ | ✅ **APPROVED 2026-08-13** — Option A, single-tenant, one operator. The rewrite-class risk is closed by decision |
 | 3 | **PD-092 — Launch platform scope** | Informed by PD-004 (platform share by market) but should not wait long behind it; it starts the procurement clocks |
 | 4 | **PD-001 — Scaffold** | Trivial to decide, and blocks nothing until code lands — but it costs one minute now and confusion later |
 
@@ -1138,9 +1178,10 @@ proven in a timed restore drill.
 
 Three points, offered because they save the most time:
 
-1. **A provisional decision, recorded, beats an open one.** *"Single-tenant, and we accept
-   that multi-tenancy would be a major programme"* is a complete answer. Silence is not, and
-   silence on PD-008 is functionally a choice of single-tenant taken without a record.
+1. ~~**A provisional decision, recorded, beats an open one.**~~ **Resolved:** PD-008 was
+   answered decisively — Option A, single-tenant, with multi-tenancy explicitly out of
+   scope rather than merely unbuilt. That is a stronger answer than the provisional one
+   this note anticipated, and it removes the rewrite-class risk entirely.
 
 2. **The [LEGAL] decisions need a lawyer, not a longer analysis from me.** Twenty-five of
    the ninety-three are flagged [LEGAL], and no amount of further engineering work will

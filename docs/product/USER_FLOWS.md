@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.1
-**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved: eleventh authorization check added)
+**Version:** 1.2
+**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved: multi-tenant onboarding out of scope)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -1110,4 +1110,4 @@ These hold in **every** flow above. A flow that violates one is specified incorr
 | Support impersonation | Depends on PD-022 |
 | Social login | Depends on PD-033 |
 | Transactional purchase (PPV) | Depends on PD-007 |
-| Multi-tenant operator onboarding | Depends on PD-008 |
+| ~~Multi-tenant operator onboarding~~ | **OUT OF SCOPE** — PD-008 APPROVED (Option A, single-tenant). Not deferred; excluded. Any future revisit is a new architectural decision with its own ADR |

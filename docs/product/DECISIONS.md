@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **1 APPROVED (PD-004)**
-**Version:** 1.1
-**Date:** 2026-08-13 (PD-004 approved and recorded)
+**Status:** OPEN — awaiting product owner decisions · **2 APPROVED (PD-004, PD-008)**
+**Version:** 1.2
+**Date:** 2026-08-13 (PD-008 approved and recorded)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -48,7 +48,7 @@ approved, so the blocking and legal columns count **open** decisions only.
 | Category | Decisions | Blocking (open) | Legal (open) |
 |---|---:|---:|---:|
 | 1. Product identity and market | 7 | 3 | 2 |
-| 2. Business model and commerce | 23 | 6 | 6 |
+| 2. Business model and commerce | 23 | 5 | 6 |
 | 3. Identity and account | 13 | 2 | 2 |
 | 4. Profiles and parental control | 5 | 1 | 2 |
 | 5. Devices and concurrency | 7 | 3 | 0 |
@@ -58,13 +58,23 @@ approved, so the blocking and legal columns count **open** decisions only.
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
 | 11. Platform and technical | 8 | 5 | 0 |
-| **Total (unique decisions)** | **95** | **25** | **25** |
+| **Total (unique decisions)** | **95** | **24** | **25** |
 
-**Decided so far: 1 of 95.**
+**Decided so far: 2 of 95.**
 
 | ID | Decision | Status |
 |---|---|---|
 | **PD-004** | Target territories — **Georgia launch, multi-territory architecture, future territories configurable** | **APPROVED · FINAL** (2026-08-13) |
+| **PD-008** | Multi-tenancy — **Option A, single-tenant. One operator, one product. Multi-tenancy, white-label, and SaaS operator platform all OUT OF SCOPE** | **APPROVED · FINAL** (2026-08-13) |
+
+**TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
+compatible and independent: one operator serving many territories is the approved model.
+See PD-008 for the comparison table.
+
+**Version 1.2 changes.** PD-008 approved and recorded (§2): Option A, single-tenant, one
+operator. Open blocking 25 → 24; approved 1 → 2. No decision was added or removed. The
+approval is **stricter than the Option-B recommendation** in `DECISION_BRIEF.md`, which is
+marked superseded rather than amended.
 
 **Version 1.1 changes.** PD-004 approved and recorded (§1). Two consequential decisions
 added — **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy) —
@@ -242,15 +252,97 @@ assets — a channel-origination capability that does not otherwise exist in thi
 Whether individual titles or events can be purchased separately.
 **Status:** OPEN.
 
-### PD-008 — Multi-tenancy **[BLOCKING — Phase 3]**
-Whether KMS TV serves one operator or several.
-**Why it matters.** **The most expensive decision on this list to defer.** Retrofitting
-tenancy touches every table, every query, and every authorization check. Deciding it at
-Phase 3 costs a design conversation; deciding it at Phase 20 costs a rewrite.
-**RECOMMENDED:** decide explicitly either way and record it — *"single-tenant, and we
-accept that multi-tenancy would be a major programme"* is a perfectly good answer, and
-far better than silence.
-**Status:** OPEN · **Required before Phase 3.**
+### PD-008 — Multi-tenancy — **APPROVED · FINAL**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-008** |
+| **Decision** | **Option A — Single-tenant KMS TV** |
+| **Status** | **APPROVED · FINAL** |
+| **Operator model** | **One operator** |
+| **Multi-tenancy** | **OUT OF SCOPE** |
+| **White-label** | **OUT OF SCOPE** |
+| **SaaS operator platform** | **OUT OF SCOPE** |
+| **Future multi-tenancy** | Possible future architectural decision, **not part of current implementation** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-13 |
+| **Supersedes** | The OPEN status of this entry and the Option-B recommendation in `DECISION_BRIEF.md` Part 1 |
+
+**The decision as approved.** KMS TV operates as a platform for **one operator/business**.
+The initial and production architecture **MUST NOT** implement SaaS multi-tenancy or
+multiple isolated operators.
+
+**Explicitly OUT OF SCOPE for the current product:**
+
+- multiple operator tenants
+- white-label operators
+- tenant-specific deployments managed by a shared control plane
+- tenant isolation
+- tenant-specific billing
+- tenant-specific admin organizations
+- tenant-specific content catalogs
+- tenant-specific rights domains
+
+**KMS TV is one operator and one product.**
+
+**Architectural principles (binding).** The architecture must remain clean and
+single-tenant. Specifically:
+
+1. Do **NOT** introduce a `tenant_id` into every table merely for hypothetical future use.
+2. Do **NOT** create artificial tenant abstractions.
+3. Do **NOT** implement tenant-aware authorization.
+4. Do **NOT** implement tenant-aware billing.
+5. Do **NOT** implement tenant-aware content management.
+6. Do **NOT** implement tenant-aware caching.
+7. Do **NOT** implement tenant-aware storage paths.
+8. Do **NOT** implement tenant-aware analytics.
+9. Do **NOT** implement multi-operator administration.
+10. Do **NOT** implement white-label functionality.
+
+**Future extensibility.** The code must not be *deliberately* made impossible to evolve
+toward multi-tenancy in the distant future. But **future multi-tenancy MUST NOT influence
+the current data model unless a concrete requirement requires it**, and **no speculative
+infrastructure may be built**. If a multi-tenant requirement appears later it is a **new
+architectural decision requiring its own ADR**, not a resumption of this one.
+
+**The approved product model:**
+
+```
+ONE OPERATOR
+ONE KMS TV SERVICE
+ONE CENTRAL ADMIN CONTROL PLANE
+ONE CONTENT/RIGHTS DOMAIN
+ONE SUBSCRIPTION SYSTEM
+ONE PAYMENT DOMAIN
+ONE ANALYTICS DOMAIN
+```
+
+**TENANCY ≠ TERRITORY — the two must not be confused.**
+
+| | Tenancy (PD-008) | Territory (PD-004) |
+|---|---|---|
+| **Decision** | Single-tenant — **one operator** | Multi-territory — **many territories possible** |
+| **What it partitions** | *Who runs the platform* | *Where the platform serves and what may be served there* |
+| **In scope?** | Multi-tenancy **OUT OF SCOPE** | Multi-territory **REQUIRED from day one** |
+| **In the model** | No tenant concept, no `tenant_id`, no tenant abstractions | Territory is a first-class, configurable concept (FR-TER-01) |
+
+One operator serving several territories is **exactly the approved model**, and it
+requires **no tenancy concept whatsoever**. Georgia today, further territories later, all
+under one operator, one catalogue, one rights domain, one admin control plane.
+
+**Relationship to the earlier recommendation.** `DECISION_BRIEF.md` recommended **Option
+B** (single-tenant code with deployment-per-operator). The approval selects **Option A**,
+which is **stricter**: Option B contemplated a second deployment for a second operator,
+whereas Option A rules out multiple operators entirely — including the shared control
+plane over per-operator deployments that Option B implied. The approval is narrower than
+the recommendation, not a variant of it, and this document follows the approval.
+
+**Consequences recorded elsewhere:**
+- `PRODUCT_SPEC.md` §1.2 (operator model), §2.5 (B2B wholesale → out of scope),
+  §2.9 (multi-tenant/white-label → out of scope), §40
+- `REQUIREMENTS.md` §A29 (FR-OPR-01…06)
+- `USER_FLOWS.md` Appendix B (multi-tenant onboarding → out of scope, not deferred)
+- `docs/legal/DECISION_LOG.md` L-010 · `PROJECT_STATE.md` §7 D-018
 
 ### PD-009 — Anonymous playback
 Whether unauthenticated visitors can play anything.
@@ -763,7 +855,7 @@ practical output of this register.
 | Before | Must be resolved |
 |---|---|
 | **Phase 2** (Requirements) | PD-003, PD-077 — segments and language rationale shape priority |
-| **Phase 3** (Architecture) | ~~PD-004 (territories)~~ **APPROVED — Georgia, multi-territory architecture** · **PD-008** (multi-tenancy), **PD-092** (launch scope) |
+| **Phase 3** (Architecture) | ~~PD-004 (territories)~~ **APPROVED — Georgia, multi-territory architecture** · ~~PD-008 (multi-tenancy)~~ **APPROVED — Option A, single-tenant, one operator** · **PD-092** (launch scope) — the only Phase 3 blocker remaining |
 | **Phase 4** (Database) — added | **PD-095** (travelling-subscriber policy — determines whether an account carries a home territory) |
 | **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
 | **Phase 4** (Database) | PD-035 (rating scheme), PD-049 (add-ons vs tiers), PD-013 (package structure) |

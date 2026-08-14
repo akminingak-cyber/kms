@@ -110,6 +110,35 @@ the *Decisions* section of `PROJECT_STATE.md`.
 - **Recorded by:** Engineering agent
 - **Status:** Accepted
 
+### L-010 — Single-operator product; not a SaaS platform for third parties
+- **Date:** 2026-08-13
+- **Phase:** 1
+- **Decision:** The product owner has approved **PD-008 — Option A, single-tenant**. KMS TV
+  is a platform for **one operator**. Multi-tenancy, white-label operators, and a SaaS
+  operator platform are **out of scope** for the current product.
+- **Rationale:** Recorded here because it materially narrows one licensing analysis.
+  `CLAUDE.md` §3 requires third-party license compatibility to be determined against the
+  **KMS TV distribution model**. That model is now confirmed as a proprietary server-side
+  product plus proprietary client applications, operated by **one operator for its own
+  subscribers** — not software offered to third parties as a hosted service. Network- and
+  service-oriented copyleft terms turn on how software is *offered to others*, so
+  confirming that KMS TV is not offered to third-party operators is a relevant input to
+  that determination.
+- **[UNVERIFIED]** No claim is made here about what any particular license requires. The
+  license classification rules in `THIRD_PARTY_LICENSES.md` §2 are unchanged, and AGPL- and
+  SSPL-family components still require explicit written legal approval before use. This
+  entry records a **fact about the product**, not a conclusion about any license.
+- **Alternatives considered:** deployment-per-operator (Option B) and shared-schema
+  multi-tenancy (Option C), both recorded in `docs/product/DECISION_BRIEF.md` Part 1.
+  Option A is narrower than both.
+- **Legal review required:** no for the decision itself; the license classification work in
+  `THIRD_PARTY_LICENSES.md` remains outstanding and unchanged
+- **Consequence:** should multi-tenancy or white-label ever be revisited, it is a **new
+  architectural decision requiring its own ADR**, and the license analysis above must be
+  re-run, because the distribution model would have changed.
+- **Recorded by:** Engineering agent, on the product owner's decision
+- **Status:** Accepted
+
 ### L-008 — Launch territory: Georgia; multi-territory architecture
 - **Date:** 2026-08-13
 - **Phase:** 1

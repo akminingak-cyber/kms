@@ -1,9 +1,9 @@
 # PRODUCT_SPEC.md — KMS TV Product Specification
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004 APPROVED (territories)**
-**Version:** 1.1
-**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved and propagated)
+**Status:** DRAFT — awaiting product approval · **PD-004 and PD-008 APPROVED**
+**Version:** 1.2
+**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved and propagated)
 **Governing document:** `CLAUDE.md` (binding)
 **Companion documents:** `REQUIREMENTS.md`, `USER_FLOWS.md`, `FEATURE_MATRIX.md`, `DECISIONS.md`
 
@@ -45,11 +45,60 @@ marked **PROPOSED — REQUIRES VALIDATION** and carries a `PD-nnn` reference.
 | Target platforms | Web · Android · Android TV · iOS/iPadOS · Samsung Tizen · LG webOS | [CONFIRMED] |
 | Commercial intent | A real commercial software product, not a demonstration or a player app | [CONFIRMED] |
 | Operating premise | A **licensed operator** distributing **licensed content** to **entitled subscribers** | [CONFIRMED] — `CLAUDE.md` §2 |
+| **Operator model** | **One operator. Single-tenant.** Multi-tenancy, white-label, and SaaS operator platform are **OUT OF SCOPE** | [CONFIRMED — PD-008 APPROVED] |
 
 **KMS TV is not** a media player, a playlist aggregator, a stream index, or a tool for
 accessing third-party services. It is the software an operator runs to distribute
 content it holds rights to. This distinction determines the entire architecture:
 entitlement and rights enforcement are the product, and the player is a consequence.
+
+**KMS TV is also not a SaaS platform for operators.** Per **PD-008 (APPROVED)** it serves
+**one operator**. See §1.2.
+
+### 1.2 Operator model — single-tenant [CONFIRMED — PD-008 APPROVED · FINAL]
+
+KMS TV is **one operator and one product**:
+
+```
+ONE OPERATOR
+ONE KMS TV SERVICE
+ONE CENTRAL ADMIN CONTROL PLANE
+ONE CONTENT/RIGHTS DOMAIN
+ONE SUBSCRIPTION SYSTEM
+ONE PAYMENT DOMAIN
+ONE ANALYTICS DOMAIN
+```
+
+**OUT OF SCOPE for the current product:** multiple operator tenants · white-label
+operators · tenant-specific deployments managed by a shared control plane · tenant
+isolation · tenant-specific billing · tenant-specific admin organizations ·
+tenant-specific content catalogs · tenant-specific rights domains.
+
+**No tenant concept may appear anywhere in the product.** No `tenant_id` introduced for
+hypothetical future use, no artificial tenant abstractions, and no tenant-aware
+authorization, billing, content management, caching, storage paths, or analytics. The
+architecture remains clean and single-tenant.
+
+**Future extensibility.** The product must not be *deliberately* made impossible to evolve
+toward multi-tenancy in the distant future — but **future multi-tenancy must not influence
+the current data model unless a concrete requirement requires it**, and **no speculative
+infrastructure is to be built**. Should a multi-tenant requirement ever appear, it is a
+**new architectural decision requiring its own ADR**, not a resumption of PD-008.
+
+#### TENANCY ≠ TERRITORY
+
+The two decisions are independent and both are approved. They must never be conflated.
+
+| | **Tenancy — PD-008** | **Territory — PD-004** |
+|---|---|---|
+| Decision | **Single-tenant — one operator** | **Multi-territory — many territories possible** |
+| Partitions | *Who runs the platform* | *Where it serves, and what may be served there* |
+| Status | Multi-tenancy **OUT OF SCOPE** | Multi-territory **REQUIRED from day one** |
+| In the model | No tenant concept, no `tenant_id` | Territory is first-class and configurable (§2.3.1, FR-TER-01) |
+
+**One operator serving several territories is exactly the approved model, and it requires
+no tenancy concept at all.** Georgia today, further territories later — one operator, one
+catalogue, one rights domain, one admin control plane throughout.
 
 ### 1.1 Product identity conflict inherited from the repository
 
@@ -220,11 +269,12 @@ information has been supplied.
 | **Advertising-supported (AVOD/FAST)** | Ad-funded channels or content | Requires ad insertion, an ad provider, measurement, and consent handling. **No ad provider capability may be assumed** (`CLAUDE.md` §1). | [OPEN — PD-006] + [LEGAL] |
 | **Hybrid** | Paid tiers plus an ad-supported free tier | Combination of the above | [OPEN — PD-005/006] |
 | **Transactional (TVOD/PPV)** | Pay per title or per event | Requires per-asset purchase, separate entitlement grants, and event-specific rights | [OPEN — PD-007] |
-| **Operator/B2B wholesale** | KMS TV licensed to another operator | Requires multi-tenancy, which is an architectural decision that cannot be retrofitted cheaply | [OPEN — PD-008] |
+| ~~**Operator/B2B wholesale**~~ | ~~KMS TV licensed to another operator~~ | **OUT OF SCOPE.** Would require multi-tenancy, which **PD-008 (APPROVED)** excludes from the current product | **[REJECTED — PD-008 APPROVED]** |
 
-**PD-008 (multi-tenancy) must be answered before Phase 3.** Retrofitting tenancy into a
-single-tenant data model touches every table, every query, and every authorization check.
-It is the single most expensive decision on this list to defer.
+**PD-008 is APPROVED: Option A — single-tenant, one operator.** Multi-tenancy, white-label,
+and SaaS operator platform are **OUT OF SCOPE** (§1.2). The B2B wholesale model above is
+therefore rejected for the current product. Should it ever be revisited, it is a new
+architectural decision with its own ADR, not a reopening of PD-008.
 
 ### 2.6 Free tier possibilities
 
@@ -274,7 +324,7 @@ Recorded as direction, none approved:
 | Offline download | Requires download rights, DRM offline licences, and device storage policy | [OPEN — PD-016] + [LEGAL] |
 | 4K / HDR delivery | Higher bitrate ladders, device capability gating, higher CDN cost | [OPEN — PD-017] |
 | Additional platforms (Roku, Fire TV, Apple TV, Vidaa, set-top boxes) | Each is a full client project with its own store and certification | [OPEN — PD-018] |
-| Multi-tenant / white-label | See PD-008 — architectural, must be decided before Phase 3 | [OPEN — PD-008] |
+| ~~Multi-tenant / white-label~~ | **OUT OF SCOPE** per PD-008 (APPROVED). Not deferred — excluded. Any future revisit is a **new architectural decision with its own ADR** | **[REJECTED — PD-008 APPROVED]** |
 | Personalized recommendations using ML | Phase 22 of the brief explicitly defers ML; deterministic fallback is the P0 requirement | [PROPOSED — later] |
 | Social / watch-party features | Out of scope for launch | [PROPOSED — later] |
 
@@ -1809,6 +1859,7 @@ subscriber features. *"Internal only" is not an exemption.*
 
 | This section | Requirements | Flows | Decisions |
 |---|---|---|---|
+| §1.2 Operator model | FR-OPR-* | — | **PD-008 APPROVED** |
 | §2.3, §2.3.1 Territories | FR-TER-* | UF-07, UF-13, UF-15, UF-18 | **PD-004 APPROVED**, PD-094, PD-095 |
 | §3 User types | FR-USR-* | UF-01…UF-05 | PD-022, PD-023 |
 | §4 Account | FR-ACC-* | UF-01, UF-02, UF-03, UF-05 | PD-020, PD-024…PD-033 |
@@ -1846,4 +1897,4 @@ Stated as clearly as what is (`CLAUDE.md` §21):
 - **No capacity figures.** Phase 32.
 - **No advertising design.** PD-006.
 - **No ML recommendation design.** Deterministic only at launch.
-- **No multi-tenancy decision.** PD-008 — must be answered before Phase 3.
+- ~~**No multi-tenancy decision.**~~ **RESOLVED — PD-008 APPROVED:** Option A, single-tenant, one operator. Multi-tenancy, white-label, and SaaS operator platform are **out of scope**, and **no tenant abstraction may be built speculatively**.

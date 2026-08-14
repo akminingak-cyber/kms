@@ -211,18 +211,19 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
 - [x] Performance targets stated as PROPOSED — REQUIRES VALIDATION; scalability
       dimensions defined with no capacity claimed.
 - [x] Content and rights safety restated as binding product constraints.
-- [x] **319 requirements** written (190 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
-      259 functional and 60 non-functional; counts derived by counting rows, not estimated.
-      Includes the **FR-TER-\*** territory domain added when PD-004 was approved.
-- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 196 criteria
-      covering all 190 P0 requirements; coverage verified programmatically, none missing.
+- [x] **325 requirements** written (196 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
+      265 functional and 60 non-functional; counts derived by counting rows, not estimated.
+      Includes the **FR-TER-\*** territory domain (PD-004) and the **FR-OPR-\*** operator-model
+      domain (PD-008).
+- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 202 criteria
+      covering all 196 P0 requirements; coverage verified programmatically, none missing.
 - [x] **30 edge cases** defined across every critical domain.
 - [x] **25 user and operator flows** specified with happy, alternate, and failure paths.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **95 product decisions recorded** — none silently chosen — of which **1 is APPROVED
-      (PD-004)**, **25 remain blocking**, and **25 require legal verification** (counts
-      corrected 2026-08-13 from the estimates first published; see `DECISIONS.md`
+- [x] **95 product decisions recorded** — none silently chosen — of which **2 are APPROVED
+      (PD-004, PD-008)**, **24 remain blocking**, and **25 require legal verification**
+      (counts corrected 2026-08-13 from the estimates first published; see `DECISIONS.md`
       register summary).
 - [x] `docs/product/DECISION_BRIEF.md` prepared for the product owner: the three primary
       decisions analysed across 22 dimensions each, all blocking decisions summarized
@@ -237,6 +238,12 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       §A28, `USER_FLOWS.md`, `FEATURE_MATRIX.md`, and `docs/legal/DECISION_LOG.md` L-008/L-009.
       The three-concept separation (app distribution / service availability / content
       rights) is now binding, and playback authorization carries an **eleventh check**.
+- [x] **PD-008 APPROVED and propagated** (2026-08-13): **Option A — single-tenant KMS TV**,
+      one operator, one product. Multi-tenancy, white-label, and SaaS operator platform are
+      **OUT OF SCOPE**. Recorded in `DECISIONS.md`, `DECISION_BRIEF.md`, `PRODUCT_SPEC.md`
+      §1.2, `REQUIREMENTS.md` §A29 (FR-OPR-01…06), `USER_FLOWS.md`, `FEATURE_MATRIX.md`,
+      and `docs/legal/DECISION_LOG.md` L-010. **TENANCY ≠ TERRITORY** stated explicitly
+      wherever both appear.
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -253,8 +260,9 @@ commit and push to `claude/kms-tv-step-0-audit-peahvj`, then **STOP** and report
 
 Phase 1 will be marked **COMPLETE** only by explicit human confirmation after review, and
 **only once the blocking decisions it surfaced are resolved.** **PD-004 is now APPROVED**;
-**PD-008** (multi-tenancy) and **PD-092** (launch platform scope) still gate Phase 3, and
-**PD-095** (travelling-subscriber policy, arising from PD-004) now gates Phase 4. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
+**PD-004 and PD-008 are now APPROVED.** **PD-092** (launch platform scope) is the **only
+remaining Phase 3 blocker**, and **PD-095** (travelling-subscriber policy, arising from
+PD-004) gates Phase 4. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
 
 ---
 
@@ -270,7 +278,7 @@ answered first are:
 | ID | Decision | Gates |
 |---|---|---|
 | ~~PD-004~~ | ~~Target territories~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable |
-| **PD-008** | Multi-tenancy: one operator or several | Phase 3 — the most expensive decision on the register to defer; retrofitting touches every table, query, and authorization check |
+| ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **APPROVED 2026-08-13** — Option A, single-tenant, one operator. Multi-tenancy, white-label, and SaaS operator platform out of scope |
 | **PD-092** | Launch platform scope and order | Phase 3 — determines client sequence, certification lead times, device procurement, and whether B-004 (Apple toolchain) is on the critical path |
 | **PD-095** | Travelling-subscriber policy — home vs. current territory in authorization | Phase 4 — determines whether an account carries a home territory distinct from its determined current territory |
 
@@ -326,6 +334,8 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-015 | 2026-08-13 | **PD-004 APPROVED · FINAL — launch territory Georgia; multi-territory architecture; future territories configurable.** App distribution, service availability, and content rights are three separate concepts that MUST NOT be merged. | **Accepted — product owner decision** | The first product decision taken. Territory becomes a determinate input for PD-081, PD-035, PD-054, PD-075 and others, all of which remain [LEGAL] and open. Recorded in `docs/legal/DECISION_LOG.md` L-008 and L-009. |
 | D-016 | 2026-08-13 | Playback authorization gains an **eleventh check — service availability** — evaluated separately from content rights, with a distinct denial reason code. | **Accepted — consequence of D-015** | Required by PD-004 item 15. Merging service availability into the content-rights check would make "licensed here but not served here" and "served here but not licensed here" indistinguishable; the second is how unlicensed distribution happens. |
 | D-017 | 2026-08-13 | Two consequential decisions recorded rather than defaulted: **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy, blocking Phase 4). | **Accepted** | The three-concept separation raises both; the approval answers neither. `CLAUDE.md` §1 prohibits silently choosing them. |
+| D-018 | 2026-08-13 | **PD-008 APPROVED · FINAL — Option A, single-tenant KMS TV. One operator, one product.** Multi-tenancy, white-label, and SaaS operator platform are **OUT OF SCOPE**. No tenant concept, no `tenant_id`, no tenant abstractions, no speculative multi-tenancy infrastructure. | **Accepted — product owner decision** | Second product decision taken, and **stricter than the Option-B recommendation** in `DECISION_BRIEF.md`. Closes the register's only rewrite-class risk by decision rather than by migration path. Recorded in `docs/legal/DECISION_LOG.md` L-010. |
+| D-019 | 2026-08-13 | **TENANCY ≠ TERRITORY** is stated explicitly wherever both appear. Single-tenancy does not constrain territory support; territory support introduces no tenancy. | **Accepted — consequence of D-018** | One operator serving several territories is the approved model and requires no tenancy concept. Conflating them would either block PD-004's multi-territory requirement or smuggle tenancy in under a territory label. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
 The 93 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
@@ -348,8 +358,8 @@ The three decisions to answer first, because they gate Phase 3 and much of Phase
 
 1. **PD-004 — target territories.** Determines rights, geo-enforcement, applicable privacy
    law, tax, payment methods, and content classification. The largest single unknown.
-2. **PD-008 — multi-tenancy.** One operator or several. The most expensive decision here
-   to defer; either answer is fine, silence is not.
+2. ~~**PD-008 — multi-tenancy.**~~ ✅ **APPROVED** — Option A, single-tenant. The register's
+   only rewrite-class risk is now closed by decision.
 3. **PD-092 — launch platform scope.** Determines client sequence, certification lead
    times, device procurement, and whether the Apple toolchain blocker (B-004) sits on the
    critical path.
@@ -367,7 +377,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004 APPROVED**; 25 blocking decisions open |
+| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004 and PD-008 APPROVED**; 24 blocking decisions open |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

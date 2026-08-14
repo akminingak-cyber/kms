@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.1
-**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved)
+**Version:** 1.2
+**Date:** 2026-08-13 (rev. 1.2 — PD-004 and PD-008 approved)
 **Source:** `PRODUCT_SPEC.md` · `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -511,4 +511,4 @@ finalized until at least the following are resolved:
 | PD-046 / PD-047 | Player and concurrency display behaviour |
 | PD-035 | Maturity scheme — affects every entitlement-filtered surface |
 | PD-076 | In-app purchase — reshapes the commerce rows on mobile and TV |
-| PD-008 | Multi-tenancy — architectural; affects every backend row |
+| ~~PD-008~~ | **APPROVED** — Option A, single-tenant, one operator. Multi-tenancy, white-label, and SaaS operator platform OUT OF SCOPE. No matrix row is tenant-scoped, and none may become so |

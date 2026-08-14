@@ -1,9 +1,9 @@
 # REQUIREMENTS.md — KMS TV Requirements and Acceptance Criteria
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004 APPROVED (territories)**
-**Version:** 1.1
-**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved: territory domain added)
+**Status:** DRAFT — awaiting product approval · **PD-004 and PD-008 APPROVED**
+**Version:** 1.2
+**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved: operator-model domain added)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -39,7 +39,7 @@ with no recommendations engine is merely plainer.
 `PRODUCT_SPEC.md` §0.1.
 
 ### 0.4 Coverage rule
-**Acceptance criteria are provided for every P0 requirement**, per the brief — all 190 of
+**Acceptance criteria are provided for every P0 requirement**, per the brief — all 196 of
 them. They appear in two places:
 
 - **In the domain sections (Parts A and B)** for the P0 requirements whose criteria
@@ -88,7 +88,8 @@ estimated.
 | Accessibility (A11Y) | 4 | 3 | 1 | 0 | 8 |
 | Errors (ERR) | 4 | 1 | 0 | 0 | 5 |
 | **Territories (TER)** — *added rev. 1.1* | **8** | **6** | **0** | **0** | **14** |
-| **Functional total** | **143** | **89** | **21** | **6** | **259** |
+| **Operator model (OPR)** — *added rev. 1.2* | **6** | **0** | **0** | **0** | **6** |
+| **Functional total** | **149** | **89** | **21** | **6** | **265** |
 | Security (NFR-SEC) | 14 | 2 | 0 | 0 | 16 |
 | Privacy (NFR-PRV) | 8 | 2 | 1 | 0 | 11 |
 | Performance (NFR-PER) | 9 | 3 | 0 | 0 | 12 |
@@ -96,11 +97,11 @@ estimated.
 | Observability (NFR-OBS) | 7 | 2 | 0 | 0 | 9 |
 | Availability (NFR-AVL) | 3 | 1 | 0 | 0 | 4 |
 | **Non-functional total** | **47** | **12** | **1** | **0** | **60** |
-| **GRAND TOTAL** | **190** | **101** | **22** | **6** | **319** |
+| **GRAND TOTAL** | **196** | **101** | **22** | **6** | **325** |
 
 **Where the P0 weight sits.** Playback authorization (11), Rights (9), Security (14),
 Admin (12), Account (11), Privacy (8), and Territories (8) together account for 73 of the
-190 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
+196 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
 none. That distribution is the specification's central claim about this product: the
 launch-critical work is authorization, rights, and accountability, not features.
 
@@ -1192,6 +1193,65 @@ GIVEN a person in a territory where the service is unavailable
 WHEN the "not available yet" state is displayed
 THEN it contains no reference to VPNs, proxies, location changes, or any other means of
 obtaining access.
+
+---
+
+## A29. Operator model (OPR)
+
+Arising from **PD-008 — APPROVED · FINAL** (2026-08-13): Option A, single-tenant. One
+operator, one product. `PRODUCT_SPEC.md` §1.2 governs.
+
+These requirements are unusual in that most are **prohibitions**. That is deliberate: the
+approval's substance is what must *not* be built, and an unbuilt thing needs a stated
+requirement or it gets built anyway "just in case".
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-OPR-01 | KMS TV serves **one operator**. There is one service, one admin control plane, one content/rights domain, one subscription system, one payment domain, and one analytics domain. | **P0** |
+| FR-OPR-02 | **No tenant concept exists in the product.** No `tenant_id` or equivalent discriminator is introduced for hypothetical future use, and no artificial tenant abstraction is created. | **P0** |
+| FR-OPR-03 | Authorization, billing, content management, caching, storage paths, and analytics are **not** tenant-aware. | **P0** |
+| FR-OPR-04 | Multi-operator administration and white-label functionality are **not implemented**. | **P0** |
+| FR-OPR-05 | No speculative multi-tenancy infrastructure is built. Future multi-tenancy does not influence the current data model unless a concrete requirement requires it. | **P0** |
+| FR-OPR-06 | Tenancy and territory are distinct concepts. Single-tenancy does **not** constrain territory support, and territory support does **not** introduce tenancy. | **P0** |
+
+**Acceptance criteria**
+
+`AC-FR-OPR-01-1`
+GIVEN the deployed product
+WHEN its administrative surface, catalogue, rights domain, subscription system, payment
+domain, and analytics are inspected
+THEN exactly one of each exists
+AND none is partitioned by operator.
+
+`AC-FR-OPR-02-1`
+GIVEN the complete data model and codebase
+WHEN searched for a tenant discriminator — `tenant_id`, `organisation_id` used as a tenancy
+key, or an equivalent — used to partition operator data
+THEN no occurrence exists
+AND the check is part of the CI gate.
+
+`AC-FR-OPR-03-1`
+GIVEN any authorization decision, billing operation, content operation, cache key, storage
+path, or analytics event
+WHEN it is inspected
+THEN no tenant dimension participates in it.
+
+`AC-FR-OPR-04-1`
+GIVEN the Admin Control Center
+WHEN its capabilities are enumerated
+THEN no capability administers a second operator, and no white-label or per-operator
+branding capability exists.
+
+`AC-FR-OPR-05-1`
+GIVEN any component introduced during implementation
+WHEN it is reviewed against PD-008
+THEN it contains no abstraction whose only justification is possible future multi-tenancy.
+
+`AC-FR-OPR-06-1`
+GIVEN the approved model of one operator serving multiple territories
+WHEN a second territory is added per FR-TER-07
+THEN it is added through territory configuration alone
+AND **no tenant is created, and no tenancy concept is required**.
 
 ---
 

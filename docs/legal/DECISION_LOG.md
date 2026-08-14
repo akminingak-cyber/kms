@@ -110,6 +110,45 @@ the *Decisions* section of `PROJECT_STATE.md`.
 - **Recorded by:** Engineering agent
 - **Status:** Accepted
 
+### L-011 — Travelling subscribers: subscription follows the subscriber; territory rights unchanged
+- **Date:** 2026-08-13
+- **Phase:** 1
+- **Decision:** The product owner has approved **PD-095 — Option A**. An active subscription
+  remains associated with the subscriber while travelling, but **confers no content access
+  by itself**. Access remains subject to the **current** territory, service availability,
+  applicable content rights, package entitlement, playback authorization, and platform or
+  device policy.
+- **Rationale for recording here:** the decision draws a line that matters legally.
+  **Subscription ownership is a commercial relationship with the subscriber; content
+  distribution rights are a territorial grant from a rights holder.** The approval keeps
+  them separate, so a subscription can never be construed as a licence to receive content
+  in a territory the operator has no rights for. This is precisely the confusion that
+  produces unlicensed distribution, and the approval forecloses it.
+- **Consistent with:** L-002 (distribution modes granted independently) and L-009 (service
+  availability and content rights are independent conditions). PD-095 adds a third
+  independence: **subscription validity is independent of territorial content rights.**
+- **Alternatives considered:** home territory governs access; per-rights-agreement
+  configuration; explicit travel allowance with a defined duration. Recorded in
+  `docs/product/DECISIONS.md` PD-095.
+- **Legal review required:** **yes — for the aspects the approval deliberately left open.**
+  Outstanding and unresolved by this decision:
+  - whether any applicable law or contract requires or restricts cross-border access for
+    subscribers temporarily present in another territory
+  - whether individual rights agreements permit reception outside the licensed territory in
+    any circumstance
+  - consumer-law and contract-term implications of a subscription whose usable content
+    varies by location
+  - privacy implications of determining a subscriber's current territory, which is location
+    data (see PD-081, PD-086)
+- **Legal review status:** pending — required before Phase 15 (playback authorization), and
+  informed by PD-081.
+- **[UNVERIFIED]** No claim is made about the law of any jurisdiction, nor about what any
+  rights agreement permits. **No roaming duration, country list, percentage-of-time rule,
+  VPN or IP rule, or travel-specific device restriction is defined or assumed** — the
+  approval prohibits inventing them.
+- **Recorded by:** Engineering agent, on the product owner's decision
+- **Status:** Accepted
+
 ### L-010 — Single-operator product; not a SaaS platform for third parties
 - **Date:** 2026-08-13
 - **Phase:** 1

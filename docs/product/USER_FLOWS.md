@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.2
-**Date:** 2026-08-13 (rev. 1.2 — PD-008 approved: multi-tenant onboarding out of scope)
+**Version:** 1.3
+**Date:** 2026-08-13 (rev. 1.3 — PD-095 approved: UF-26 travelling subscriber added)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -52,6 +52,7 @@ lives.
 | UF-23 | Admin — content publishing | Content Manager | P0 |
 | UF-24 | Admin — rights expiration management | Administrator | P0 |
 | UF-25 | Admin — playback session investigation | Support / Operations | P0 |
+| **UF-26** | **Travelling subscriber** | Subscriber | **P0** |
 
 ---
 
@@ -1076,6 +1077,78 @@ overridden while the window is closed (FR-CHN-05).
 
 ---
 
+## UF-26 — Travelling subscriber
+
+**Actor** Subscriber · **Priority** P0
+**Precondition** Active subscription · **Trigger** The subscriber is present in a territory
+other than the one where they normally view
+**Governing decision** PD-095 — APPROVED · FINAL. `PRODUCT_SPEC.md` §2.3.2.
+
+### Core principle
+**Subscription ownership is separate from content territory rights.** The subscription
+follows the subscriber; it is never a universal content license.
+
+### Happy path — service available, content licensed
+1. Subscriber opens the application in another territory.
+2. Session and device are unchanged — **the subscription remains `active`**. No state
+   transition occurs because of the change of territory alone.
+3. The backend determines the **current territory server-side**. Client-supplied location is
+   not authoritative, and the subscriber's home territory is not substituted for it.
+4. **Service availability** is evaluated for the current territory. It is available.
+5. The catalogue is filtered for the **current** territory — content licensed there appears,
+   content licensed only elsewhere does not.
+6. Subscriber selects an asset; playback authorization runs all eleven checks (§12.1),
+   reading the **current** territory in checks 6, 9, and 11.
+7. **Content rights cover the current territory** for this asset, mode, and device class.
+8. Authorization succeeds; playback starts; the decision is logged as compliance evidence
+   including the determined territory.
+
+### Alternate paths
+- **A1 — Subscriber returns home.** Territory is re-determined; the full catalogue for the
+  home territory becomes available again. The subscription was never interrupted.
+- **A2 — Territory changes mid-session.** The next authorization evaluates the new current
+  territory. Behaviour for a session in progress follows the same policy as any
+  authorization-input change.
+- **A3 — Package differs by territory.** Package eligibility is territory-scoped (FR-TER-08);
+  what is offered may differ from the home territory even where service is available.
+
+### Failure paths
+- **F1 — Service not available in the current territory.** Denied with
+  `SERVICE_NOT_AVAILABLE`, per the service-availability policy — **distinct** from a rights
+  denial. The exact message and recovery flow **may be defined later** (PD-095).
+- **F2 — Content not licensed in the current territory.** Denied with
+  `TERRITORY_RESTRICTED`. Neutral message. **No workaround is offered, suggested, or
+  hinted at** — this holds with particular force here, because a travelling subscriber is
+  exactly the viewer most likely to go looking for one.
+- **F3 — Package does not include the asset in this territory.** Denied with
+  `NOT_IN_PACKAGE`.
+- **F4 — Platform or device policy excludes it.** Denied with
+  `DEVICE_CLASS_NOT_PERMITTED`.
+- **F5 — Subscription lapses while travelling.** Ordinary subscription handling applies
+  (UF-17); travel neither accelerates nor delays it.
+
+### Explicitly not specified
+**No roaming limit of any kind exists in this flow.** PD-095 defines **none** of: maximum
+roaming days · maximum travel duration · country lists · percentage-of-time rules ·
+mandatory re-authentication intervals · VPN rules · IP thresholds · travel-specific device
+restrictions. **The flow must not be read as implying any of them.** Later decisions and
+applicable legal and business requirements may define them.
+
+**Location-detection technology is not specified.** **[UNVERIFIED]** No method, accuracy,
+or provider is assumed. Territory evaluation collects no unnecessary location data (§33).
+
+### Invariants
+- The subscription follows the subscriber; the **content** does not.
+- The **current** territory governs, determined server-side, never client-supplied.
+- Home-territory availability implies nothing about availability elsewhere.
+- `SERVICE_NOT_AVAILABLE` and `TERRITORY_RESTRICTED` remain distinct and are never used
+  interchangeably.
+
+**Requirements** FR-TRV-01…FR-TRV-07, FR-TER-04, FR-TER-05, FR-TER-06, FR-AUT-02,
+FR-AUT-03, NFR-PRV-01
+
+---
+
 ## Appendix A — Cross-flow invariants
 
 These hold in **every** flow above. A flow that violates one is specified incorrectly.
@@ -1097,6 +1170,8 @@ These hold in **every** flow above. A flow that violates one is specified incorr
 | 13 | Entitlement changes invalidate caches immediately | `CLAUDE.md` §19 |
 | 14 | Authentication responses never enable account enumeration | `CLAUDE.md` §7 |
 | 15 | "You may not" is never confused with "we could not" | `PRODUCT_SPEC.md` §11.3 |
+| 16 | An active subscription is never a universal content license | `PRODUCT_SPEC.md` §2.3.2 (PD-095) |
+| 17 | The **current** territory governs, determined server-side — never the home territory, never client-supplied | `PRODUCT_SPEC.md` §2.3.2 (PD-095) |
 
 ## Appendix B — Flows deliberately not specified
 
@@ -1110,4 +1185,5 @@ These hold in **every** flow above. A flow that violates one is specified incorr
 | Support impersonation | Depends on PD-022 |
 | Social login | Depends on PD-033 |
 | Transactional purchase (PPV) | Depends on PD-007 |
+| Roaming limits / travel duration rules | **Deliberately undefined** — PD-095 approved with no roaming limit of any kind. Not deferred to a named decision; simply not part of the product unless separately approved |
 | ~~Multi-tenant operator onboarding~~ | **OUT OF SCOPE** — PD-008 APPROVED (Option A, single-tenant). Not deferred; excluded. Any future revisit is a new architectural decision with its own ADR |

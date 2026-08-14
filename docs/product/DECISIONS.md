@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **3 APPROVED (PD-004, PD-008, PD-092)**
-**Version:** 1.3
-**Date:** 2026-08-13 (PD-092 approved and recorded)
+**Status:** OPEN — awaiting product owner decisions · **4 APPROVED (PD-004, PD-008, PD-092, PD-095)**
+**Version:** 1.4
+**Date:** 2026-08-13 (PD-095 approved and recorded)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -47,7 +47,7 @@ approved, so the blocking and legal columns count **open** decisions only.
 
 | Category | Decisions | Blocking (open) | Legal (open) |
 |---|---:|---:|---:|
-| 1. Product identity and market | 7 | 3 | 2 |
+| 1. Product identity and market | 7 | 2 | 1 |
 | 2. Business model and commerce | 23 | 5 | 6 |
 | 3. Identity and account | 13 | 2 | 2 |
 | 4. Profiles and parental control | 5 | 1 | 2 |
@@ -58,23 +58,30 @@ approved, so the blocking and legal columns count **open** decisions only.
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
 | 11. Platform and technical | 8 | 4 | 0 |
-| **Total (unique decisions)** | **95** | **23** | **25** |
+| **Total (unique decisions)** | **95** | **22** | **24** |
 
-**Decided so far: 3 of 95.**
+**Decided so far: 4 of 95.**
 
 | ID | Decision | Status |
 |---|---|---|
 | **PD-004** | Target territories — **Georgia launch, multi-territory architecture, future territories configurable** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-008** | Multi-tenancy — **Option A, single-tenant. One operator, one product. Multi-tenancy, white-label, and SaaS operator platform all OUT OF SCOPE** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-092** | Launch platform scope — **Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x** | **APPROVED · FINAL** (2026-08-13) |
+| **PD-095** | Travelling-subscriber policy — **Option A. Subscription follows the subscriber; current territory, service availability, and content rights remain authoritative** | **APPROVED · FINAL** (2026-08-13) |
 
-**All three Phase 3 blocking decisions are now approved.** Phase 3 (System architecture)
-has **no remaining blocking decisions**. Phase 4 still requires PD-035, PD-095, and the
-structural part of PD-013/PD-049.
+**Phase 3 (System architecture) has no remaining blocking decisions.** Phase 4 still
+requires **PD-035** (classification scheme) and the structural part of PD-013/PD-049.
 
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.4 changes.** PD-095 approved and recorded (§1): Option A, subscription follows
+the subscriber. Open blocking 23 → 22; approved 3 → 4. The approval **answers the policy
+question the brief declined to answer** and settles which territory the existing
+authorization checks use — **the current territory, determined server-side**. It adds **no
+twelfth authorization check**, and explicitly defines **no** roaming duration, country list,
+or location-detection technology.
 
 **Version 1.3 changes.** PD-092 approved and recorded (§11): Option B, three launch
 clients. Open blocking 24 → 23; approved 2 → 3. The approval **confirms** the Option-B
@@ -215,23 +222,101 @@ deliberately separated it from service availability precisely so it could be tak
 own merits.
 **Status:** OPEN · Arising from PD-004 · Required by Phase 19.
 
-### PD-095 — Travelling-subscriber policy **[BLOCKING — Phase 4] [LEGAL]**
-When a subscriber of a served territory is temporarily present in another territory, what
-may they watch — and does authorization evaluate their **home** territory, their **current**
-territory, or both?
-**Why it matters.** This is a data-model question before it is a policy question: it
-determines whether an account carries a home territory distinct from its current
-determined territory, which is a Phase 4 decision. Content rights are granted per
-territory of *reception*, so the safe default is that the current territory governs — but
-some agreements are written differently, and the answer may be dictated by contract.
-**Options.** Current territory governs (deny anything not licensed where the viewer is) ·
-home territory governs · per-rights-agreement configuration · explicit travel allowance
-with a defined duration.
-**RECOMMENDATION — NOT APPROVED:** on the policy, none — it is [LEGAL] and
-contract-dependent. On the **model**, carry both a home territory on the account and a
-determined current territory on each authorization, because a model with only one of them
-cannot express any of the options above.
-**Status:** OPEN · Arising from PD-004 · Required before Phase 4.
+### PD-095 — Travelling-subscriber policy — **APPROVED · FINAL**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-095** |
+| **Decision** | **Option A — Subscription follows the subscriber** |
+| **Status** | **APPROVED** |
+| **Policy** | **Subscription follows subscriber** |
+| **Restriction** | **Current territory + service availability + content rights remain authoritative** |
+| **Exact roaming duration** | **NOT DEFINED** |
+| **Specific countries** | **NOT DEFINED** |
+| **Location-detection technology** | **NOT DEFINED** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-13 |
+
+**The decision as approved.** An active KMS TV subscription **remains associated with the
+subscriber while travelling**. It does **NOT** automatically grant access to every KMS TV
+service or every piece of content in every territory.
+
+Access remains subject to all six of:
+
+1. **Current territory**
+2. **KMS TV service availability** in that territory
+3. **Applicable content rights** in that territory
+4. **Package entitlement**
+5. **Playback authorization**
+6. **Any applicable platform/device policy**
+
+**Core principle (binding).**
+
+> **SUBSCRIPTION OWNERSHIP is separate from CONTENT TERRITORY RIGHTS.**
+
+A subscriber travelling from Georgia to another territory retains an active subscription.
+The platform then determines whether the requested service and content are available in
+the subscriber's **current** territory.
+
+| Worked example (from the approval) | |
+|---|---|
+| Subscriber home territory | Georgia |
+| Current territory | USA |
+| Subscription | **ACTIVE** — it follows the subscriber |
+| Requested content **has** applicable rights in the USA | → playback **may be allowed** |
+| Requested content **has no** applicable rights in the USA | → playback **must be denied** |
+
+**The USA appears here only because the approval used it to illustrate the principle. It is
+not a planned territory**, and no territory beyond Georgia is named, planned, or assumed —
+consistent with PD-004, which carries the same disclaimer.
+
+**An active subscription is not a universal content license.** Content available in the
+subscriber's home territory is **not** automatically available while travelling.
+
+**Service availability.** The current territory is evaluated against KMS TV service
+availability (PD-004). If the service is not available in the current territory, access is
+denied per the service-availability policy. The exact user-facing message and recovery flow
+**may be defined later**.
+
+**Content rights remain territory-aware.** A channel or content item may be AVAILABLE in
+Georgia and UNAVAILABLE in another territory. The product model supports this (FR-TER-05,
+`AC-FR-TER-05-1`).
+
+**Nothing about roaming limits is invented.** The following are **explicitly NOT defined**
+by this approval and **MUST NOT be assumed** unless separately approved as product
+decisions: maximum roaming days · maximum travel duration · country lists ·
+percentage-of-time rules · mandatory re-authentication intervals · VPN rules · IP
+thresholds · device restrictions specific to travel. These may be set by later decisions
+and by applicable legal and business requirements.
+
+**Privacy.** Territory evaluation follows the platform's privacy and data-minimization
+requirements (`CLAUDE.md` §18, NFR-PRV-01). **Unnecessary location data must not be
+collected.** **No geolocation technology is defined** — the mechanism for determining the
+current territory is an implementation decision for a later phase, and remains
+**[UNVERIFIED]**: no method, accuracy, or provider is assumed anywhere.
+
+**Effect on playback authorization — a refinement, not a new check.** The eight inputs the
+approval requires at playback time (subscriber account state · subscription state · package
+entitlement · current territory · service availability · content rights · device/platform
+policy · playback policy) all map onto the **existing eleven checks** in
+`PRODUCT_SPEC.md` §12.1. PD-095 adds no twelfth check. What it settles is **which**
+territory those checks use: **the current territory, determined server-side at
+authorization time — never the home territory, and never a client-supplied value.**
+
+**Data-model consequence.** The subscription is **not territory-bound for validity**: it
+persists across territories rather than lapsing or suspending on travel. Each authorization
+carries a **determined current territory**. Whether an account additionally records a home
+territory for *commercial* purposes — pricing, tax, package eligibility, all territory-
+scoped under PD-004 — follows from PD-013, PD-014, and PD-054 and is **not decided here**.
+
+**Compatibility.** Compatible with **PD-004** — PD-095 builds directly on its three-concept
+separation (app distribution / service availability / content rights) and on its
+territory-aware rights model. Compatible with **PD-008** — travelling concerns one
+subscriber of the single operator and introduces no tenancy. Neither decision is modified.
+
+**Recorded in:** `PRODUCT_SPEC.md` §2.3.2 and §12 · `REQUIREMENTS.md` §A31 (FR-TRV-01…07) ·
+`USER_FLOWS.md` UF-26 · `FEATURE_MATRIX.md` §12 · `docs/legal/DECISION_LOG.md` L-011 ·
+`PROJECT_STATE.md` §7 D-023.
 
 ### PD-077 — Rationale for Spanish
 Georgian (primary), English, and Russian form a coherent set. Spanish alongside them is
@@ -942,7 +1027,7 @@ practical output of this register.
 |---|---|
 | **Phase 2** (Requirements) | PD-003, PD-077 — segments and language rationale shape priority |
 | **Phase 3** (Architecture) | ~~PD-004~~ **APPROVED** · ~~PD-008~~ **APPROVED** · ~~PD-092~~ **APPROVED — Option B, Web + Android + Android TV at launch** — ✅ **no blocking decisions remain for Phase 3** |
-| **Phase 4** (Database) — added | **PD-095** (travelling-subscriber policy — determines whether an account carries a home territory) |
+| **Phase 4** (Database) — added | ~~PD-095~~ **APPROVED — subscription follows the subscriber; current territory authoritative at authorization** |
 | **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
 | **Phase 4** (Database) | PD-035 (rating scheme), PD-049 (add-ons vs tiers), PD-013 (package structure) |
 | **Phase 6** (Security & threat model) | PD-081 (privacy regimes), PD-026 (revocation interval) |

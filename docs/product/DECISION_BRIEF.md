@@ -2,9 +2,9 @@
 
 **Prepared for:** Product owner
 **Phase:** 1 — Product specification (STEP 1 complete, awaiting decisions)
-**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004, PD-008, PD-092 APPROVED**
-**Version:** 1.3
-**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved and recorded)
+**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004, PD-008, PD-092, PD-095 APPROVED**
+**Version:** 1.4
+**Date:** 2026-08-13 (rev. 1.4 — PD-095 approved and recorded)
 **Source register:** `docs/product/DECISIONS.md` — IDs and wording taken from it verbatim
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -21,7 +21,12 @@ law, it is flagged **[LEGAL]** and must be verified by qualified advisors.
 **[UNVERIFIED]** marks a third-party fact not read from a primary source, per
 `CLAUDE.md` §1.
 
-### 0.1 Current state — 3 approved, 23 blocking decisions open
+### 0.1 Current state — 4 approved, 22 blocking decisions open
+
+**Revision 1.4.** **PD-095 is APPROVED — Option A, subscription follows the subscriber.**
+An active subscription is never a universal content license; current territory, service
+availability, and content rights remain authoritative. Roaming limits and location-detection
+technology are **not defined**. Blocking count 23 → **22 open**.
 
 **Revision 1.3.** **PD-092 is APPROVED — Option B.** v1.0 ships Web + Android + Android TV;
 iOS/iPadOS, Samsung Tizen, and LG webOS follow in v1.x. Blocking count 24 → **23 open**.
@@ -46,13 +51,12 @@ correctly flagged in its own text and in `DECISIONS.md` §12 from the start.
 
 ### 0.2 The blocking decisions
 
-**Resolved (3):** ~~`PD-004`~~ · ~~`PD-008`~~ · ~~`PD-092`~~ — all **APPROVED · FINAL**, 2026-08-13
+**Resolved (4):** ~~`PD-004`~~ · ~~`PD-008`~~ · ~~`PD-092`~~ · ~~`PD-095`~~ — all **APPROVED · FINAL**, 2026-08-13
 
-**Open (23):**
+**Open (22):**
 `PD-001` · `PD-005` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
 `PD-035` · `PD-037` · `PD-038` · `PD-040` · `PD-044` · `PD-051` · `PD-055` · `PD-056` ·
-`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-093` ·
-**`PD-094`** · **`PD-095`**
+`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-093` · **`PD-094`**
 
 ### 0.3 Confidence scale used in this brief
 
@@ -91,7 +95,8 @@ correctly flagged in its own text and in `DECISIONS.md` §12 from the start.
 > authorization check** (service availability, distinct from content rights).
 >
 > Two consequential decisions arise and remain open: **PD-094** (app distribution scope) and
-> **PD-095** (travelling-subscriber policy, required before Phase 4).
+> **PD-095** (travelling-subscriber policy) — ✅ **since APPROVED 2026-08-13: Option A,
+> subscription follows the subscriber, current territory authoritative.**
 >
 > The analysis below is retained as the record of what was considered. Sections 5–7 are
 > superseded by the approval; the consequence analysis in sections 8–20 remains accurate
@@ -1094,7 +1099,7 @@ Every blocking decision classified **A**, **B**, or **C**.
 |---|---|---|
 | **PD-001** | Product identity and the pre-existing scaffold | Repository must be coherent before any code lands beside it. Also gates D-009 (web framework), which is a Phase 3 output |
 | ~~PD-004~~ | ~~Target territories~~ | ✅ **RESOLVED** — approved 2026-08-13 |
-| **PD-095** | Travelling-subscriber policy *(new, from PD-004)* | Determines whether an account carries a home territory distinct from its determined current territory — a Phase 4 data-model question |
+| ~~PD-095~~ | ~~Travelling-subscriber policy~~ | ✅ **RESOLVED** — approved 2026-08-13, Option A. Subscription follows the subscriber; the **current** territory governs at authorization |
 | ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **RESOLVED** — approved 2026-08-13, Option A single-tenant |
 | ~~PD-092~~ | ~~Launch platform scope~~ | ✅ **RESOLVED** — approved 2026-08-13, Option B |
 | **PD-035** | Content rating / maturity scheme | The Phase 4 data model must carry a scheme identifier alongside the rating value. Retrofitting a second scheme into a single-scheme model is a migration across every rated asset |
@@ -1150,10 +1155,10 @@ It means only that the *later* answer does not invalidate *earlier* work.
 
 | Class | Count | IDs |
 |---|---:|---|
-| **A — before architecture** | 5 open | PD-001, ~~PD-004 (RESOLVED)~~, ~~PD-008 (RESOLVED)~~, ~~PD-092 (RESOLVED)~~, PD-031, PD-035, PD-081, **PD-095** |
+| **A — before architecture** | 4 open | PD-001, ~~PD-004~~, ~~PD-008~~, ~~PD-092~~, ~~PD-095~~ *(all RESOLVED)*, PD-031, PD-035, PD-081 |
 | **B — before implementation** | 15 | PD-005, PD-013, PD-014, PD-026, PD-037, PD-038, PD-040, PD-044, PD-051, PD-055, PD-056, PD-074, PD-088, PD-093, **PD-094** |
 | **C — deferrable** | 3 | PD-087, PD-089, PD-090 |
-| **Total** | **23 open** (PD-004, PD-008, PD-092 resolved; PD-094 and PD-095 added) | |
+| **Total** | **22 open** (PD-004, PD-008, PD-092, PD-095 resolved; PD-094 added) | |
 
 ---
 

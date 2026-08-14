@@ -1,9 +1,9 @@
 # REQUIREMENTS.md — KMS TV Requirements and Acceptance Criteria
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092 APPROVED**
-**Version:** 1.3
-**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved: platform-scope domain added)
+**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092, PD-095 APPROVED**
+**Version:** 1.4
+**Date:** 2026-08-13 (rev. 1.4 — PD-095 approved: travelling-subscriber domain added)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -39,7 +39,7 @@ with no recommendations engine is merely plainer.
 `PRODUCT_SPEC.md` §0.1.
 
 ### 0.4 Coverage rule
-**Acceptance criteria are provided for every P0 requirement**, per the brief — all 205 of
+**Acceptance criteria are provided for every P0 requirement**, per the brief — all 212 of
 them. They appear in two places:
 
 - **In the domain sections (Parts A and B)** for the P0 requirements whose criteria
@@ -90,7 +90,8 @@ estimated.
 | **Territories (TER)** — *added rev. 1.1* | **8** | **6** | **0** | **0** | **14** |
 | **Operator model (OPR)** — *added rev. 1.2* | **6** | **0** | **0** | **0** | **6** |
 | **Platform scope (PLT)** — *added rev. 1.3* | **9** | **0** | **0** | **0** | **9** |
-| **Functional total** | **158** | **89** | **21** | **6** | **274** |
+| **Travelling subscribers (TRV)** — *added rev. 1.4* | **7** | **0** | **0** | **0** | **7** |
+| **Functional total** | **165** | **89** | **21** | **6** | **281** |
 | Security (NFR-SEC) | 14 | 2 | 0 | 0 | 16 |
 | Privacy (NFR-PRV) | 8 | 2 | 1 | 0 | 11 |
 | Performance (NFR-PER) | 9 | 3 | 0 | 0 | 12 |
@@ -98,11 +99,11 @@ estimated.
 | Observability (NFR-OBS) | 7 | 2 | 0 | 0 | 9 |
 | Availability (NFR-AVL) | 3 | 1 | 0 | 0 | 4 |
 | **Non-functional total** | **47** | **12** | **1** | **0** | **60** |
-| **GRAND TOTAL** | **205** | **101** | **22** | **6** | **334** |
+| **GRAND TOTAL** | **212** | **101** | **22** | **6** | **341** |
 
 **Where the P0 weight sits.** Playback authorization (11), Rights (9), Security (14),
 Admin (12), Account (11), Privacy (8), and Territories (8) together account for 73 of the
-205 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
+212 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
 none. That distribution is the specification's central claim about this product: the
 launch-critical work is authorization, rights, and accountability, not features.
 
@@ -1332,6 +1333,75 @@ WHEN each capability named in FR-PLT-09 is exercised using directional keys, OK,
 only
 THEN every capability is reachable and operable
 AND each meets its approved product requirement.
+
+---
+
+## A31. Travelling subscribers (TRV)
+
+Arising from **PD-095 — APPROVED · FINAL** (2026-08-13): Option A, subscription follows the
+subscriber. `PRODUCT_SPEC.md` §2.3.2 governs.
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-TRV-01 | An active subscription **remains associated with the subscriber while travelling**. It is not suspended, cancelled, or invalidated by presence in another territory. | **P0** |
+| FR-TRV-02 | **An active subscription never constitutes a universal content license.** It grants no automatic access to any service or content in any territory. | **P0** |
+| FR-TRV-03 | Access while travelling is subject to all six conditions in `PRODUCT_SPEC.md` §2.3.2: current territory, service availability, content rights, package entitlement, playback authorization, and applicable platform/device policy. | **P0** |
+| FR-TRV-04 | The territory evaluated at playback authorization is the **current territory, determined server-side** — never the home territory, and never a client-supplied value. | **P0** |
+| FR-TRV-05 | Content available in the subscriber's home territory is **not** automatically available in another territory. | **P0** |
+| FR-TRV-06 | If KMS TV service is unavailable in the current territory, access is denied per the service-availability policy, distinctly from a content-rights denial. | **P0** |
+| FR-TRV-07 | Territory evaluation collects no unnecessary location data and complies with the platform's privacy and data-minimization requirements. | **P0** |
+
+**Deliberately not specified** (PD-095): maximum roaming days · maximum travel duration ·
+country lists · percentage-of-time rules · mandatory re-authentication intervals · VPN
+rules · IP thresholds · travel-specific device restrictions · location-detection
+technology. **None may be assumed** without a separate approved decision.
+
+**Acceptance criteria**
+
+`AC-FR-TRV-01-1`
+GIVEN a subscriber with an active subscription in their home territory
+WHEN they are present in another territory
+THEN the subscription remains `active`
+AND no state transition occurs as a consequence of the change of territory alone.
+
+`AC-FR-TRV-02-1`
+GIVEN a subscriber with an active subscription
+AND an asset whose rights do not cover the subscriber's current territory
+WHEN playback authorization is requested
+THEN the request is denied
+AND the active subscription does not override the rights determination.
+
+`AC-FR-TRV-03-1`
+GIVEN a travelling subscriber failing exactly one of the six conditions
+WHEN authorization is evaluated
+THEN the request is denied
+AND the reason code identifies which condition failed.
+
+`AC-FR-TRV-04-1`
+GIVEN a request carrying a client-supplied territory differing from the server-side
+determination
+WHEN authorization is evaluated
+THEN the server-side determination of the **current** territory governs
+AND the subscriber's home territory does not substitute for it.
+
+`AC-FR-TRV-05-1`
+GIVEN an asset available in the subscriber's home territory and unlicensed in their
+current territory
+WHEN the subscriber browses and then requests playback while travelling
+THEN the asset is absent from their catalogue
+AND a direct playback request is denied with `TERRITORY_RESTRICTED`.
+
+`AC-FR-TRV-06-1`
+GIVEN a subscriber present in a territory where KMS TV service is not available
+WHEN playback authorization is requested
+THEN the request is denied with `SERVICE_NOT_AVAILABLE`
+AND not with `TERRITORY_RESTRICTED`.
+
+`AC-FR-TRV-07-1`
+GIVEN territory evaluation for any authorization request
+WHEN the personal data collected for it is inspected
+THEN it is limited to what the territory determination requires
+AND no location data is retained beyond its documented purpose and retention period.
 
 ---
 

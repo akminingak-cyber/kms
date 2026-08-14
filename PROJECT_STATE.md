@@ -211,17 +211,20 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
 - [x] Performance targets stated as PROPOSED — REQUIRES VALIDATION; scalability
       dimensions defined with no capacity claimed.
 - [x] Content and rights safety restated as binding product constraints.
-- [x] **334 requirements** written (205 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
-      274 functional and 60 non-functional; counts derived by counting rows, not estimated.
-      Includes **FR-TER-\*** (PD-004), **FR-OPR-\*** (PD-008), and **FR-PLT-\*** (PD-092).
-- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 211 criteria
-      covering all 205 P0 requirements; coverage verified programmatically, none missing.
+- [x] **341 requirements** written (212 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
+      281 functional and 60 non-functional; counts derived by counting rows, not estimated.
+      Includes **FR-TER-\*** (PD-004), **FR-OPR-\*** (PD-008), **FR-PLT-\*** (PD-092), and
+      **FR-TRV-\*** (PD-095).
+- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 218 criteria
+      covering all 212 P0 requirements; coverage verified programmatically, none missing.
 - [x] **30 edge cases** defined across every critical domain.
-- [x] **25 user and operator flows** specified with happy, alternate, and failure paths.
+- [x] **26 user and operator flows** specified with happy, alternate, and failure paths —
+      UF-26 (travelling subscriber) added when PD-095 was approved.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **95 product decisions recorded** — none silently chosen — of which **3 are APPROVED
-      (PD-004, PD-008, PD-092)**, **23 remain blocking**, and **25 require legal verification**
+- [x] **95 product decisions recorded** — none silently chosen — of which **4 are APPROVED
+      (PD-004, PD-008, PD-092, PD-095)**, **22 remain blocking**, and **24 require legal
+      verification**
       (counts corrected 2026-08-13 from the estimates first published; see `DECISIONS.md`
       register summary).
 - [x] `docs/product/DECISION_BRIEF.md` prepared for the product owner: the three primary
@@ -250,6 +253,14 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       server-authoritative domains**. Recorded in `DECISIONS.md`, `DECISION_BRIEF.md`,
       `PRODUCT_SPEC.md` §1.3, `REQUIREMENTS.md` §A30 (FR-PLT-01…09), and
       `FEATURE_MATRIX.md` §0.4.
+- [x] **PD-095 APPROVED and propagated** (2026-08-13): **Option A — subscription follows the
+      subscriber.** An active subscription is **never a universal content license**; current
+      territory, service availability, and content rights remain authoritative. **Roaming
+      duration, country lists, and location-detection technology are NOT DEFINED**, and the
+      approval explicitly prohibits inventing them. Recorded in `DECISIONS.md`,
+      `DECISION_BRIEF.md`, `PRODUCT_SPEC.md` §2.3.2, `REQUIREMENTS.md` §A31 (FR-TRV-01…07),
+      `USER_FLOWS.md` UF-26, `FEATURE_MATRIX.md` §12, and `docs/legal/DECISION_LOG.md`
+      L-011.
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -266,9 +277,9 @@ commit and push to `claude/kms-tv-step-0-audit-peahvj`, then **STOP** and report
 
 Phase 1 will be marked **COMPLETE** only by explicit human confirmation after review, and
 **only once the blocking decisions it surfaced are resolved.** **PD-004 is now APPROVED**;
-**PD-004, PD-008, and PD-092 are now APPROVED — Phase 3 has no remaining blocking
-decisions.** **PD-095** (travelling-subscriber policy, arising from PD-004) gates Phase 4,
-alongside PD-035 and the structural part of PD-013/PD-049. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
+**PD-004, PD-008, PD-092, and PD-095 are now APPROVED.** **Phase 3 has no remaining
+blocking decisions.** Phase 4 requires **PD-035** (classification scheme) and the
+structural part of PD-013/PD-049. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
 
 ---
 
@@ -286,7 +297,7 @@ answered first are:
 | ~~PD-004~~ | ~~Target territories~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable |
 | ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **APPROVED 2026-08-13** — Option A, single-tenant, one operator. Multi-tenancy, white-label, and SaaS operator platform out of scope |
 | ~~PD-092~~ | ~~Launch platform scope~~ | ✅ **APPROVED 2026-08-13** — Option B. v1.0 = Web + Android + Android TV |
-| **PD-095** | Travelling-subscriber policy — home vs. current territory in authorization | Phase 4 — determines whether an account carries a home territory distinct from its determined current territory |
+| ~~PD-095~~ | ~~Travelling-subscriber policy~~ | ✅ **APPROVED 2026-08-13** — Option A, subscription follows the subscriber; current territory authoritative |
 
 The Phase 0 environment blockers below are unchanged and still apply.
 
@@ -344,6 +355,8 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-019 | 2026-08-13 | **TENANCY ≠ TERRITORY** is stated explicitly wherever both appear. Single-tenancy does not constrain territory support; territory support introduces no tenancy. | **Accepted — consequence of D-018** | One operator serving several territories is the approved model and requires no tenancy concept. Conflating them would either block PD-004's multi-territory requirement or smuggle tenancy in under a territory label. |
 | D-020 | 2026-08-13 | **PD-092 APPROVED · FINAL — Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x.** Exact version numbers not fixed. | **Accepted — product owner decision** | Third product decision, and the one that **confirms** its recommendation rather than narrowing or extending it. **All three Phase 3 blocking decisions are now approved.** |
 | D-021 | 2026-08-13 | **The backend API is platform-neutral.** No platform-specific business API paths. All clients consume one shared versioned API; platform-specific behaviour lives only in the client/player layer. | **Accepted — consequence of D-020** | Per-platform business APIs fork business logic by client, which is how six clients end up with six subtly different entitlement behaviours. Recorded now so Phase 5 designs one API, not six. |
+| D-023 | 2026-08-13 | **PD-095 APPROVED · FINAL — Option A, subscription follows the subscriber.** Current territory, service availability, and content rights remain authoritative. Roaming duration, country lists, and location-detection technology are **NOT DEFINED**. | **Accepted — product owner decision** | Fourth product decision. Establishes that **subscription ownership is separate from content territory rights** — an active subscription is never a universal content license. Recorded in `docs/legal/DECISION_LOG.md` L-011. |
+| D-024 | 2026-08-13 | Playback authorization gains **no twelfth check**. PD-095's eight required inputs map onto the existing eleven; the approval settles that checks 6, 9, and 11 evaluate the **current** territory, determined server-side. | **Accepted — consequence of D-023** | Resisting a check-count increase matters: the eight inputs were already covered, and inflating the count would imply new machinery where only a clarification was needed. |
 | D-022 | 2026-08-13 | **Fifteen domains remain server-authoritative and platform-independent** and are never duplicated inside a client: authentication, authorization, users, profiles, devices, sessions, channels, EPG, packages, subscriptions, entitlements, rights, playback authorization, payments, account state. | **Accepted — consequence of D-020** | Extends `CLAUDE.md` §4.2 from entitlement alone to the full list. A rule duplicated in a client is a rule that will drift from the server's. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
@@ -388,7 +401,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004, PD-008, PD-092 APPROVED**; 23 blocking decisions open |
+| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; 22 blocking decisions open |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

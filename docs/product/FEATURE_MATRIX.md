@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.3
-**Date:** 2026-08-13 (rev. 1.3 — PD-092 approved: launch scope resolved)
+**Version:** 1.4
+**Date:** 2026-08-13 (rev. 1.4 — PD-095 approved: travelling-subscriber rows added)
 **Source:** `PRODUCT_SPEC.md` · `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -355,6 +355,9 @@ PD-076 governs.
 | Feature | Pri | WEB | AND | ATV | iOS | TIZ | WOS | ADM | BE |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Territory configurable, never hard-coded | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
+| Subscription follows the subscriber while travelling | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
+| Current territory authoritative (never home, never client-supplied) | P0 | — | — | — | — | — | — | ● | ● |
+| Catalogue filtered by current territory while travelling | P0 | ● | ● | ● | ● | ● | ● | — | ● |
 | App distribution / service availability / content rights kept separate | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
 | "Service not available yet" state (not an error) | P0 | ● | ● | ● | ● | ● | ● | — | ● |
 | Rights metadata on every distributable asset | P0 | — | — | — | — | — | — | ● | ● |
@@ -515,7 +518,7 @@ finalized until at least the following are resolved:
 |---|---|
 | ~~PD-004~~ | **APPROVED** — Georgia launch, multi-territory architecture, future territories configurable |
 | PD-094 | App distribution scope — which territories the app is listed in, distinct from service availability |
-| PD-095 | Travelling-subscriber policy — home vs. current territory in authorization |
+| ~~PD-095~~ | **APPROVED** — Option A, subscription follows the subscriber; current territory, service availability, and content rights authoritative. **No roaming limits and no location-detection technology defined** |
 | ~~PD-092~~ | **APPROVED** — Option B. v1.0 = Web + Android + Android TV; iOS, Tizen, webOS in v1.x |
 | PD-005 / PD-006 | Free tier and advertising — several rows exist only if approved |
 | PD-015 / PD-016 | Recording and download rows |

@@ -211,23 +211,32 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
 - [x] Performance targets stated as PROPOSED — REQUIRES VALIDATION; scalability
       dimensions defined with no capacity claimed.
 - [x] Content and rights safety restated as binding product constraints.
-- [x] **305 requirements** written (182 P0 · 95 P1 · 22 P2 · 6 P3) with priority reasoning —
-      245 functional and 60 non-functional; counts derived by counting rows, not estimated.
-- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 187 criteria
-      covering all 182 P0 requirements; coverage verified programmatically, none missing.
+- [x] **319 requirements** written (190 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
+      259 functional and 60 non-functional; counts derived by counting rows, not estimated.
+      Includes the **FR-TER-\*** territory domain added when PD-004 was approved.
+- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 196 criteria
+      covering all 190 P0 requirements; coverage verified programmatically, none missing.
 - [x] **30 edge cases** defined across every critical domain.
 - [x] **25 user and operator flows** specified with happy, alternate, and failure paths.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **93 open product decisions recorded** — none silently chosen — with **24 flagged
-      blocking and 25 flagged as requiring legal verification** (counts corrected
-      2026-08-13 from the estimates 21 and 24 first published; see `DECISIONS.md`
+- [x] **95 product decisions recorded** — none silently chosen — of which **1 is APPROVED
+      (PD-004)**, **25 remain blocking**, and **25 require legal verification** (counts
+      corrected 2026-08-13 from the estimates first published; see `DECISIONS.md`
       register summary).
 - [x] `docs/product/DECISION_BRIEF.md` prepared for the product owner: the three primary
-      decisions analysed across 22 dimensions each, all 24 blocking decisions summarized,
+      decisions analysed across 22 dimensions each, all blocking decisions summarized
+      (24 at the time of writing; 25 open after the PD-004 approval added PD-094/PD-095),
       A/B/C ordering classification, and a recommended decision sequence. Every
       recommendation labelled **RECOMMENDATION — NOT APPROVED**.
-- [x] **12 ambiguities in the brief itself recorded** rather than resolved by assumption.
+- [x] **12 ambiguities in the brief itself recorded** rather than resolved by assumption —
+      of which **A-02 (no target territory stated) is now RESOLVED** by the PD-004 approval.
+- [x] **PD-004 APPROVED and propagated** (2026-08-13): launch territory **Georgia**,
+      **multi-territory architecture**, future territories **configurable**. Recorded in
+      `DECISIONS.md`, `DECISION_BRIEF.md`, `PRODUCT_SPEC.md` §2.3/§2.3.1, `REQUIREMENTS.md`
+      §A28, `USER_FLOWS.md`, `FEATURE_MATRIX.md`, and `docs/legal/DECISION_LOG.md` L-008/L-009.
+      The three-concept separation (app distribution / service availability / content
+      rights) is now binding, and playback authorization carries an **eleventh check**.
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -243,9 +252,9 @@ Phase 1 deliverables are written: `docs/product/PRODUCT_SPEC.md`, `REQUIREMENTS.
 commit and push to `claude/kms-tv-step-0-audit-peahvj`, then **STOP** and report.
 
 Phase 1 will be marked **COMPLETE** only by explicit human confirmation after review, and
-**only once the blocking decisions it surfaced are resolved** — most importantly PD-004
-(territories), PD-008 (multi-tenancy), and PD-092 (launch platform scope), which gate
-Phase 3. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
+**only once the blocking decisions it surfaced are resolved.** **PD-004 is now APPROVED**;
+**PD-008** (multi-tenancy) and **PD-092** (launch platform scope) still gate Phase 3, and
+**PD-095** (travelling-subscriber policy, arising from PD-004) now gates Phase 4. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
 
 ---
 
@@ -260,9 +269,10 @@ answered first are:
 
 | ID | Decision | Gates |
 |---|---|---|
-| **PD-004** | Target territories | Phase 3 — determines rights, geo-enforcement, privacy law, tax, payment methods, and classification schemes |
+| ~~PD-004~~ | ~~Target territories~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable |
 | **PD-008** | Multi-tenancy: one operator or several | Phase 3 — the most expensive decision on the register to defer; retrofitting touches every table, query, and authorization check |
 | **PD-092** | Launch platform scope and order | Phase 3 — determines client sequence, certification lead times, device procurement, and whether B-004 (Apple toolchain) is on the critical path |
+| **PD-095** | Travelling-subscriber policy — home vs. current territory in authorization | Phase 4 — determines whether an account carries a home territory distinct from its determined current territory |
 
 The Phase 0 environment blockers below are unchanged and still apply.
 
@@ -313,6 +323,9 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-012 | 2026-08-13 | Phase 1 records product decisions in a **separate register**, `docs/product/DECISIONS.md`, using `PD-nnn` identifiers. | **Accepted** | 93 product decisions would swamp this engineering register. Accepted `PD-nnn` decisions are mirrored back here; legal ones are mirrored to `docs/legal/DECISION_LOG.md`. |
 | D-013 | 2026-08-13 | The Phase 1 specification chooses **no** open product decision on the owner's behalf; every one is recorded as OPEN or RECOMMENDED. | **Accepted** | `CLAUDE.md` §1 and the STEP 1 brief both prohibit silent selection. A recommendation with reasoning is useful; a silent default is a fabricated requirement. |
 | D-014 | 2026-08-13 | The pre-existing scaffold was **left untouched** in Phase 1; no file was modified or deleted and no code was copied from it. | **Accepted** | STEP 1 was scoped to documentation only. Deleting files is a repository change requiring the owner's decision (PD-001 / D-006), not an engineering one. |
+| D-015 | 2026-08-13 | **PD-004 APPROVED · FINAL — launch territory Georgia; multi-territory architecture; future territories configurable.** App distribution, service availability, and content rights are three separate concepts that MUST NOT be merged. | **Accepted — product owner decision** | The first product decision taken. Territory becomes a determinate input for PD-081, PD-035, PD-054, PD-075 and others, all of which remain [LEGAL] and open. Recorded in `docs/legal/DECISION_LOG.md` L-008 and L-009. |
+| D-016 | 2026-08-13 | Playback authorization gains an **eleventh check — service availability** — evaluated separately from content rights, with a distinct denial reason code. | **Accepted — consequence of D-015** | Required by PD-004 item 15. Merging service availability into the content-rights check would make "licensed here but not served here" and "served here but not licensed here" indistinguishable; the second is how unlicensed distribution happens. |
+| D-017 | 2026-08-13 | Two consequential decisions recorded rather than defaulted: **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy, blocking Phase 4). | **Accepted** | The three-concept separation raises both; the approval answers neither. `CLAUDE.md` §1 prohibits silently choosing them. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
 The 93 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
@@ -354,7 +367,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS** — deliverables written, awaiting review and 24 blocking decisions |
+| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004 APPROVED**; 25 blocking decisions open |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

@@ -110,6 +110,64 @@ the *Decisions* section of `PROJECT_STATE.md`.
 - **Recorded by:** Engineering agent
 - **Status:** Accepted
 
+### L-008 — Launch territory: Georgia; multi-territory architecture
+- **Date:** 2026-08-13
+- **Phase:** 1
+- **Decision:** The product owner has approved **PD-004**. KMS TV launches commercially in
+  **Georgia**. The architecture is **multi-territory from day one**, and future territories
+  are **configurable** without redesigning the core platform. **App distribution, service
+  availability, and content rights are three separate concepts and must not be merged.**
+- **Rationale:** Recorded here because the territory determines which legal regimes apply.
+  The territory decision is commercial; its legal consequences are not, and they are
+  enumerated below as outstanding.
+- **Alternatives considered:** Multi-territory launch; deferring the territory decision.
+  Both are recorded in `docs/product/DECISION_BRIEF.md` Part 1.
+- **Legal review required:** **yes — for the consequences, not for the decision itself.**
+  The following are now determinable and remain outstanding, each with a determinate input
+  for the first time:
+  - **PD-081** — which privacy/data-protection regime applies
+  - **PD-035** — which content classification scheme applies
+  - **PD-054** — tax treatment of subscription revenue
+  - **PD-073** — invoice and receipt content requirements
+  - **PD-075** — permissible payment methods
+  - **PD-085** — children's privacy obligations
+  - **PD-086** — data processing locations and cross-border transfers
+  - **PD-095** — travelling-subscriber policy (new, arising from PD-004)
+- **Legal review status:** pending — required before Phase 6 (threat model and privacy
+  controls) and before Phase 12 (commercial model).
+- **[UNVERIFIED]** **No claim is made in this or any KMS TV document about the regulatory,
+  broadcasting, tax, or data-protection regime of Georgia or of any other country.** The
+  territory being named does not make any legal fact about it known.
+- **No future territory is named or assumed.** The approval cites the United States solely
+  as an illustration that a further territory must be addable. Treating an illustration as
+  a plan would violate `CLAUDE.md` §1, and no such inference has been made.
+- **Rights consequence:** every rights agreement for launch must cover Georgia for the
+  intended distribution modes. Serving any other territory requires both service
+  availability being enabled there **and** rights covering it — two independent conditions
+  (L-009).
+- **Recorded by:** Engineering agent, on the product owner's decision
+- **Status:** Accepted
+
+### L-009 — Service availability and content rights are independent conditions
+- **Date:** 2026-08-13
+- **Phase:** 1
+- **Decision:** Whether KMS TV is commercially available in a territory, and whether a
+  given asset may be distributed in that territory, are **separate determinations with
+  separate owners**. Neither implies the other, in either direction. Playback authorization
+  evaluates them as two distinct checks producing two distinct denial reasons
+  (`SERVICE_NOT_AVAILABLE` and `TERRITORY_RESTRICTED`).
+- **Rationale:** Collapsing the two makes one of two real states unrepresentable: an asset
+  licensed for a territory the operator does not serve, and — the dangerous one — a served
+  territory assumed to carry a licensed catalogue. The second assumption is a direct route
+  to unlicensed distribution, which `CLAUDE.md` §2 exists to prevent.
+- **Alternatives considered:** A single combined territorial check. Rejected: it cannot
+  express the states above, and it produces a denial reason that tells neither the viewer
+  nor the operator which condition failed.
+- **Legal review required:** no (design decision implementing L-008); the underlying rights
+  determinations remain [LEGAL]
+- **Recorded by:** Engineering agent
+- **Status:** Accepted
+
 ### L-007 — Pre-existing repository scaffold: legal status unassessed
 - **Date:** 2026-08-13
 - **Phase:** 0

@@ -2,9 +2,9 @@
 
 **Prepared for:** Product owner
 **Phase:** 1 — Product specification (STEP 1 complete, awaiting decisions)
-**Status:** **WAITING FOR PRODUCT OWNER DECISIONS**
-**Version:** 1.0
-**Date:** 2026-08-13
+**Status:** **WAITING FOR PRODUCT OWNER DECISIONS** · **PD-004 APPROVED**
+**Version:** 1.1
+**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved and recorded)
 **Source register:** `docs/product/DECISIONS.md` — IDs and wording taken from it verbatim
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -21,24 +21,30 @@ law, it is flagged **[LEGAL]** and must be verified by qualified advisors.
 **[UNVERIFIED]** marks a third-party fact not read from a primary source, per
 `CLAUDE.md` §1.
 
-### 0.1 Count correction — 24 blocking decisions, not 21
+### 0.1 Current state — 1 approved, 25 blocking decisions open
 
-The review request refers to 21 blocking decisions. That figure came from my STEP 1
-report, where the register's summary row was an **estimate** rather than a count. The
-measured figure is **24**.
+**Revision 1.1.** PD-004 is **APPROVED** (Georgia launch, multi-territory architecture,
+future territories configurable). Two consequential decisions arose from it and remain
+open: **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy).
 
-The arithmetic reconciles cleanly: **24 blocking decisions in total, of which 3 are the
-primary decisions covered in Part 1, leaving 21 in Part 2.** The summary row in
-`DECISIONS.md` has been corrected (blocking 21 → 24, legal 24 → 25) with the correction
-recorded in place rather than quietly amended. No decision was added, removed, or
-reclassified — every entry was correctly flagged in its own text and in `DECISIONS.md` §12
-from the start.
+Blocking count: 24 → **25 open** (PD-004 resolved, PD-094 and PD-095 added).
 
-### 0.2 The 24 blocking decisions
+*Original count correction, retained for the record.* The review request referred to 21
+blocking decisions. That figure came from my STEP 1 report, where the register's summary
+row was an **estimate** rather than a count; the measured figure at that time was **24**.
+The summary row in `DECISIONS.md` was corrected in place rather than quietly amended. No
+decision was added, removed, or reclassified by that correction — every entry was
+correctly flagged in its own text and in `DECISIONS.md` §12 from the start.
 
-`PD-001` · `PD-004` · `PD-005` · `PD-008` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
+### 0.2 The blocking decisions
+
+**Resolved (1):** ~~`PD-004`~~ — **APPROVED · FINAL**, 2026-08-13
+
+**Open (25):**
+`PD-001` · `PD-005` · `PD-008` · `PD-013` · `PD-014` · `PD-026` · `PD-031` ·
 `PD-035` · `PD-037` · `PD-038` · `PD-040` · `PD-044` · `PD-051` · `PD-055` · `PD-056` ·
-`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-092` · `PD-093`
+`PD-074` · `PD-081` · `PD-087` · `PD-088` · `PD-089` · `PD-090` · `PD-092` · `PD-093` ·
+**`PD-094`** *(new)* · **`PD-095`** *(new)*
 
 ### 0.3 Confidence scale used in this brief
 
@@ -54,9 +60,36 @@ from the start.
 
 ---
 
-# PD-004 — TARGET TERRITORIES
+# PD-004 — TARGET TERRITORIES — ✅ **APPROVED · FINAL**
 
-**Register entry:** `DECISIONS.md` §1, *"PD-004 — Target territories **[BLOCKING — Phase 3] [LEGAL]**"*
+> ## OUTCOME
+>
+> | Field | Value |
+> |---|---|
+> | **Decision** | **APPROVED** |
+> | **Decision ID** | **PD-004** |
+> | **Launch territory** | **Georgia** |
+> | **Architecture** | **Multi-territory** |
+> | **Future territories** | **Configurable** |
+> | **Status** | **FINAL** |
+> | **Approved on** | 2026-08-13 |
+>
+> **The approved decision goes further than the recommendation below.** The recommendation
+> was Option B — a single primary territory with an enumerated secondary set. The approval
+> adopts the single-launch-territory element (Georgia) and adds a binding architectural
+> requirement the brief did not propose: **app distribution, service availability, and
+> content rights are three separate concepts that must not be merged.** That separation is
+> now specified in `PRODUCT_SPEC.md` §2.3.1 and is the source of an **eleventh playback
+> authorization check** (service availability, distinct from content rights).
+>
+> Two consequential decisions arise and remain open: **PD-094** (app distribution scope) and
+> **PD-095** (travelling-subscriber policy, required before Phase 4).
+>
+> The analysis below is retained as the record of what was considered. Sections 5–7 are
+> superseded by the approval; the consequence analysis in sections 8–20 remains accurate
+> and now describes the approved path.
+
+**Register entry:** `DECISIONS.md` §1, *"PD-004 — Target territories — **APPROVED · FINAL**"*
 
 ## 1. Exact question that must be decided
 
@@ -120,10 +153,13 @@ negotiation, tax, payments, privacy, and classification all unresolvable.
 
 ## 5. Recommended option
 
-### **RECOMMENDATION — NOT APPROVED**
+### ~~RECOMMENDATION — NOT APPROVED~~ → **SUPERSEDED BY APPROVAL**
 
-**Option B — a single named primary launch territory, with an explicitly enumerated
-secondary set that may be empty at launch.**
+~~**Option B — a single named primary launch territory, with an explicitly enumerated
+secondary set that may be empty at launch.**~~
+
+**Approved:** Georgia as the single launch territory, multi-territory architecture, future
+territories configurable, with the three-concept separation as a binding constraint.
 
 The model is built territory-aware unconditionally (which is not optional), while the
 operational and commercial surface is kept to one market. Adding a territory later becomes
@@ -155,7 +191,9 @@ Territory becomes an evaluated input in the authorization path, alongside entitl
 rights. Territory determination must be **server-side and authoritative**; client-reported
 location is never trusted (`CLAUDE.md` §12). The determination mechanism itself is
 **[UNVERIFIED]** — no geo-determination method, accuracy, or provider is assumed anywhere
-in the specification, and one must be selected and verified in Phase 6.
+in the specification, and one must be selected and verified in Phase 6. **Post-approval:**
+the determination now feeds two independent checks — service availability and content
+rights — which must not share a single conflated result.
 
 ## 9. Database consequences
 
@@ -976,7 +1014,8 @@ Every blocking decision classified **A**, **B**, or **C**.
 | ID | Decision | Why Class A |
 |---|---|---|
 | **PD-001** | Product identity and the pre-existing scaffold | Repository must be coherent before any code lands beside it. Also gates D-009 (web framework), which is a Phase 3 output |
-| **PD-004** | Target territories | Five downstream decisions stall behind it, one of which (PD-035) blocks Phase 4. Rights negotiation — the longest external lead time in the programme — cannot start without it |
+| ~~PD-004~~ | ~~Target territories~~ | ✅ **RESOLVED** — approved 2026-08-13 |
+| **PD-095** | Travelling-subscriber policy *(new, from PD-004)* | Determines whether an account carries a home territory distinct from its determined current territory — a Phase 4 data-model question |
 | **PD-008** | Multi-tenancy | The only decision here whose deferral cost is a **rewrite**. Tenancy is a property of every table, query, cache key, and authorization check |
 | **PD-092** | Launch platform scope | Sequences all client work, settles D-009, and starts the procurement and certification clocks that cannot be compressed later |
 | **PD-035** | Content rating / maturity scheme | The Phase 4 data model must carry a scheme identifier alongside the rating value. Retrofitting a second scheme into a single-scheme model is a migration across every rated asset |
@@ -1032,10 +1071,10 @@ It means only that the *later* answer does not invalidate *earlier* work.
 
 | Class | Count | IDs |
 |---|---:|---|
-| **A — before architecture** | 7 | PD-001, PD-004, PD-008, PD-031, PD-035, PD-081, PD-092 |
-| **B — before implementation** | 14 | PD-005, PD-013, PD-014, PD-026, PD-037, PD-038, PD-040, PD-044, PD-051, PD-055, PD-056, PD-074, PD-088, PD-093 |
+| **A — before architecture** | 7 | PD-001, ~~PD-004 (RESOLVED)~~, PD-008, PD-031, PD-035, PD-081, PD-092, **PD-095** |
+| **B — before implementation** | 15 | PD-005, PD-013, PD-014, PD-026, PD-037, PD-038, PD-040, PD-044, PD-051, PD-055, PD-056, PD-074, PD-088, PD-093, **PD-094** |
 | **C — deferrable** | 3 | PD-087, PD-089, PD-090 |
-| **Total** | **24** | |
+| **Total** | **25 open** (PD-004 resolved; PD-094 and PD-095 added) | |
 
 ---
 
@@ -1049,7 +1088,7 @@ the one resource that cannot be recovered later.
 
 | # | Item | Note |
 |---|---|---|
-| 1 | **PD-004 — Territories** | Five decisions are downstream. Nothing about rights, privacy, tax, or payments can start without it |
+| 1 | ~~**PD-004 — Territories**~~ | ✅ **APPROVED 2026-08-13** — Georgia launch, multi-territory architecture, future territories configurable. Downstream decisions PD-081, PD-035, PD-054, PD-075 now have a determinate input |
 | 2 | **PD-008 — Multi-tenancy** | Independent of PD-004 and can be decided in parallel. The only rewrite-class risk in the register |
 | 3 | **PD-092 — Launch platform scope** | Informed by PD-004 (platform share by market) but should not wait long behind it; it starts the procurement clocks |
 | 4 | **PD-001 — Scaffold** | Trivial to decide, and blocks nothing until code lands — but it costs one minute now and confusion later |

@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.0
-**Date:** 2026-08-13
+**Version:** 1.1
+**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved: eleventh authorization check added)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -299,7 +299,7 @@ no re-authentication, and can never elevate a session.
 ### Happy path
 1. Viewer selects a channel.
 2. Client requests **playback authorization** for the channel.
-3. Backend evaluates **all ten checks** (`PRODUCT_SPEC.md` §12.1), in full, with no skip
+3. Backend evaluates **all eleven checks** (`PRODUCT_SPEC.md` §12.1), in full, with no skip
    path:
    authenticated session · account status · subscription state · package contents ·
    entitlement decision · **rights window, territory, device class, and live distribution
@@ -402,7 +402,7 @@ that will not play because of the guide is broken.
    guide.
 2. Client **debounces** rapid stepping so only committed changes trigger authorization.
 3. On commit, client requests a **new playback authorization** for the target channel.
-4. Backend evaluates all ten checks afresh. The previous channel's authorization is
+4. Backend evaluates all eleven checks afresh. The previous channel's authorization is
    **never reused or extended**.
 5. Previous session is released, freeing its concurrency slot.
 6. New playback session issued; playback starts.
@@ -540,7 +540,7 @@ that will not play because of the guide is broken.
 2. Viewer opens a title's detail: synopsis, duration, rating, artwork, availability.
 3. Viewer selects play.
 4. Client requests playback authorization for **VOD mode** specifically.
-5. Backend evaluates all ten checks, including **VOD distribution rights** for this title,
+5. Backend evaluates all eleven checks, including **VOD distribution rights** for this title,
    territory, and device class.
 6. Playback session issued; signed short-lived URLs returned; edge validates independently.
 7. Playback starts; subtitles and audio tracks selectable where supplied.
@@ -728,7 +728,7 @@ audited.
 
 ### Flow
 1. Viewer requests playback (UF-07, UF-11, UF-13).
-2. Backend evaluates all ten checks.
+2. Backend evaluates all eleven checks.
 3. One or more checks fail.
 4. Backend returns a **denial with a stable, machine-readable reason code**.
 5. Backend records the decision as **compliance evidence** with the full evaluation
@@ -744,7 +744,8 @@ audited.
 | `SUBSCRIPTION_EXPIRED` | Subscription has ended | Direct renewal path |
 | `NOT_IN_PACKAGE` | Included in a different package | Direct upgrade path |
 | `RIGHTS_EXPIRED` | **Neutral** — no longer available | Suggest alternatives |
-| `TERRITORY_RESTRICTED` | **Neutral** — not available in your location | Suggest available alternatives. **No workaround is offered, suggested, or hinted at.** |
+| `TERRITORY_RESTRICTED` | **Neutral** — this title is not available in your location | Suggest available alternatives. **No workaround is offered, suggested, or hinted at.** |
+| `SERVICE_NOT_AVAILABLE` | **Neutral** — KMS TV is not available in your location yet. Distinct from an unlicensed title (PD-004) | Offer notification if approved (PD-065). **No workaround offered or hinted.** |
 | `DEVICE_CLASS_NOT_PERMITTED` | Not available on this device type | State which device types can play it |
 | `DEVICE_LIMIT_REACHED` | Device limit reached | Open device management → UF-20 |
 | `CONCURRENCY_LIMIT_REACHED` | Already watching elsewhere | Stop another session (PD-047) or wait |

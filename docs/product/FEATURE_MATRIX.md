@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.0
-**Date:** 2026-08-13
+**Version:** 1.1
+**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved)
 **Source:** `PRODUCT_SPEC.md` · `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -223,7 +223,8 @@ a UI convenience.
 | Feature | Pri | WEB | AND | ATV | iOS | TIZ | WOS | ADM | BE |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Backend authorization required for all playback | P0 | ● | ● | ● | ● | ● | ● | — | ● |
-| All ten checks, no skip path | P0 | — | — | — | — | — | — | — | ● |
+| All eleven checks, no skip path | P0 | — | — | — | — | — | — | — | ● |
+| Service availability check, distinct from content rights | P0 | — | — | — | — | — | — | ● | ● |
 | Client-reported data never authoritative | P0 | ● | ● | ● | ● | ● | ● | — | ● |
 | Stable machine-readable reason codes | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
 | Short-lived, bound, revocable sessions | P0 | ● | ● | ● | ● | ● | ● | — | ● |
@@ -341,6 +342,9 @@ PD-076 governs.
 
 | Feature | Pri | WEB | AND | ATV | iOS | TIZ | WOS | ADM | BE |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Territory configurable, never hard-coded | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
+| App distribution / service availability / content rights kept separate | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
+| "Service not available yet" state (not an error) | P0 | ● | ● | ● | ● | ● | ● | — | ● |
 | Rights metadata on every distributable asset | P0 | — | — | — | — | — | — | ● | ● |
 | Answer "why may we serve this?" | P0 | — | — | — | — | — | — | ● | ● |
 | **Independent distribution-mode enforcement** | P0 | ● | ● | ● | ● | ● | ● | ● | ● |
@@ -497,6 +501,9 @@ finalized until at least the following are resolved:
 
 | Decision | Blocks |
 |---|---|
+| ~~PD-004~~ | **APPROVED** — Georgia launch, multi-territory architecture, future territories configurable |
+| PD-094 | App distribution scope — which territories the app is listed in, distinct from service availability |
+| PD-095 | Travelling-subscriber policy — home vs. current territory in authorization |
 | PD-092 | Launch platform scope — the column set that matters first |
 | PD-005 / PD-006 | Free tier and advertising — several rows exist only if approved |
 | PD-015 / PD-016 | Recording and download rows |

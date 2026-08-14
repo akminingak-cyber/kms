@@ -1,9 +1,9 @@
 # REQUIREMENTS.md — KMS TV Requirements and Acceptance Criteria
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval
-**Version:** 1.0
-**Date:** 2026-08-13
+**Status:** DRAFT — awaiting product approval · **PD-004 APPROVED (territories)**
+**Version:** 1.1
+**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved: territory domain added)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -39,12 +39,12 @@ with no recommendations engine is merely plainer.
 `PRODUCT_SPEC.md` §0.1.
 
 ### 0.4 Coverage rule
-**Acceptance criteria are provided for every P0 requirement**, per the brief — all 182 of
+**Acceptance criteria are provided for every P0 requirement**, per the brief — all 190 of
 them. They appear in two places:
 
-- **In the domain sections (Parts A and B)** for the 91 P0 requirements whose criteria
+- **In the domain sections (Parts A and B)** for the P0 requirements whose criteria
   carry the most design weight, where the criterion earns discussion.
-- **In Part D** for the remaining 91, stated compactly. These are no less binding; they
+- **In Part D** for the remainder, stated compactly. These are no less binding; they
   are separated only to keep the domain sections readable.
 
 P1–P3 requirements carry acceptance criteria where they are already unambiguous. The
@@ -87,7 +87,8 @@ estimated.
 | i18n (I18N) | 5 | 2 | 1 | 1 | 9 |
 | Accessibility (A11Y) | 4 | 3 | 1 | 0 | 8 |
 | Errors (ERR) | 4 | 1 | 0 | 0 | 5 |
-| **Functional total** | **135** | **83** | **21** | **6** | **245** |
+| **Territories (TER)** — *added rev. 1.1* | **8** | **6** | **0** | **0** | **14** |
+| **Functional total** | **143** | **89** | **21** | **6** | **259** |
 | Security (NFR-SEC) | 14 | 2 | 0 | 0 | 16 |
 | Privacy (NFR-PRV) | 8 | 2 | 1 | 0 | 11 |
 | Performance (NFR-PER) | 9 | 3 | 0 | 0 | 12 |
@@ -95,11 +96,11 @@ estimated.
 | Observability (NFR-OBS) | 7 | 2 | 0 | 0 | 9 |
 | Availability (NFR-AVL) | 3 | 1 | 0 | 0 | 4 |
 | **Non-functional total** | **47** | **12** | **1** | **0** | **60** |
-| **GRAND TOTAL** | **182** | **95** | **22** | **6** | **305** |
+| **GRAND TOTAL** | **190** | **101** | **22** | **6** | **319** |
 
 **Where the P0 weight sits.** Playback authorization (11), Rights (9), Security (14),
-Admin (12), Account (11), and Privacy (8) together account for 65 of the 182 P0
-requirements — more than a third — while Catch-up, Restart, and Favorites contribute
+Admin (12), Account (11), Privacy (8), and Territories (8) together account for 73 of the
+190 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
 none. That distribution is the specification's central claim about this product: the
 launch-critical work is authorization, rights, and accountability, not features.
 
@@ -509,7 +510,7 @@ AND only on failure of that attempt is a recoverable error shown.
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-AUT-01 | Every playback requires a backend authorization decision. Possessing a manifest URL never permits playback. | **P0** |
-| FR-AUT-02 | Authorization evaluates all ten checks in `PRODUCT_SPEC.md` §12.1 on every request, with no skip path. | **P0** |
+| FR-AUT-02 | Authorization evaluates all **eleven** checks in `PRODUCT_SPEC.md` §12.1 on every request, with no skip path. | **P0** |
 | FR-AUT-03 | Client-reported location, device class, and time are never authoritative. | **P0** |
 | FR-AUT-04 | Every denial returns a stable, machine-readable reason code; clients never parse human text. | **P0** |
 | FR-AUT-05 | Playback sessions are short-lived, bound to one viewer, device, and asset, and are revocable. | **P0** |
@@ -530,10 +531,17 @@ THEN delivery is refused
 AND no media segment is served.
 
 `AC-FR-AUT-02-1`
-GIVEN a viewer failing exactly one of the ten authorization checks
+GIVEN a viewer failing exactly one of the eleven authorization checks
 WHEN authorization is requested
 THEN the request is denied
 AND the reason code identifies the specific failed check.
+
+`AC-FR-AUT-02-2`
+GIVEN a viewer in a territory where the service is not available
+AND an asset whose content rights would otherwise permit playback there
+WHEN authorization is requested
+THEN the request is denied with `SERVICE_NOT_AVAILABLE`, not `TERRITORY_RESTRICTED`
+AND the two conditions remain independently representable.
 
 `AC-FR-AUT-03-1`
 GIVEN a client supplying a location header indicating a permitted territory
@@ -1103,6 +1111,86 @@ GIVEN a viewer denied for territory or expired rights
 WHEN the error is displayed
 THEN the message is neutral
 AND it contains no reference to VPNs, proxies, location changes, or any other means of
+obtaining access.
+
+---
+
+## A28. Territories (TER)
+
+Arising from **PD-004 — APPROVED · FINAL** (2026-08-13): Georgia launch, multi-territory
+architecture, future territories configurable. `PRODUCT_SPEC.md` §2.3 and §2.3.1 govern.
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-TER-01 | Territory is a first-class, configurable concept. **No component hard-codes Georgia, or any other territory, as the only possible territory.** | **P0** |
+| FR-TER-02 | **App distribution, service availability, and content rights are three independent concepts.** No component derives one from another. | **P0** |
+| FR-TER-03 | Installing or opening the application confers no access to content, in any territory. | **P0** |
+| FR-TER-04 | Service availability is configurable per territory and enforced server-side. | **P0** |
+| FR-TER-05 | Content availability is controlled independently per territory, through the rights system, not through a catalogue flag. | **P0** |
+| FR-TER-06 | Playback authorization evaluates service availability as a check distinct from content rights, with a distinct reason code. | **P0** |
+| FR-TER-07 | A new territory is addable through configuration and data, without changes to the core platform's structure. | **P0** |
+| FR-TER-08 | Packages are territory-scoped: a package may be offered in one territory and not another. | P1 |
+| FR-TER-09 | Pricing and currency are territory-scoped. | P1 |
+| FR-TER-10 | Payment methods are territory-scoped. | P1 |
+| FR-TER-11 | Tax configuration is territory-scoped. | P1 |
+| FR-TER-12 | Localization defaults are territory-scoped, independently of the profile's language choice. | P1 |
+| FR-TER-13 | A person in a territory where the service is unavailable receives a clear, non-error "not available yet" state, never a failure screen and never a workaround suggestion. | **P0** |
+| FR-TER-14 | Operators can view and configure territory availability, and see which territories each rights agreement covers. | P1 |
+
+**Acceptance criteria**
+
+`AC-FR-TER-01-1`
+GIVEN the complete codebase and configuration
+WHEN searched for a hard-coded territory identifier used as the sole or default territory
+THEN no occurrence exists outside configuration and seed data
+AND the check is part of the CI gate.
+
+`AC-FR-TER-02-1`
+GIVEN a territory where the application is installable, the service is unavailable, and an
+asset's rights would permit playback
+WHEN each of the three concepts is evaluated
+THEN each returns its own independent result
+AND no result is inferred from another.
+
+`AC-FR-TER-03-1`
+GIVEN a person who has installed the application in a territory where the service is not
+available
+WHEN they open the application and attempt any playback
+THEN no content is served
+AND no registration or subscription is possible
+AND the application shows the "not available yet" state rather than an error.
+
+`AC-FR-TER-04-1`
+GIVEN a territory whose service availability is switched off in configuration
+WHEN a request originates from that territory
+THEN registration, subscription, and playback are all refused server-side
+AND the refusal does not depend on any client-side check.
+
+`AC-FR-TER-05-1`
+GIVEN an asset whose rights cover territory X but not territory Y
+AND the service is available in both X and Y
+WHEN a viewer in Y browses the catalogue
+THEN the asset is absent from their catalogue
+AND a direct playback request is denied with `TERRITORY_RESTRICTED`.
+
+`AC-FR-TER-06-1`
+GIVEN two viewers, one in an unserved territory and one in a served territory requesting an
+asset unlicensed there
+WHEN each requests playback
+THEN the first receives `SERVICE_NOT_AVAILABLE` and the second `TERRITORY_RESTRICTED`
+AND the codes are never used interchangeably.
+
+`AC-FR-TER-07-1`
+GIVEN a new territory to be added
+WHEN it is introduced
+THEN it is added through configuration, reference data, and rights agreements alone
+AND no schema change, code change, or redeployment of core services is required to
+represent it.
+
+`AC-FR-TER-13-1`
+GIVEN a person in a territory where the service is unavailable
+WHEN the "not available yet" state is displayed
+THEN it contains no reference to VPNs, proxies, location changes, or any other means of
 obtaining access.
 
 ---

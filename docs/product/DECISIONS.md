@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions
-**Version:** 1.0
-**Date:** 2026-08-13
+**Status:** OPEN — awaiting product owner decisions · **1 APPROVED (PD-004)**
+**Version:** 1.1
+**Date:** 2026-08-13 (PD-004 approved and recorded)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -41,12 +41,13 @@ from a primary source.
 
 Counts below are **derived by counting the decision headings in this document**, not
 estimated. Two decisions (PD-002, PD-085) appear twice as cross-reference pointers, so the
-document contains 95 headings for 93 unique decisions; the totals row counts unique
-decisions.
+document contains 97 headings for 95 unique decisions; the totals row counts unique
+decisions. A decision loses its `[BLOCKING]` and `[LEGAL]` heading flags when it is
+approved, so the blocking and legal columns count **open** decisions only.
 
-| Category | Count | Blocking | Legal |
+| Category | Decisions | Blocking (open) | Legal (open) |
 |---|---:|---:|---:|
-| 1. Product identity and market | 5 | 2 | 2 |
+| 1. Product identity and market | 7 | 3 | 2 |
 | 2. Business model and commerce | 23 | 6 | 6 |
 | 3. Identity and account | 13 | 2 | 2 |
 | 4. Profiles and parental control | 5 | 1 | 2 |
@@ -57,14 +58,26 @@ decisions.
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
 | 11. Platform and technical | 8 | 5 | 0 |
-| **Total (unique decisions)** | **93** | **24** | **25** |
+| **Total (unique decisions)** | **95** | **25** | **25** |
+
+**Decided so far: 1 of 95.**
+
+| ID | Decision | Status |
+|---|---|---|
+| **PD-004** | Target territories — **Georgia launch, multi-territory architecture, future territories configurable** | **APPROVED · FINAL** (2026-08-13) |
+
+**Version 1.1 changes.** PD-004 approved and recorded (§1). Two consequential decisions
+added — **PD-094** (app distribution scope) and **PD-095** (travelling-subscriber policy) —
+arising from the three-concept separation the approval mandates; neither is answered by
+the approval, so neither has been defaulted. Decision count 93 → 95; open blocking 24 → 25
+(PD-004 resolved, two added); open legal 25 → 25 (PD-004 resolved, PD-095 added).
 
 **Correction, 2026-08-13.** The blocking and legal totals were first published as 21 and
 24, and the per-category rows alongside them were estimates written before the register
-was finished. The measured values are **24 blocking** and **25 legal**. The difference is
-not attributable to any particular decisions — no decision was added, removed, or
-reclassified, and every entry was correctly flagged in its own text and in §12 from the
-start. Only the summary row was wrong. Recorded rather than quietly amended, per
+was finished. The measured values at that time were **24 blocking** and **25 legal**. The
+difference was not attributable to any particular decisions — no decision was added,
+removed, or reclassified, and every entry was correctly flagged in its own text and in §12
+from the start. Only the summary row was wrong. Recorded rather than quietly amended, per
 `CLAUDE.md` §1 and §24.
 
 ---
@@ -89,7 +102,7 @@ Whether viewers outside the home territory are served, and with what content.
 **Why it matters.** Territorial rights routinely prohibit it. This segment may be
 partially or entirely unserviceable, and assuming otherwise builds a market plan on an
 unlicensed foundation.
-**Status:** OPEN · Required by Phase 1 · Depends on PD-004.
+**Status:** OPEN · Required by Phase 1 · Depends on PD-004 — **input now available: Georgia (APPROVED)**. PD-004 separates service availability from content rights, so the diaspora question is now precisely: which territories become *service-available*, and which rights cover them.
 
 ### PD-003 — Target user segments
 The segments in `PRODUCT_SPEC.md` §2.2 are inferences from the product type and language
@@ -97,16 +110,107 @@ set. No market research was supplied.
 **Why it matters.** Segments drive feature priority and the launch platform order.
 **Status:** OPEN · Required by Phase 1.
 
-### PD-004 — Target territories **[BLOCKING — Phase 3] [LEGAL]**
-The list of countries in which KMS TV will operate.
-**Why it matters.** This is the most consequential open decision in the register.
-Territories determine: rights negotiations and geo-enforcement obligations; applicable
-privacy law; tax treatment; payment methods; content classification schemes; CDN
-footprint; and language priority. **Phases 3 through 6 cannot be correctly designed
-without it.**
-**[UNVERIFIED]** This specification makes no claim about the regulatory, broadcasting,
-tax, or data-protection regime of any country.
-**Status:** OPEN · **Required before Phase 3.**
+### PD-004 — Target territories — **APPROVED · FINAL**
+
+| Field | Value |
+|---|---|
+| **Decision** | **APPROVED** |
+| **Decision ID** | **PD-004** |
+| **Launch territory** | **Georgia** |
+| **Architecture** | **Multi-territory** |
+| **Future territories** | **Configurable** |
+| **Status** | **FINAL** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-13 |
+| **Supersedes** | The OPEN status of this entry and the Option-B recommendation in `DECISION_BRIEF.md` Part 1 |
+
+**The decision as approved.** KMS TV launches commercially in **Georgia** first. The
+platform architecture MUST be **multi-territory from day one**. Specifically:
+
+1. Georgia is the initial launch territory.
+2. The architecture MUST NOT hard-code Georgia as the only possible territory.
+3. Future territories MUST be configurable without rewriting the core architecture.
+4. **App distribution MUST be treated separately from service availability.**
+5. Service availability MUST be configurable per territory.
+6. Content availability MUST be controlled independently per territory.
+7. Content rights MUST always be territory-aware.
+8. Packages MAY differ by territory.
+9. Pricing MAY differ by territory.
+10. Payment methods MAY differ by territory.
+11. Tax configuration MAY differ by territory.
+12. Localization MAY differ by territory.
+13. A future territory MUST be addable without redesigning the core platform.
+14. **Installing the KMS TV application in another country MUST NOT automatically grant
+    access to content.**
+15. Playback authorization MUST evaluate the applicable territory, service-availability,
+    and content-rights rules.
+
+**The three-concept separation (binding).** App distribution, service availability, and
+content rights are **three independent concepts and MUST NOT be merged**. Each is a
+separate gate, evaluated separately:
+
+| Concept | Governs | Answers |
+|---|---|---|
+| **App distribution** | Where the client application may be obtained and installed | *Can this person get the app?* |
+| **Service availability** | Where KMS TV operates commercially — registration, subscription, billing, support | *Can this person become and remain a customer?* |
+| **Content rights** | Per-asset territorial distribution grants | *May this specific asset be served to this person, here, now, in this mode?* |
+
+Worked examples, from the approval:
+- A person may install the application in a territory where the **service is not
+  commercially available**. Installation grants nothing.
+- The service may be available in a territory while a **particular channel is unavailable
+  there**, because the applicable content rights do not cover it.
+
+**No future territory is named or assumed.** The approval cites the United States only as
+an illustration of addability. `CLAUDE.md` §1 prohibits inferring a launch plan from an
+example, and none is inferred here or anywhere else in the specification.
+
+**What remains open.** The territory is now determined; its *legal consequences* are not.
+PD-081 (applicable privacy regimes), PD-035 (classification scheme), PD-054 (tax
+treatment), and PD-075 (payment methods) each now have a determinate input and remain
+**[LEGAL]** and OPEN. **[UNVERIFIED]** This document continues to make no claim about the
+regulatory, broadcasting, tax, or data-protection regime of Georgia or of any other
+country.
+
+**Consequential new decisions.** The three-concept separation surfaces two questions the
+approval does not answer, recorded as **PD-094** (app distribution scope) and **PD-095**
+(travelling-subscriber policy) rather than defaulted.
+
+**Recorded in:** `docs/legal/DECISION_LOG.md` L-008 · `PROJECT_STATE.md` §7 D-015 ·
+`PRODUCT_SPEC.md` §2.3 and §2.3.1 · `REQUIREMENTS.md` §A28 · `DECISION_BRIEF.md` Part 1.
+
+### PD-094 — App distribution scope **[BLOCKING — Phase 19]**
+In which territories is the KMS TV application listed and installable, given that this is
+now explicitly **separate** from service availability (PD-004 item 4)?
+**Why it matters.** PD-004 establishes that installation grants nothing, but does not say
+where installation is offered. Store listing territories are a distribution and marketing
+decision with store-policy consequences, and they determine what a person who installs the
+app outside a served territory actually sees.
+**[UNVERIFIED]** No app store's territorial listing rules or requirements are assumed.
+**Options.** Launch territory only · launch territory plus selected others · unrestricted
+listing with an in-app "service not available here" state.
+**RECOMMENDATION — NOT APPROVED:** none. This is a distribution decision, and PD-004
+deliberately separated it from service availability precisely so it could be taken on its
+own merits.
+**Status:** OPEN · Arising from PD-004 · Required by Phase 19.
+
+### PD-095 — Travelling-subscriber policy **[BLOCKING — Phase 4] [LEGAL]**
+When a subscriber of a served territory is temporarily present in another territory, what
+may they watch — and does authorization evaluate their **home** territory, their **current**
+territory, or both?
+**Why it matters.** This is a data-model question before it is a policy question: it
+determines whether an account carries a home territory distinct from its current
+determined territory, which is a Phase 4 decision. Content rights are granted per
+territory of *reception*, so the safe default is that the current territory governs — but
+some agreements are written differently, and the answer may be dictated by contract.
+**Options.** Current territory governs (deny anything not licensed where the viewer is) ·
+home territory governs · per-rights-agreement configuration · explicit travel allowance
+with a defined duration.
+**RECOMMENDATION — NOT APPROVED:** on the policy, none — it is [LEGAL] and
+contract-dependent. On the **model**, carry both a home territory on the account and a
+determined current territory on each authorization, because a model with only one of them
+cannot express any of the options above.
+**Status:** OPEN · Arising from PD-004 · Required before Phase 4.
 
 ### PD-077 — Rationale for Spanish
 Georgian (primary), English, and Russian form a coherent set. Spanish alongside them is
@@ -180,7 +284,7 @@ entitlement model cannot be finalized without them.
 
 ### PD-014 — Pricing and currency **[BLOCKING — Phase 12] [LEGAL]**
 Prices, currencies, and whether pricing varies by territory.
-**Status:** OPEN · Depends on PD-004.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
 ### PD-049 — Add-ons versus exclusive tiers
 Whether packages stack (base + sports add-on) or are mutually exclusive tiers.
@@ -224,7 +328,7 @@ Circumstances, timeframes, proration, and entitlement consequences.
 
 ### PD-054 — Tax treatment **[LEGAL]**
 **[UNVERIFIED]** No claim is made about tax obligations in any jurisdiction.
-**Status:** OPEN · Depends on PD-004 · Required by Phase 12.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)** · Required by Phase 12.
 
 ### PD-073 — Invoices and receipts **[LEGAL]**
 Whether required, and what they must contain — jurisdiction-specific.
@@ -239,7 +343,7 @@ against **two** real candidates before it is finalized.
 
 ### PD-075 — Payment methods
 Cards, bank transfer, local methods, wallets, carrier billing. Strongly territory-dependent.
-**Status:** OPEN · Depends on PD-004.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
 ### PD-076 — In-app purchase **[UNVERIFIED]**
 Whether app-store IAP is required on mobile and TV platforms.
@@ -255,7 +359,7 @@ documentation at Phase 27.
 
 ### PD-020 — Account identifier type
 Email, phone, or both. Strongly market-dependent.
-**Status:** OPEN · Depends on PD-004 · Required by Phase 8.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)** · Required by Phase 8.
 
 ### PD-024 — Registration data fields
 Which personal data is collected at registration. `CLAUDE.md` §18 requires a stated
@@ -335,7 +439,7 @@ applies in any market.** No scheme has been assumed anywhere in this specificati
 recommendation surface. The data model must carry a **scheme identifier alongside the
 rating value** so multiple schemes can coexist across territories — which is a Phase 4
 design consequence of this decision.
-**Status:** OPEN · Depends on PD-004.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
 ### PD-036 — Maximum profiles per account
 **Status:** OPEN · Required by Phase 9.
@@ -351,7 +455,7 @@ Introduces moderation and storage obligations.
 
 ### PD-085 — Children's privacy obligations **[LEGAL]**
 **[UNVERIFIED]** No claim is made about children's privacy law in any jurisdiction.
-**Status:** OPEN · Depends on PD-004.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
 ---
 
@@ -509,7 +613,7 @@ Which subscription notifications a user may disable.
 ### PD-066 — Marketing consent model **[LEGAL]**
 Opt-in or opt-out. **[UNVERIFIED]** No claim is made about consent requirements in any
 jurisdiction.
-**Status:** OPEN · Depends on PD-004.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
 ### PD-080 — Audio description
 Depends on whether described audio assets are supplied by content providers.
@@ -574,7 +678,7 @@ Opt-out, opt-in, or neither.
 
 ### PD-086 — Data processing locations and cross-border transfers **[LEGAL]**
 `CLAUDE.md` §18 requires documentation before launch.
-**Status:** OPEN · Depends on PD-004, PD-081.
+**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)** — and on PD-081.
 
 ### PD-079 — Accessibility conformance target **[LEGAL]**
 **[UNVERIFIED]** No claim is made about accessibility legislation in any market.
@@ -659,7 +763,9 @@ practical output of this register.
 | Before | Must be resolved |
 |---|---|
 | **Phase 2** (Requirements) | PD-003, PD-077 — segments and language rationale shape priority |
-| **Phase 3** (Architecture) | **PD-004** (territories), **PD-008** (multi-tenancy), **PD-092** (launch scope) |
+| **Phase 3** (Architecture) | ~~PD-004 (territories)~~ **APPROVED — Georgia, multi-territory architecture** · **PD-008** (multi-tenancy), **PD-092** (launch scope) |
+| **Phase 4** (Database) — added | **PD-095** (travelling-subscriber policy — determines whether an account carries a home territory) |
+| **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
 | **Phase 4** (Database) | PD-035 (rating scheme), PD-049 (add-ons vs tiers), PD-013 (package structure) |
 | **Phase 6** (Security & threat model) | PD-081 (privacy regimes), PD-026 (revocation interval) |
 | **Phase 7** (Backend foundation) | D-007, D-008, D-010 |
@@ -689,7 +795,7 @@ ambiguous or incomplete, recorded rather than resolved by assumption.
 | # | Ambiguity | Handling in this specification |
 |---|---|---|
 | **A-01** | **Georgian primary + Russian + Spanish.** Spanish is unusual in this set and unexplained. | Recorded as PD-077. All four treated as required; no market inferred from the set. |
-| **A-02** | **No target territory stated**, yet rights, geo-enforcement, privacy, tax, and classification all depend on it. | Recorded as PD-004 and flagged as blocking Phase 3. No territory assumed anywhere. |
+| **A-02** | **No target territory stated**, yet rights, geo-enforcement, privacy, tax, and classification all depend on it. | **RESOLVED 2026-08-13** by the approval of PD-004: Georgia is the launch territory, the architecture is multi-territory, and future territories are configurable. No territory beyond Georgia is assumed anywhere; the approval's mention of the United States is an illustration of addability, not a plan. |
 | **A-03** | **Subscription state sets differ** between the STEP 1 brief and `IMPLEMENTATION_PLAN.md` Phase 12. | Brief treated as authoritative; discrepancy recorded as PD-052 rather than silently reconciled. |
 | **A-04** | **Package names given as examples** and explicitly unapproved. | No package names used anywhere in this specification. Recorded as PD-013. |
 | **A-05** | **"Household/profile user" listed as a user type** alongside account-level types. | Modelled as a profile within an account, not a separate identity type. Documented in `PRODUCT_SPEC.md` §3.1.6. |

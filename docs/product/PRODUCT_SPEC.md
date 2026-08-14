@@ -1,9 +1,9 @@
 # PRODUCT_SPEC.md — KMS TV Product Specification
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval
-**Version:** 1.0
-**Date:** 2026-08-13
+**Status:** DRAFT — awaiting product approval · **PD-004 APPROVED (territories)**
+**Version:** 1.1
+**Date:** 2026-08-13 (rev. 1.1 — PD-004 approved and propagated)
 **Governing document:** `CLAUDE.md` (binding)
 **Companion documents:** `REQUIREMENTS.md`, `USER_FLOWS.md`, `FEATURE_MATRIX.md`, `DECISIONS.md`
 
@@ -88,7 +88,7 @@ prove compliance loses content, and an operator with no content has no product.
 | Household television viewers | The primary audience. Watch live channels on a TV, occasionally on mobile. Value channel availability, guide accuracy, and reliability far above feature count. | [PROPOSED] |
 | Mobile / on-the-go viewers | Watch on phone or tablet, typically shorter sessions, often on cellular networks. Value fast startup and low data use. | [PROPOSED] |
 | On-demand viewers | Primarily consume VOD, movies, and series. Value catalogue depth, search, resume, and recommendations. | [PROPOSED] |
-| Diaspora viewers | Viewers outside the operator's home territory wanting home-market channels. **Subject entirely to territorial rights** — this segment may be unserviceable for some or all content. | [PROPOSED] + [LEGAL — PD-002] |
+| Diaspora viewers | Viewers outside Georgia wanting home-market channels. **Subject to two independent gates** (§2.3.1): whether the service is made available in their territory, and whether content rights cover it there. This segment may be unserviceable for some or all content. | [PROPOSED] + [LEGAL — PD-002] |
 | Operator staff | Content managers, support, finance, operations, analysts. Internal users of the Admin Control Center. | [CONFIRMED] |
 
 **[OPEN — PD-003]** The target user segments above are inferences drawn from the product
@@ -100,20 +100,93 @@ and no market research has been supplied. They must be confirmed or replaced.
 The brief confirms four product languages: **Georgian (primary), English, Russian,
 Spanish**. [CONFIRMED]
 
-Georgian as the primary language strongly suggests Georgia as the home market, but
-**a language set is not a market definition**, and the inclusion of Spanish alongside
-Georgian and Russian is unusual enough that it must not be interpreted without
-confirmation.
+**PD-004 is APPROVED and FINAL** (2026-08-13):
 
-**[OPEN — PD-004]** Define the list of territories in which KMS TV will operate, and
-the rationale for the Spanish language requirement. This is not a cosmetic question:
-territories determine rights negotiations, geo-enforcement obligations, tax handling,
-payment methods, privacy law applicability, and content classification requirements.
-**Nothing downstream of Phase 3 can be correctly designed without it.**
+| Field | Value | Status |
+|---|---|---|
+| **Launch territory** | **Georgia** | [CONFIRMED — PD-004] |
+| **Architecture** | **Multi-territory from day one** | [CONFIRMED — PD-004] |
+| **Future territories** | **Configurable, without redesigning the core platform** | [CONFIRMED — PD-004] |
+
+Binding consequences of the approval:
+
+- Georgia is the initial launch territory. **Georgia MUST NOT be hard-coded as the only
+  possible territory** anywhere in the platform.
+- **Service availability MUST be configurable per territory.**
+- **Content availability MUST be controlled independently per territory**, and content
+  rights MUST always be territory-aware.
+- Packages, pricing, payment methods, tax configuration, and localization **MAY differ by
+  territory** — so each must be modelled as territory-scoped, not global.
+- **A future territory MUST be addable without redesigning the core platform.**
+- **Installing the application in another country MUST NOT grant access to content.**
+- Playback authorization MUST evaluate the applicable territory, service-availability, and
+  content-rights rules (§12).
+
+**No territory beyond Georgia is named, planned, or assumed.** The approval mentions the
+United States solely as an illustration that a future territory must be addable. Inferring
+a launch plan from an illustration would be a fabrication, and none is inferred here
+(`CLAUDE.md` §1).
 
 **[UNVERIFIED]** No claim is made in this document about the regulatory, broadcasting,
-tax, or data-protection regime of any specific country. All such determinations are
-marked [LEGAL] and deferred to qualified advisors.
+tax, or data-protection regime of Georgia or of any other country. The territory is now
+determined; its legal consequences are not. **PD-081** (applicable privacy regimes),
+**PD-035** (classification scheme), **PD-054** (tax treatment), and **PD-075** (payment
+methods) each now have a determinate input and remain **[LEGAL]** and open.
+
+**[OPEN — PD-077]** The rationale for the Spanish language requirement remains
+unexplained. All four languages remain required; no market is inferred from the set.
+
+---
+
+### 2.3.1 App distribution, service availability, and content rights — three separate concepts
+
+**Binding, from PD-004. These three MUST NOT be merged, collapsed, or inferred from one
+another** — in the data model, in the API, in the clients, or in operator tooling.
+
+| # | Concept | Governs | Answers | Controlled by |
+|---|---|---|---|---|
+| 1 | **App distribution** | Where the client application may be obtained and installed | *Can this person get the app?* | Store listing territories and web accessibility |
+| 2 | **Service availability** | Where KMS TV operates commercially — registration, subscription, billing, support | *Can this person become and remain a customer?* | Operator commercial and legal readiness per territory |
+| 3 | **Content rights** | Per-asset territorial distribution grants | *May this specific asset be served to this person, here, now, in this mode?* | Rights agreements (§15) |
+
+**They are three independent gates, evaluated in order, and passing one implies nothing
+about the next:**
+
+```
+install the app            →  app distribution covers this territory
+   ↓  (grants nothing)
+register / subscribe       →  service availability covers this territory
+   ↓  (grants no specific content)
+play a given asset         →  content rights cover this asset,
+                              this territory, this device class, this mode
+```
+
+Worked examples, taken directly from the approval:
+
+- **A person may install the application in a territory where the service is not
+  commercially available.** They can open it. They cannot register, subscribe, or play.
+  The application must present a clear, non-error "not available in your location yet"
+  state — this is an expected condition, not a failure (§31).
+- **The service may be available in a territory while a particular channel is not**,
+  because the applicable content rights do not cover that territory. The channel is absent
+  from that viewer's catalogue, and a direct request is denied neutrally.
+
+**Why the separation is load-bearing.** Merging app distribution into service availability
+produces a platform that cannot be listed anywhere it does not yet trade — which blocks
+soft launches, diaspora marketing, and app-store presence ahead of commercial readiness.
+Merging service availability into content rights produces a platform that assumes a
+served territory means a licensed catalogue, which is precisely the assumption that causes
+unlicensed distribution. Each merge is a distinct failure, and the second is a compliance
+failure.
+
+**Consequential open decisions.** The separation raises two questions the approval does not
+answer, and neither has been defaulted:
+
+- **[OPEN — PD-094]** In which territories is the application listed and installable?
+- **[OPEN — PD-095] [LEGAL]** When a subscriber of a served territory is temporarily
+  present in another, does authorization evaluate their **home** territory, their
+  **current** territory, or both? This is a data-model question before it is a policy
+  question, and it is required before Phase 4.
 
 ### 2.4 Primary use cases
 
@@ -853,6 +926,20 @@ fast path that skips any of them:
 8. **Concurrent sessions** — within the effective concurrency limit
 9. **Geographic policy** — where a rights agreement requires it, **server-side**
 10. **Playback policy** — restart/catch-up/quality permissions for this asset
+11. **Service availability** — KMS TV is commercially available in the applicable
+    territory (PD-004)
+
+**Check 11 was added by the approval of PD-004** and is deliberately **separate from
+check 6**. Service availability and content rights are different questions with different
+owners: availability is the operator's commercial and legal readiness in a territory,
+rights are a per-asset contractual grant. A territory can be served with a given asset
+unlicensed there, and an asset can be licensed for a territory the operator does not yet
+serve. Collapsing the two would make one of those states unrepresentable — and the second
+of them is the state in which unlicensed distribution happens.
+
+App distribution (§2.3.1 concept 1) is **not** an authorization check, because it is not an
+authorization question. It governs whether someone can obtain the application at all, and
+by PD-004 item 14 it confers nothing.
 
 ### 12.2 Core product rules
 
@@ -873,7 +960,8 @@ fast path that skips any of them:
 | **Expired subscription** | Denied. Explain state, offer renewal path directly from the error | `SUBSCRIPTION_EXPIRED` |
 | **Unauthorized channel** (not in package) | Denied. Explain which package includes it, offer upgrade | `NOT_IN_PACKAGE` |
 | **Expired content rights** | Denied. **Neutral message** — "not currently available" — never blame the viewer | `RIGHTS_EXPIRED` |
-| **Outside licensed territory** | Denied. Neutral message. **No workaround is offered, suggested, or hinted at** (`CLAUDE.md` §1) | `TERRITORY_RESTRICTED` |
+| **Outside licensed territory** (service available, this asset not licensed here) | Denied. Neutral message. **No workaround is offered, suggested, or hinted at** (`CLAUDE.md` §1) | `TERRITORY_RESTRICTED` |
+| **Service not available in this territory** (PD-004) | Denied. **Distinct from the above** — the service does not operate here at all, rather than this asset being unlicensed. Neutral, forward-looking message; no workaround offered or hinted | `SERVICE_NOT_AVAILABLE` |
 | **Device class not permitted** | Denied. State which device types can play it | `DEVICE_CLASS_NOT_PERMITTED` |
 | **Too many devices** | Registration/playback denied; offer device management to remove one | `DEVICE_LIMIT_REACHED` |
 | **Too many simultaneous streams** | Denied. Show which sessions are active and offer to stop one **[PROPOSED — PD-047]** | `CONCURRENCY_LIMIT_REACHED` |
@@ -1474,7 +1562,8 @@ a **logging requirement**, and an **analytics event**.
 | Subscription expired | "Your subscription has ended." | Direct renewal path | Yes | `error.entitlement.subscription_expired` |
 | Content unavailable | "This isn't available right now." — **neutral, never blames the viewer** | Suggest alternatives | Yes | `error.content.unavailable` |
 | Rights expired | "This is no longer available." — neutral | Suggest alternatives | Yes — **compliance evidence** | `error.rights.expired` |
-| Territory restricted | "This isn't available in your location." — **no workaround offered or hinted** | Suggest available alternatives | Yes — compliance evidence | `error.rights.territory` |
+| Territory restricted (asset unlicensed here) | "This isn't available in your location." — **no workaround offered or hinted** | Suggest available alternatives | Yes — compliance evidence | `error.rights.territory` |
+| Service not available in territory | "KMS TV isn't available in your location yet." — a **normal state, not an error**; distinct from an unlicensed asset; **no workaround offered or hinted** | Offer to be notified if approved (PD-065); no dead end | Yes | `error.service.not_available` |
 | Stream unavailable | "We can't play this right now." | Retry; alternative channel | Yes + operations alert | `error.playback.source` |
 | EPG unavailable | "Programme information is unavailable." — **playback still works** | None needed; retry in background | Yes + operations alert | `error.epg.unavailable` |
 | Payment failure | "Your payment didn't go through." | Update payment method; retry | Yes (**never** card data) | `error.payment.failed` |
@@ -1720,6 +1809,7 @@ subscriber features. *"Internal only" is not an exemption.*
 
 | This section | Requirements | Flows | Decisions |
 |---|---|---|---|
+| §2.3, §2.3.1 Territories | FR-TER-* | UF-07, UF-13, UF-15, UF-18 | **PD-004 APPROVED**, PD-094, PD-095 |
 | §3 User types | FR-USR-* | UF-01…UF-05 | PD-022, PD-023 |
 | §4 Account | FR-ACC-* | UF-01, UF-02, UF-03, UF-05 | PD-020, PD-024…PD-033 |
 | §5 Profiles | FR-PRF-* | UF-04 | PD-034…PD-036, PD-021 |
@@ -1743,7 +1833,12 @@ Stated as clearly as what is (`CLAUDE.md` §21):
 
 - **No database schema, API contract, or technology choice.** Phases 3–5.
 - **No pricing, package names, or commercial terms.** PD-013, PD-014.
-- **No target territories.** PD-004 — and much of the design depends on it.
+- ~~**No target territories.**~~ **RESOLVED — PD-004 APPROVED:** Georgia launch,
+  multi-territory architecture, future territories configurable. **No territory beyond
+  Georgia is named, planned, or assumed**, and no second territory's legal, tax, payment,
+  or classification regime has been researched.
+- **No app distribution territories.** PD-094 — distinct from service availability.
+- **No travelling-subscriber policy.** PD-095 — required before Phase 4.
 - **No device, concurrency, profile, or catch-up limits.** PD-036, PD-038, PD-040, PD-058.
 - **No content rating scheme.** PD-035 — no scheme is assumed for any market.
 - **No legal or regulatory determinations.** All marked [LEGAL].

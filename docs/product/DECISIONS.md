@@ -39,21 +39,33 @@ from a primary source.
 
 ### Register summary
 
+Counts below are **derived by counting the decision headings in this document**, not
+estimated. Two decisions (PD-002, PD-085) appear twice as cross-reference pointers, so the
+document contains 95 headings for 93 unique decisions; the totals row counts unique
+decisions.
+
 | Category | Count | Blocking | Legal |
 |---|---:|---:|---:|
-| Product identity & market | 5 | 3 | 2 |
-| Business model & commerce | 16 | 4 | 4 |
-| Identity & account | 12 | 1 | 3 |
-| Profiles & parental control | 5 | 1 | 2 |
-| Devices & concurrency | 7 | 3 | 0 |
-| Content, EPG & time-shift | 9 | 1 | 1 |
-| Rights & compliance | 4 | 2 | 3 |
-| Discovery & personalization | 7 | 0 | 1 |
-| Admin & roles | 6 | 0 | 1 |
-| Privacy & data | 8 | 1 | 7 |
-| Platform & technical | 9 | 3 | 0 |
-| Performance & operations | 5 | 2 | 0 |
-| **Total** | **93** | **21** | **24** |
+| 1. Product identity and market | 5 | 2 | 2 |
+| 2. Business model and commerce | 23 | 6 | 6 |
+| 3. Identity and account | 13 | 2 | 2 |
+| 4. Profiles and parental control | 5 | 1 | 2 |
+| 5. Devices and concurrency | 7 | 3 | 0 |
+| 6. Content, EPG and time-shift | 9 | 1 | 2 |
+| 7. Rights and compliance | 4 | 3 | 2 |
+| 8. Discovery and personalization | 7 | 0 | 1 |
+| 9. Admin and roles | 6 | 0 | 2 |
+| 10. Privacy and data | 8 | 1 | 8 |
+| 11. Platform and technical | 8 | 5 | 0 |
+| **Total (unique decisions)** | **93** | **24** | **25** |
+
+**Correction, 2026-08-13.** The blocking and legal totals were first published as 21 and
+24, and the per-category rows alongside them were estimates written before the register
+was finished. The measured values are **24 blocking** and **25 legal**. The difference is
+not attributable to any particular decisions — no decision was added, removed, or
+reclassified, and every entry was correctly flagged in its own text and in §12 from the
+start. Only the summary row was wrong. Recorded rather than quietly amended, per
+`CLAUDE.md` §1 and §24.
 
 ---
 

@@ -219,8 +219,14 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
 - [x] **25 user and operator flows** specified with happy, alternate, and failure paths.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **93 open product decisions recorded** — none silently chosen — with 21 flagged
-      blocking and 24 flagged as requiring legal verification.
+- [x] **93 open product decisions recorded** — none silently chosen — with **24 flagged
+      blocking and 25 flagged as requiring legal verification** (counts corrected
+      2026-08-13 from the estimates 21 and 24 first published; see `DECISIONS.md`
+      register summary).
+- [x] `docs/product/DECISION_BRIEF.md` prepared for the product owner: the three primary
+      decisions analysed across 22 dimensions each, all 24 blocking decisions summarized,
+      A/B/C ordering classification, and a recommended decision sequence. Every
+      recommendation labelled **RECOMMENDATION — NOT APPROVED**.
 - [x] **12 ambiguities in the brief itself recorded** rather than resolved by assumption.
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
@@ -348,7 +354,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS** — deliverables written, awaiting review and 21 blocking decisions |
+| 1 | Product specification | **IN PROGRESS** — deliverables written, awaiting review and 24 blocking decisions |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

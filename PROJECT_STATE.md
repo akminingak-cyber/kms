@@ -20,7 +20,7 @@
 | **Legal research** | **PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE ENVIRONMENT** (B-009, L-012) |
 | **STEP 2** | **NOT STARTED** |
 | **Phase 0** | **COMPLETE** — final gate passed, human-confirmed 2026-08-13 |
-| **Last updated** | 2026-08-16 (PD-049 Q1 approved) |
+| **Last updated** | 2026-08-16 (PD-007 approved) |
 | **Updated by** | Engineering agent (Claude Code) |
 | **Repository** | `akminingak-cyber/kms` |
 | **Working branch** | `claude/kms-tv-step-0-audit-peahvj` |
@@ -226,9 +226,9 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       UF-26 (travelling subscriber) added when PD-095 was approved.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **99 product decisions recorded** — none silently chosen — of which **4 are APPROVED
-      (PD-004, PD-008, PD-092, PD-095)**, **one is half-approved (PD-049 Q1)**, **22 remain
-      blocking**, and **24 require legal verification**
+- [x] **99 product decisions recorded** — none silently chosen — of which **5 are APPROVED
+      (PD-004, PD-007, PD-008, PD-092, PD-095)**, **one is half-approved (PD-049 Q1)**,
+      **22 remain blocking**, and **24 require legal verification**
       (counts corrected 2026-08-13 from the estimates first published, and re-derived
       2026-08-16 after PD-096/097/098 were added; see `DECISIONS.md` register summary.
       Blocking and legal counts are unchanged because the three new decisions carry no
@@ -299,6 +299,18 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       rules that coexisting grants now require — quality limits, concurrency limits, device
       limits, content entitlements, territory eligibility, effective dates, and conflicting
       allowances. **No rule was chosen**, and Phase 4 must not encode one.
+- [x] **PD-007 APPROVED and propagated** (2026-08-16): **Option A — no PPV at launch.**
+      **KMS TV will not sell individual titles or events separately at launch.** Pay-per-view,
+      one-time title purchase, one-time event purchase, transactional purchase flow and
+      rental flow are **out of scope at launch**. This is a **launch-scope** decision and
+      **not a permanent prohibition** — **future PPV remains possible as a separately
+      approved future commercial capability.** The future-compatibility requirement is
+      **already satisfied by PD-049 Q1** (`0..N` grants), so **no preparatory work is
+      permitted and none was done**. Recorded in `DECISIONS.md` §2, `PRODUCT_SPEC.md` §2.5
+      and **§13.6** (launch commercial scope), `USER_FLOWS.md` Appendix B,
+      `docs/legal/DECISION_LOG.md` **L-013**, and §7 **D-031** below. **No PPV requirement,
+      acceptance criterion, user flow, feature-matrix row, or implementation was created**,
+      and **PD-049 Q1, PD-049 Q2, PD-099, PD-013 and PD-057 are all unchanged.**
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -440,6 +452,7 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-027 | 2026-08-16 | **PD-096, PD-097 and PD-098 recorded as OPEN, with no `[BLOCKING]` or `[LEGAL]` flag and no phase assignment.** | **Accepted — recording decision only** | All three arise from PD-035. Which phase each gates, and whether each needs legal verification in its own right, depends on how PD-035 resolves; assigning a flag now would be a determination, and none has been made. They are listed in `DECISIONS.md` §12 beneath the phase table so they are not lost, and must be assigned or explicitly marked non-blocking when PD-035 is decided. |
 | D-028 | 2026-08-16 | **PD-049 Q1 APPROVED · structural — a KMS TV account MAY hold more than one commercial grant simultaneously.** The model MUST NOT assume `1 account = exactly 1 commercial grant`. Conceptual shape: `1 account → 0..N commercial grants → effective entitlements → playback authorization`. **Structural only:** no add-on sale, tier name, price, package content, PPV, or promotion is approved. | **Accepted — product owner decision** | The structural half of PD-049 was the only part that gated Phase 4, and it is answerable with zero commercial input. Settling it now lets the Phase 4 ERD model the account→grant relation once, instead of restructuring checks 4 and 5 — the most heavily negative-tested path in the product — after the fact. The commercial half (Q2) remains open precisely because the specification contains no market input to decide it. |
 | D-029 | 2026-08-16 | **Playback authorization gains no twelfth check.** The eleven checks in `PRODUCT_SPEC.md` §12.1 are unchanged. Multiple grants change what checks 4 (package) and 5 (entitlement) evaluate **over** — a set rather than a single grant — not which checks run. | **Accepted — consequence of D-028** | Same reasoning as D-024 for PD-095: the approval is absorbed by existing machinery, and inflating the check count would imply new enforcement where only the input cardinality changed. It also preserves §3.1.5's rule that *"Tier must never alter which checks run — only their outcome."* |
+| D-031 | 2026-08-16 | **PD-007 APPROVED · Option A — no PPV at launch.** KMS TV will not sell individual titles or events separately at launch. **Launch scope only — not a permanent prohibition**; future PPV remains possible as a separately approved future commercial capability. **No PPV purchase flow, billing, entitlement logic, rental logic, UI, admin tooling, reporting, payment flow, or refund logic may be built — including as preparation.** | **Accepted — product owner decision** | Fifth fully-approved product decision. It costs nothing in future optionality because **PD-049 Q1 already satisfies the future-compatibility requirement**: a future PPV grant would be an asset-scoped, one-off commercial grant inside the approved `0..N` model, so preserving the capability requires **no work at all**. Recording that explicitly is what keeps "keep it possible" from being read as "build scaffolding for it", which `PD-008`'s architectural rules prohibit. Rights consequence recorded as `docs/legal/DECISION_LOG.md` L-013: launch rights agreements need not cover transactional distribution, and future PPV would need a **separate** rights grant per L-002. |
 | D-030 | 2026-08-16 | **Where several grants could each reach the same asset, the playback-authorization evidence must record which grant the decision rested on.** | **Accepted — consequence of D-028** | `CLAUDE.md` §12 requires authorization decisions to be logged "with enough detail to prove compliance to a rights holder". Under a single-grant model the grant was implicit; under `0..N` it is not. *"The account was entitled"* is not evidence a rights holder can audit. **No legal-log entry was created for this**: it makes no claim about law or about what any contract permits, and the rights-side rule it supports is already recorded as L-002. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
@@ -453,7 +466,7 @@ those with engineering consequence are duplicated here when accepted.
 **STOP.** **STEP 2: NOT STARTED.** Status: **WAITING FOR PRODUCT OWNER DECISIONS.**
 
 The immediate next action is **product owner decisions**, not corrections. The
-specification is deliberately incomplete in exactly **95** places (99 decisions, 4 fully
+specification is deliberately incomplete in exactly **94** places (99 decisions, 5 fully
 approved, PD-049 half-approved), and each is a question only the product owner can answer.
 
 **Do not begin Phase 2 (Requirements and acceptance criteria) until Phase 1 is explicitly
@@ -489,9 +502,10 @@ Then, in order:
 
 **Now scheduled rather than blocking:** **PD-013**, **PD-014** and **PD-049 Q2** move to
 **Phase 12** (packages and subscriptions); **PD-099** moves to **Phase 14** (entitlement
-engine). None of them gates Phase 4. **PD-007** (transactional / PPV) remains OPEN and is
-worth answering alongside PD-049 Q2, since PD-049 Q1 has now made the model able to carry
-it whichever way it goes.
+engine). None of them gates Phase 4. ~~**PD-007** (transactional / PPV) remains OPEN~~
+✅ **APPROVED 2026-08-16 — Option A, no PPV at launch.** It never gated Phase 4 and does not
+now; should PPV be reintroduced by a future decision, that decision would gate the
+commercial implementation phase at that time. **No new phase was created.**
 
 ---
 
@@ -503,7 +517,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; **PD-049 Q1 APPROVED (structural)**; 22 blocking decisions open; **B-009 legal research blocked** |
+| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-007, PD-008, PD-092, PD-095 APPROVED**; **PD-049 Q1 APPROVED (structural)**; 22 blocking decisions open; **B-009 legal research blocked** |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

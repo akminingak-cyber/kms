@@ -400,7 +400,7 @@ information has been supplied.
 | **Free tier** | A limited set of channels/content at no cost | Requires an entitlement path for unpaid accounts and a rights basis permitting free distribution — which is a **separate grant** from paid distribution | [OPEN — PD-005] + [LEGAL] |
 | **Advertising-supported (AVOD/FAST)** | Ad-funded channels or content | Requires ad insertion, an ad provider, measurement, and consent handling. **No ad provider capability may be assumed** (`CLAUDE.md` §1). | [OPEN — PD-006] + [LEGAL] |
 | **Hybrid** | Paid tiers plus an ad-supported free tier | Combination of the above | [OPEN — PD-005/006] |
-| **Transactional (TVOD/PPV)** | Pay per title or per event | Requires per-asset purchase, separate entitlement grants, and event-specific rights | [OPEN — PD-007] |
+| **Transactional (TVOD/PPV)** | Pay per title or per event | **NOT AT LAUNCH.** KMS TV will not sell individual titles or events separately at launch (§13.6). **Launch scope only — not a permanent prohibition**; future PPV remains possible as a separately approved future commercial capability | **[NOT AT LAUNCH — PD-007 APPROVED]** |
 | ~~**Operator/B2B wholesale**~~ | ~~KMS TV licensed to another operator~~ | **OUT OF SCOPE.** Would require multi-tenancy, which **PD-008 (APPROVED)** excludes from the current product | **[REJECTED — PD-008 APPROVED]** |
 
 **PD-008 is APPROVED: Option A — single-tenant, one operator.** Multi-tenancy, white-label,
@@ -1233,8 +1233,9 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or
-package contents **[OPEN — PD-013]**, any prices **[OPEN — PD-014]**, transactional/PPV
-purchase **[OPEN — PD-007]**, or promotions **[OPEN — PD-012]**. A structure that *permits*
+package contents **[OPEN — PD-013]**, any prices **[OPEN — PD-014]**, or promotions
+**[OPEN — PD-012]**. Transactional/PPV purchase is now settled separately and is **not sold
+at launch** — **PD-007 APPROVED**, §13.6. A structure that *permits*
 several grants obliges no one to *sell* several, and **no add-on pricing, purchase flow,
 admin surface, or attach-rate analytics may be built** until PD-049 Q2 is answered.
 
@@ -1285,6 +1286,43 @@ operator, one subscription system, no `tenant_id`), **PD-092** (grants stay
 server-authoritative; the API returns a **resolved** decision, never a grant set for a
 client to reconcile), and **PD-095** (current territory, service availability, and content
 rights remain authoritative). **None of those decisions was modified.**
+
+### 13.6 Launch commercial scope [CONFIRMED — PD-007 APPROVED]
+
+> **KMS TV will not sell individual titles or events separately at launch.**
+
+| In scope at launch | Out of scope at launch |
+|---|---|
+| Recurring subscription model | Pay-per-view |
+| Subscription-based commercial grants | One-time title purchase |
+| Entitlement-based access | One-time event purchase |
+| Rights-based playback authorization | Rental |
+| | Transactional content purchase |
+
+**This is a launch-scope decision, not a permanent prohibition.** **Future PPV remains
+possible as a separately approved future commercial capability** — it would be a new product
+decision with its own record, not a resumption of PD-007. This is deliberately **unlike**
+§1.2's treatment of multi-tenancy, which PD-008 places permanently out of scope.
+
+**Future-compatibility requirement, and why nothing is owed against it.** The architecture
+must not make future PPV impossible, and must not require a fundamental redesign of the
+account / grant / entitlement model to add it. **That requirement is already satisfied by
+PD-049 Q1** (§13.4): an account may hold `0..N` commercial grants, so a future PPV grant
+would simply be an **asset-scoped, one-off** commercial grant alongside a subscription
+grant, in the terms §13.5 already defines. **No preparatory work is required, and none may
+be done.**
+
+**Explicitly not to be built — now or as preparation:** PPV purchase flow · PPV billing ·
+PPV entitlement logic · PPV rental logic · PPV UI · PPV admin tools · PPV reporting · PPV
+payment flow · PPV refund logic. Building any of them would be the speculative
+infrastructure §1.2's architectural rules prohibit. **PPV is not a current feature of this
+product and appears in no launch feature set.**
+
+**This table says nothing about add-ons.** Whether add-ons are sold at launch is
+**[OPEN — PD-049 Q2]**, neither approved nor rejected by PD-007. Package names, contents,
+allowances and eligibility remain **[OPEN — PD-013]**; grant resolution rules remain
+**[OPEN — PD-099]**; additional VOD content types remain **[OPEN — PD-057]** — **no event
+content model is inferred** merely because PPV was considered and declined.
 
 ---
 

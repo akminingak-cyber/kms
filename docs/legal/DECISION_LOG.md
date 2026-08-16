@@ -329,3 +329,41 @@ the *Decisions* section of `PROJECT_STATE.md`.
   restart are classified. Those questions are open.
 - **Recorded by:** Engineering agent
 - **Status:** Open
+
+### L-013 — No transactional/PPV distribution at launch; rights consequence
+- **Date:** 2026-08-16
+- **Phase:** 1
+- **Decision:** The product owner has approved **PD-007 — Option A**. **KMS TV will not sell
+  individual titles or events separately at launch.** Pay-per-view, one-time title purchase,
+  one-time event purchase, transactional purchase and rental are **out of scope at launch**.
+- **Rationale for recording here:** the decision has a **rights-procurement consequence**,
+  which is why it belongs in this log rather than only in the product register. **L-002**
+  establishes that distribution modes are granted and enforced **independently** — holding
+  one never implies another. `PRODUCT_SPEC.md` §15.2 enumerates six modes: **Live ·
+  Catch-up · Restart · VOD · Recording · Download**. There is **no transactional mode among
+  them**, and `PRODUCT_SPEC.md` §2.5 records that PPV *"requires … event-specific rights"*.
+  It follows that **launch rights agreements need not, and should not be assumed to, cover
+  transactional or event-specific distribution.** Should PPV ever be approved, it requires a
+  **separate rights grant**, per L-002 — an existing agreement covering VOD does not extend
+  to selling the same title individually.
+- **What this entry does not do.** It creates **no** obligation, **no** new distribution
+  mode, and **no** preparatory work. It records a product fact and the rights consequence
+  that follows from L-002, so that the fact is not rediscovered during rights negotiation.
+- **[UNVERIFIED]** No claim is made about what any rights agreement permits, about whether
+  any territory's law treats transactional distribution differently, or about the
+  consumer-law or tax treatment of a one-off purchase. Those questions do not arise at
+  launch and are not answered here.
+- **Scope:** **launch scope only.** This is **not** a permanent prohibition and is
+  deliberately unlike **L-010**/PD-008, which places multi-tenancy out of scope entirely.
+  **Future PPV remains possible as a separately approved future commercial capability**, and
+  would be a new product decision with its own record.
+- **Legal review required:** no for the decision itself. **If PPV is ever reintroduced**,
+  the following become live and are **not** assessed here: rights grant for transactional
+  distribution, refund policy (PD-091, `[LEGAL]`), tax treatment of one-off purchases
+  (PD-054, `[LEGAL]`), invoice requirements (PD-073, `[LEGAL]`), and store in-app-purchase
+  policy (PD-076, `[UNVERIFIED]`).
+- **Alternatives considered:** PPV events only · PPV individual content · PPV with a defined
+  rental window · hybrid subscription + add-ons + PPV. All recorded in `docs/product/DECISIONS.md`
+  PD-007.
+- **Recorded by:** Engineering agent, on the product owner's decision
+- **Status:** Accepted

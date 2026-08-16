@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **4 APPROVED (PD-004, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.6
-**Date:** 2026-08-16 (PD-049 split — Q1 APPROVED, Q2 OPEN; PD-099 recorded as OPEN)
+**Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
+**Version:** 1.7
+**Date:** 2026-08-16 (PD-007 APPROVED — Option A, no PPV at launch)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -72,7 +72,7 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | 11. Platform and technical | 8 | 4 | 0 |
 | **Total (unique decisions)** | **99** | **22** | **24** |
 
-**Decided so far: 4 of 99 fully decided, plus the structural half of PD-049.**
+**Decided so far: 5 of 99 fully decided, plus the structural half of PD-049.**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -80,6 +80,7 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | **PD-008** | Multi-tenancy — **Option A, single-tenant. One operator, one product. Multi-tenancy, white-label, and SaaS operator platform all OUT OF SCOPE** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-092** | Launch platform scope — **Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-095** | Travelling-subscriber policy — **Option A. Subscription follows the subscriber; current territory, service availability, and content rights remain authoritative** | **APPROVED · FINAL** (2026-08-13) |
+| **PD-007** | Transactional / pay-per-view — **Option A. KMS TV will not sell individual titles or events separately at launch.** **Launch scope, not a permanent prohibition** — future PPV remains possible as a separately approved future commercial capability | **APPROVED** (2026-08-16) |
 
 **Partially decided — counted above as one open decision, not as a fifth approval:**
 
@@ -98,6 +99,18 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.7 changes.** **PD-007 APPROVED** (§2): **Option A — no PPV at launch.** KMS TV
+will not sell individual titles or events separately at launch; pay-per-view, one-time
+title purchase, one-time event purchase, transactional purchase flow and rental flow are
+all **out of scope at launch**. This is a **launch-scope** decision and **not** a permanent
+prohibition — future PPV remains possible as a separately approved future commercial
+capability, and the future-compatibility requirement is **already satisfied by PD-049 Q1**,
+so **no preparatory work is permitted**. Approved count 4 → 5; decision count **unchanged at
+99** (no decision added); open blocking **unchanged at 22**; open legal **unchanged at 24**
+(PD-007 carried neither flag). **No requirement, acceptance criterion, user flow, or
+feature-matrix row was created**, and **PD-049 Q1, PD-049 Q2, PD-099, PD-013 and PD-057 are
+all unchanged.**
 
 **Version 1.6 changes.** **PD-049 Q1 APPROVED** (§2): one account may hold more than one
 commercial grant simultaneously. The **identifier PD-049 is preserved**; the entry is split
@@ -390,9 +403,78 @@ assets — a channel-origination capability that does not otherwise exist in thi
 **[UNVERIFIED]** No ad provider, format, or measurement standard is assumed.
 **Status:** OPEN.
 
-### PD-007 — Transactional / pay-per-view
-Whether individual titles or events can be purchased separately.
-**Status:** OPEN.
+### PD-007 — Transactional / pay-per-view — **APPROVED · OPTION A — NO PPV AT LAUNCH**
+
+**The original question.** *"Whether individual titles or events can be purchased
+separately."*
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-007** (unchanged) |
+| **Decision** | **Option A — no PPV at launch** |
+| **Status** | **APPROVED** |
+| **Scope of the decision** | **LAUNCH SCOPE.** Not a permanent prohibition |
+| **Future PPV** | **Remains possible as a separately approved future commercial capability** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of this entry |
+
+**The decision as approved.**
+
+> **KMS TV will not sell individual titles or events separately at launch.**
+
+**Out of scope at launch:** pay-per-view · individual title purchase · individual event
+purchase · transactional purchase flow · rental flow.
+
+**Not a permanent prohibition.** This is a **launch-scope** decision. **Future PPV remains
+possible as a separately approved future commercial capability**, and would be a new
+product decision with its own record — not a resumption of this one. It is therefore
+**unlike PD-008**, which places multi-tenancy permanently out of scope.
+
+**Future-compatibility requirement.** The architecture **MUST NOT** make future PPV
+impossible. It must not require a fundamental redesign of the account / grant / entitlement
+model to add it later. **That requirement is already satisfied by PD-049 Q1** — an account
+may hold `0..N` commercial grants, so a future PPV grant would be an **asset-scoped,
+one-off commercial grant** alongside a subscription grant. **No further work is required to
+preserve the capability, and none may be done.**
+
+**Explicitly NOT to be implemented — now or as preparation:** PPV purchase flow · PPV
+billing · PPV entitlement logic · PPV rental logic · PPV UI · PPV admin tools · PPV
+reporting · PPV payment flow · PPV refund logic. Building any of these would be exactly the
+speculative infrastructure `PD-008`'s architectural rules prohibit. **The only requirement
+is that the approved commercial-grant architecture does not structurally prevent a future
+PPV grant.**
+
+**Launch commercial scope (recorded by this approval).**
+
+| In scope at launch | Out of scope at launch |
+|---|---|
+| Recurring subscription model | PPV |
+| Subscription-based commercial grants | One-time title purchase |
+| Entitlement-based access | One-time event purchase |
+| Rights-based playback authorization | Rental |
+| | Transactional content purchase |
+
+**This table says nothing about add-ons.** Whether add-ons are sold at launch is
+**[OPEN — PD-049 Q2]** and is neither approved nor rejected by PD-007.
+
+**What this approval does NOT change.**
+
+| Decision | Effect |
+|---|---|
+| **PD-049 Q1** | **UNCHANGED — still APPROVED.** `1 account → 0..N commercial grants → effective entitlements → playback authorization` stands exactly as approved |
+| **PD-049 Q2** | **UNCHANGED — still OPEN.** PD-007 neither approves nor rejects add-ons |
+| **PD-099** | **UNCHANGED — still OPEN.** No grant conflict, quality, concurrency, device, territory, effective-date, or precedence rule is defined by this approval |
+| **PD-013** | **UNCHANGED — still OPEN.** No package name, content, allowance, eligibility, or price is decided |
+| **PD-057** | **UNCHANGED — still OPEN.** **No event content model is inferred** merely because PPV was considered and declined |
+
+**Phase impact.** PD-007 **does not block Phase 4.** It is a commercial launch-scope
+decision. Should PPV be reintroduced by a future decision, that decision would gate the
+commercial implementation phase (Phase 12) at that time. **No new phase is created**; the
+existing planning structure already accommodates it.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-031 · `PRODUCT_SPEC.md` §2.5 and §13.6 ·
+`USER_FLOWS.md` Appendix B · `docs/legal/DECISION_LOG.md` L-013.
 
 ### PD-008 — Multi-tenancy — **APPROVED · FINAL**
 

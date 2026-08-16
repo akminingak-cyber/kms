@@ -1191,6 +1191,6 @@ These hold in **every** flow above. A flow that violates one is specified incorr
 | Recording / network DVR | Depends on PD-015 and recording rights |
 | Support impersonation | Depends on PD-022 |
 | Social login | Depends on PD-033 |
-| Transactional purchase (PPV) | Depends on PD-007 |
+| Transactional purchase (PPV) | **OUT OF SCOPE AT LAUNCH** — PD-007 APPROVED (Option A). KMS TV will not sell individual titles or events separately at launch, so no purchase, rental, or refund flow exists. **Launch scope only, not a permanent prohibition** — future PPV remains possible as a separately approved future commercial capability, and would require its own flows at that time |
 | Roaming limits / travel duration rules | **Deliberately undefined** — PD-095 approved with no roaming limit of any kind. Not deferred to a named decision; simply not part of the product unless separately approved |
 | ~~Multi-tenant operator onboarding~~ | **OUT OF SCOPE** — PD-008 APPROVED (Option A, single-tenant). Not deferred; excluded. Any future revisit is a new architectural decision with its own ADR |

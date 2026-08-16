@@ -13,10 +13,14 @@
 |---|---|
 | **Project** | KMS TV |
 | **Product** | Production-grade IPTV/OTT platform |
-| **Current phase** | **STEP 1 / PHASE 1 — Product specification** |
-| **Status** | **IN PROGRESS** |
+| **Current phase** | **STEP 1 — Product Decisions** |
+| **Status** | **WAITING FOR PRODUCT OWNER DECISIONS** |
+| **Phase 3 blockers** | **NONE REMAINING** |
+| **Phase 4 blockers** | **PD-035** (legal classification) · structural part of **PD-013 / PD-049** · **PD-096 / PD-097 / PD-098** recorded, phase not yet assigned |
+| **Legal research** | **PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE ENVIRONMENT** (B-009, L-012) |
+| **STEP 2** | **NOT STARTED** |
 | **Phase 0** | **COMPLETE** — final gate passed, human-confirmed 2026-08-13 |
-| **Last updated** | 2026-08-13 |
+| **Last updated** | 2026-08-16 |
 | **Updated by** | Engineering agent (Claude Code) |
 | **Repository** | `akminingak-cyber/kms` |
 | **Working branch** | `claude/kms-tv-step-0-audit-peahvj` |
@@ -222,11 +226,13 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       UF-26 (travelling subscriber) added when PD-095 was approved.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **95 product decisions recorded** — none silently chosen — of which **4 are APPROVED
+- [x] **98 product decisions recorded** — none silently chosen — of which **4 are APPROVED
       (PD-004, PD-008, PD-092, PD-095)**, **22 remain blocking**, and **24 require legal
       verification**
-      (counts corrected 2026-08-13 from the estimates first published; see `DECISIONS.md`
-      register summary).
+      (counts corrected 2026-08-13 from the estimates first published, and re-derived
+      2026-08-16 after PD-096/097/098 were added; see `DECISIONS.md` register summary.
+      Blocking and legal counts are unchanged because the three new decisions carry no
+      flag — the phase they gate depends on PD-035, which is unresolved).
 - [x] `docs/product/DECISION_BRIEF.md` prepared for the product owner: the three primary
       decisions analysed across 22 dimensions each, all blocking decisions summarized
       (24 at the time of writing; 25 open after the PD-004 approval added PD-094/PD-095),
@@ -261,6 +267,22 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       `DECISION_BRIEF.md`, `PRODUCT_SPEC.md` §2.3.2, `REQUIREMENTS.md` §A31 (FR-TRV-01…07),
       `USER_FLOWS.md` UF-26, `FEATURE_MATRIX.md` §12, and `docs/legal/DECISION_LOG.md`
       L-011.
+- [x] **PD-035 primary-source legal research attempted 2026-08-16 — BLOCKED, and recorded
+      as blocked.** External HTTPS access to the required official sources (**Matsne** and
+      **ComCom**) was denied by the environment network policy. **No bypass was attempted.**
+      **Zero legal facts were verified from a primary source, and none was invented to fill
+      the gap.** Recorded in `docs/legal/DECISION_LOG.md` **L-012**, `DECISIONS.md` PD-035,
+      and §5 **B-009** below. The problem is **source accessibility** — it is not a claim
+      that the sources do not exist or that the law is unknown.
+- [x] **PD-096, PD-097, PD-098 recorded as OPEN** (2026-08-16) in `DECISIONS.md` §4, arising
+      from PD-035: behaviour for an asset unrated in a territory's scheme; which scheme
+      governs a travelling subscriber's maturity limit; whether warnings/descriptors are a
+      KMS TV product requirement in addition to legal requirements. **None was resolved, and
+      no recommendation was offered for any of them.**
+- [x] **Classification model recorded as a capability requirement only** (D-025) — nine
+      representable attributes, selecting no scheme and asserting no legal obligation — and
+      the **verified-fact / product-requirement / legal-interpretation separation** recorded
+      as a binding documentation rule (D-026).
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -271,15 +293,29 @@ integration, and no dependency installation. The Phase 1 commit contains markdow
 
 ## 4. Current work
 
+**STEP 1 — Product Decisions. Status: WAITING FOR PRODUCT OWNER DECISIONS.**
+
 Phase 1 deliverables are written: `docs/product/PRODUCT_SPEC.md`, `REQUIREMENTS.md`,
-`USER_FLOWS.md`, `FEATURE_MATRIX.md`, and `DECISIONS.md`. Remaining Phase 1 activity:
-commit and push to `claude/kms-tv-step-0-audit-peahvj`, then **STOP** and report.
+`USER_FLOWS.md`, `FEATURE_MATRIX.md`, and `DECISIONS.md`. Work is now **decision-gated, not
+production-gated** — the documents cannot progress further without answers only the product
+owner can give.
 
 Phase 1 will be marked **COMPLETE** only by explicit human confirmation after review, and
-**only once the blocking decisions it surfaced are resolved.** **PD-004 is now APPROVED**;
-**PD-004, PD-008, PD-092, and PD-095 are now APPROVED.** **Phase 3 has no remaining
-blocking decisions.** Phase 4 requires **PD-035** (classification scheme) and the
-structural part of PD-013/PD-049. Per `CLAUDE.md` §22, work does not advance to Phase 2 automatically.
+**only once the blocking decisions it surfaced are resolved.** **PD-004, PD-008, PD-092, and
+PD-095 are APPROVED.** **Phase 3 has no remaining blocking decisions.**
+
+**Phase 4 blockers:**
+
+| Blocker | Nature |
+|---|---|
+| **PD-035** — legal classification scheme | OPEN — **LEGAL REVIEW REQUIRED**. Primary-source research is blocked (B-009 / L-012). |
+| **Structural part of PD-013 / PD-049** | OPEN — package structure and add-ons vs. tiers shape the entitlement schema. |
+| **PD-096 / PD-097 / PD-098** | OPEN — newly recorded, arising from PD-035. **Phase assignment deliberately not made**, because which phase they gate depends on how PD-035 resolves. |
+
+**Legal research blocker: PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE
+ENVIRONMENT** — see B-009 and `docs/legal/DECISION_LOG.md` L-012.
+
+Per `CLAUDE.md` §22, work does not advance automatically. **STEP 2: NOT STARTED.**
 
 ---
 
@@ -288,9 +324,10 @@ structural part of PD-013/PD-049. Per `CLAUDE.md` §22, work does not advance to
 **None blocking the production of the Phase 1 specification** — it required analysis and
 documentation, both fully supported by the environment.
 
-**Blocking the Phase 1 gate and downstream phases:** 21 open product decisions flagged
-`[BLOCKING]` in `docs/product/DECISIONS.md` §12. The three that gate Phase 3 and should be
-answered first are:
+**Blocking the Phase 1 gate and downstream phases:** **22** open product decisions flagged
+`[BLOCKING]` in `docs/product/DECISIONS.md` §12 — count re-derived 2026-08-16 by counting
+flagged headings, correcting a stale figure of 21 in this section. The three that gate
+Phase 3 and should be answered first are:
 
 | ID | Decision | Gates |
 |---|---|---|
@@ -298,6 +335,24 @@ answered first are:
 | ~~PD-008~~ | ~~Multi-tenancy~~ | ✅ **APPROVED 2026-08-13** — Option A, single-tenant, one operator. Multi-tenancy, white-label, and SaaS operator platform out of scope |
 | ~~PD-092~~ | ~~Launch platform scope~~ | ✅ **APPROVED 2026-08-13** — Option B. v1.0 = Web + Android + Android TV |
 | ~~PD-095~~ | ~~Travelling-subscriber policy~~ | ✅ **APPROVED 2026-08-13** — Option A, subscription follows the subscriber; current territory authoritative |
+
+### Legal research blocker — active
+
+| ID | Blocker | Status |
+|---|---|---|
+| **B-009** | **PD-035 primary-source legal research cannot be performed from this environment.** "Primary-source legal research for PD-035 could not be completed from the current Claude environment because external HTTPS access to the required official sources was denied by the environment network policy. No bypass was attempted." Required primary sources: **Matsne** and the **Georgian Communications Commission / ComCom**. | **LEGAL RESEARCH BLOCKED — EXTERNAL SOURCE ACCESS REQUIRED** |
+
+**This is a source *accessibility* problem.** It is **not** a claim that the sources do not
+exist, and **not** a claim that Georgian law on this subject is unknown. The sources are
+official and exist; they could not be read from here. Denial was a general egress
+allow-list restriction — a neutral control host was refused identically — not a restriction
+aimed at these sources. Full record: `docs/legal/DECISION_LOG.md` **L-012**.
+
+**Resolution requires one of:** allowing `matsne.gov.ge` and `comcom.ge` in the
+environment's network policy and re-running the research; supplying the official texts
+directly with their URL, publication/version identifier, and retrieval date; or engaging
+qualified Georgian counsel with direct source access. **Blocks:** Phase 4 classification
+modelling, and the resolution of PD-035, PD-096, PD-097, PD-098.
 
 The Phase 0 environment blockers below are unchanged and still apply.
 
@@ -327,6 +382,8 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | K-005 | Low | Host locale is `POSIX` and `TZ` is unset. Harmless now; must be pinned explicitly in container images so EPG time handling is never environment-dependent. |
 | K-006 | Info | No CI configuration exists. Required by `CLAUDE.md` §15 before any code phase completes. |
 | K-007 | Info | No `git-lfs`. May matter if binary media test fixtures are ever versioned; avoid needing it. |
+| K-008 | Info | **NON-BLOCKING DOCUMENTATION OBSERVATION** — `DECISIONS.md` ambiguity **A-08** is still not marked **RESOLVED**, although PD-092 (approved 2026-08-13) supplies the launch platform scope A-08 was raised about. A-02 was marked RESOLVED when PD-004 was approved; A-08 was not given the same treatment. Recorded 2026-08-16 in `DECISIONS.md` §13.1 as **DO-01**. **Deliberately not fixed.** |
+| K-009 | Info | **NON-BLOCKING DOCUMENTATION OBSERVATION** — the PD-008 supersession sentence in `docs/product/DECISION_BRIEF.md` enumerates §5–7 and §8–20 but omits **§4** and **§21**, leaving their supersession status unstated. Recorded 2026-08-16 in `DECISIONS.md` §13.1 as **DO-02**. **Deliberately not fixed.** |
 
 ---
 
@@ -358,38 +415,53 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-023 | 2026-08-13 | **PD-095 APPROVED · FINAL — Option A, subscription follows the subscriber.** Current territory, service availability, and content rights remain authoritative. Roaming duration, country lists, and location-detection technology are **NOT DEFINED**. | **Accepted — product owner decision** | Fourth product decision. Establishes that **subscription ownership is separate from content territory rights** — an active subscription is never a universal content license. Recorded in `docs/legal/DECISION_LOG.md` L-011. |
 | D-024 | 2026-08-13 | Playback authorization gains **no twelfth check**. PD-095's eight required inputs map onto the existing eleven; the approval settles that checks 6, 9, and 11 evaluate the **current** territory, determined server-side. | **Accepted — consequence of D-023** | Resisting a check-count increase matters: the eight inputs were already covered, and inflating the count would imply new machinery where only a clarification was needed. |
 | D-022 | 2026-08-13 | **Fifteen domains remain server-authoritative and platform-independent** and are never duplicated inside a client: authentication, authorization, users, profiles, devices, sessions, channels, EPG, packages, subscriptions, entitlements, rights, playback authorization, payments, account state. | **Accepted — consequence of D-020** | Extends `CLAUDE.md` §4.2 from entitlement alone to the full list. A rule duplicated in a client is a rule that will drift from the server's. |
+| D-025 | 2026-08-16 | **The classification model must be *capable of representing*:** classification scheme · rating value · territory · `effective_from` · `effective_until` · authority/source reference · verification status · warnings/descriptors · parental-control policy. **This is a PRODUCT / ARCHITECTURAL capability requirement, not a legal conclusion.** It selects no classification scheme, asserts no legal obligation, defines no database schema, and does not resolve PD-035. | **Accepted — engineering design decision** | The *shape* of the model is stable across whichever scheme is ultimately determined, so Phase 4 structural work is not blocked on the legal answer — only its data is. Two elements are forced by decisions already approved rather than by any law: **territory** and **classification scheme** by PD-004 (multi-territory, configurable), and **verification status** by `CLAUDE.md` §1 and §24, which forbid treating unverified data as fact — the project's own classification knowledge is currently unverified, so a model that cannot represent that distinction would violate the constitution in its own structure. |
+| D-026 | 2026-08-16 | **"Verified legal facts, product requirements, and legal interpretations must remain explicitly separated."** An unverified legal assumption MUST NOT be converted into a product requirement. Where a product requirement exists for product reasons, it is recorded as such and not attributed to law. **Search-index results and search-engine summaries are not verified legal evidence** and may be used only to identify candidate official documents to retrieve. | **Accepted — binding documentation rule** | Restates `CLAUDE.md` §1 and §24 for the specific failure mode this project is exposed to: a plausible-sounding legal statement acquires the authority of a requirement simply by being written in a requirements document. Mirrored in `docs/legal/DECISION_LOG.md` L-012. |
+| D-027 | 2026-08-16 | **PD-096, PD-097 and PD-098 recorded as OPEN, with no `[BLOCKING]` or `[LEGAL]` flag and no phase assignment.** | **Accepted — recording decision only** | All three arise from PD-035. Which phase each gates, and whether each needs legal verification in its own right, depends on how PD-035 resolves; assigning a flag now would be a determination, and none has been made. They are listed in `DECISIONS.md` §12 beneath the phase table so they are not lost, and must be assigned or explicitly marked non-blocking when PD-035 is decided. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
-The 93 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
+The 98 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
 those with engineering consequence are duplicated here when accepted.
 
 ---
 
 ## 8. Next action
 
-**STOP.** Phase 1 ends here, by instruction.
+**STOP.** **STEP 2: NOT STARTED.** Status: **WAITING FOR PRODUCT OWNER DECISIONS.**
 
-The immediate next action is **product owner review of the five specification documents**,
-and specifically **decisions, not corrections**. The specification is deliberately
-incomplete in exactly 93 places, and each is a question only the product owner can answer.
+The immediate next action is **product owner decisions**, not corrections. The
+specification is deliberately incomplete in exactly **94** places (98 decisions, 4
+approved), and each is a question only the product owner can answer.
 
 **Do not begin Phase 2 (Requirements and acceptance criteria) until Phase 1 is explicitly
 confirmed COMPLETE.**
 
-The three decisions to answer first, because they gate Phase 3 and much of Phase 4:
+**Phase 3 (System architecture): NO REMAINING BLOCKERS.** ✅ PD-004, PD-008, PD-092 and
+PD-095 are all APPROVED. *(Blocker movement from PD-092: B-005 (Android SDK) is **on** the
+launch critical path; B-004 (Apple toolchain) is **off** it but its procurement lead time
+is unchanged; B-006 (Tizen/webOS registration) is deferred to v1.x yet remains calendar
+time and should still begin in Phase 3.)*
 
-1. **PD-004 — target territories.** Determines rights, geo-enforcement, applicable privacy
-   law, tax, payment methods, and content classification. The largest single unknown.
-2. ~~**PD-008 — multi-tenancy.**~~ ✅ **APPROVED** — Option A, single-tenant. The register's
-   only rewrite-class risk is now closed by decision.
-3. ~~**PD-092 — launch platform scope.**~~ ✅ **APPROVED** — Option B, three launch clients.
-   **Blocker movement:** B-005 (Android SDK) is now **on** the launch critical path; B-004
-   (Apple toolchain) is **off** it but its procurement lead time is unchanged; B-006
-   (Tizen/webOS registration) is deferred to v1.x yet remains calendar time and should
-   still begin in Phase 3.
+**The single action that unblocks the most work is resolving B-009** — the legal research
+blocker. Until the required official sources can be read, PD-035 cannot be answered, and
+PD-096, PD-097 and PD-098 cannot be answered either, because all three depend on it. Choose
+one:
 
-Then **PD-001 / D-006** — the pre-existing scaffold — which should be settled before any
-code lands beside it in Phase 7.
+1. Allow `matsne.gov.ge` and `comcom.ge` in the environment's network policy, then re-run
+   the primary-source research unchanged.
+2. Supply the official texts directly, with URL, publication/version identifier, and
+   retrieval date, so provenance is recordable.
+3. Engage qualified Georgian counsel with direct source access.
+
+Then, in order:
+
+1. **PD-035** — classification scheme. **OPEN — LEGAL REVIEW REQUIRED.** Gates Phase 4 and
+   the three decisions below.
+2. **PD-013 / PD-049** — the structural part. Gates the Phase 4 entitlement schema.
+3. **PD-096 / PD-097 / PD-098** — resolvable only after PD-035, and each must be assigned a
+   phase or explicitly marked non-blocking at that time.
+4. **PD-001 / D-006** — the pre-existing scaffold, settled before any code lands beside it
+   in Phase 7.
 
 ---
 
@@ -401,7 +473,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS** — deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; 22 blocking decisions open |
+| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; 22 blocking decisions open; **B-009 legal research blocked** |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

@@ -251,3 +251,81 @@ the *Decisions* section of `PROJECT_STATE.md`.
 - **Legal review status:** pending — resolve alongside decision D-006 in Phase 1
 - **Recorded by:** Engineering agent
 - **Status:** Open
+
+### L-012 — PD-035 primary-source legal research blocked; source access required
+- **Date:** 2026-08-16
+- **Phase:** 1
+- **Status:** **LEGAL RESEARCH BLOCKED — EXTERNAL SOURCE ACCESS REQUIRED**
+- **Record:**
+
+  > "Primary-source legal research for PD-035 could not be completed from the current
+  > Claude environment because external HTTPS access to the required official sources was
+  > denied by the environment network policy. No bypass was attempted."
+
+- **Required primary sources:**
+  - **Matsne** — the official legislative database of Georgia
+  - **Georgian Communications Commission / ComCom**
+- **What this entry does and does not say.** It records a **source accessibility** problem
+  and nothing more. It does **not** claim that these sources do not exist. It does **not**
+  claim that Georgian law on this subject is unknown, unknowable, or absent. The sources
+  exist and are official; they could not be read from this environment.
+- **Evidence.** Direct HTTPS to both hosts was refused by the environment's egress policy
+  (gateway answered `403` to `CONNECT`) on 2026-08-16. A neutral control host was refused
+  by the same policy in the same attempt, which establishes that the denial is a general
+  allow-list restriction and **not** a restriction aimed at these sources. No circumvention,
+  proxy chaining, or alternate route was attempted, and none may be — `CLAUDE.md` §1.
+
+- **Sources requiring direct verification.** None of the following has been read from a
+  primary source by the engineering agent. Each must be verified directly, with its URL,
+  consolidated-version/publication identifier, and retrieval date recorded at the time of
+  reading:
+  1. **Law of Georgia on Broadcasting** — current consolidated version. The specific
+     consolidated version previously supplied is **not identified by publication index**, so
+     it cannot presently be confirmed as current.
+  2. **ComCom normative acts concerning on-demand audiovisual media services.**
+  3. **ComCom normative acts concerning protection of minors and age marking**, including
+     any act defining a required marking format.
+  4. **Other potentially applicable Georgian legal instruments identified during the
+     research** and not yet triaged for relevance — candidate subject areas encountered
+     were legislation on protection of minors from harmful influence, on protection of
+     family values and minors, on advertising, and on electronic communications.
+     **These were surfaced only as search-index references, not read.** Their existence,
+     titles, current status, and applicability to KMS TV are all **unverified**, and per
+     the evidence standard below they carry no weight until retrieved from the official
+     source. They are listed solely as a retrieval agenda, because the source base PD-035
+     was previously reasoned from covered one instrument only.
+
+- **Evidence standard.** **Search-index results and search-engine summaries are NOT verified
+  legal evidence and MUST NOT be recorded as legal facts.** They may be used only to
+  identify candidate official documents to retrieve. A legal fact enters KMS TV
+  documentation only when it has been read from the official source, with that source's URL
+  and version identifier recorded.
+
+- **Separation principle (binding on all KMS TV documentation).**
+  **"Verified legal facts, product requirements, and legal interpretations must remain
+  explicitly separated."** An unverified legal assumption MUST NOT be converted into a
+  product requirement. Where a product requirement exists for product reasons, it is
+  recorded as a product requirement and not attributed to law. Mirrored as
+  `PROJECT_STATE.md` §7 **D-026**.
+
+- **Effect on PD-035.** PD-035 remains **OPEN — LEGAL REVIEW REQUIRED**. It is **not**
+  approved and no scheme has been selected. The technical model may proceed **conceptually**
+  — see `PROJECT_STATE.md` §7 **D-025**, which records a **capability requirement only** and
+  asserts no legal obligation.
+- **Consequential decisions recorded, not resolved:** **PD-096**, **PD-097**, **PD-098** in
+  `docs/product/DECISIONS.md` §4, all **OPEN**.
+- **Alternatives considered:** none available within the environment. Resolution requires
+  one of: allowing the two hosts in the environment's network policy; supplying the official
+  texts directly with their provenance; or engaging qualified Georgian counsel with direct
+  source access.
+- **Legal review required:** **yes** — qualified Georgian legal advice is required regardless
+  of source access, for interpretation as well as retrieval.
+- **Legal review status:** **blocked pending source access**; required before Phase 4
+  (database and ERD) can model classification data, and before any classification behaviour
+  is specified.
+- **[UNVERIFIED]** No claim is made in this entry about the content of Georgian law, about
+  which classification scheme applies, about whether age marking, warnings, parental
+  controls, or authorisation are legally required, or about how live, VOD, catch-up, and
+  restart are classified. Those questions are open.
+- **Recorded by:** Engineering agent
+- **Status:** Open

@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **4 APPROVED (PD-004, PD-008, PD-092, PD-095)**
-**Version:** 1.4
-**Date:** 2026-08-13 (PD-095 approved and recorded)
+**Version:** 1.5
+**Date:** 2026-08-16 (PD-096, PD-097, PD-098 recorded as OPEN; PD-035 research blocker recorded)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -41,16 +41,22 @@ from a primary source.
 
 Counts below are **derived by counting the decision headings in this document**, not
 estimated. Two decisions (PD-002, PD-085) appear twice as cross-reference pointers, so the
-document contains 97 headings for 95 unique decisions; the totals row counts unique
+document contains 100 headings for 98 unique decisions; the totals row counts unique
 decisions. A decision loses its `[BLOCKING]` and `[LEGAL]` heading flags when it is
 approved, so the blocking and legal columns count **open** decisions only.
+
+**PD-096, PD-097 and PD-098 carry no `[BLOCKING]` or `[LEGAL]` heading flag.** This is
+deliberate, not an oversight: all three arise from PD-035, and which phase they gate — and
+whether they require legal verification in their own right — cannot be determined until
+PD-035 is resolved. Assigning a flag now would be a determination, and no determination has
+been made. The blocking and legal columns are therefore **unchanged at 22 and 24**.
 
 | Category | Decisions | Blocking (open) | Legal (open) |
 |---|---:|---:|---:|
 | 1. Product identity and market | 7 | 2 | 1 |
 | 2. Business model and commerce | 23 | 5 | 6 |
 | 3. Identity and account | 13 | 2 | 2 |
-| 4. Profiles and parental control | 5 | 1 | 2 |
+| 4. Profiles and parental control | 8 | 1 | 2 |
 | 5. Devices and concurrency | 7 | 3 | 0 |
 | 6. Content, EPG and time-shift | 9 | 1 | 2 |
 | 7. Rights and compliance | 4 | 3 | 2 |
@@ -58,9 +64,9 @@ approved, so the blocking and legal columns count **open** decisions only.
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
 | 11. Platform and technical | 8 | 4 | 0 |
-| **Total (unique decisions)** | **95** | **22** | **24** |
+| **Total (unique decisions)** | **98** | **22** | **24** |
 
-**Decided so far: 4 of 95.**
+**Decided so far: 4 of 98.**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -75,6 +81,17 @@ requires **PD-035** (classification scheme) and the structural part of PD-013/PD
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.5 changes.** Documentation only — **no decision was made, approved, or
+resolved.** Three decisions arising from PD-035 recorded as **OPEN** in §4: **PD-096**
+(unrated assets), **PD-097** (governing scheme for a travelling subscriber), **PD-098**
+(warnings/descriptors as product policy). Decision count 95 → 98; **open blocking unchanged
+at 22, open legal unchanged at 24** (see the flag note above). PD-035 gains a recorded
+**primary-source research blocker** — the required official sources were unreachable from
+the current environment, no bypass attempted — and a **capability-only** technical-model
+note that selects no scheme and asserts no legal obligation. Non-blocking documentation
+observations recorded in §13.1 without being fixed. No existing decision ID was changed,
+renumbered, or altered in status.
 
 **Version 1.4 changes.** PD-095 approved and recorded (§1): Option A, subscription follows
 the subscriber. Open blocking 23 → 22; approved 3 → 4. The approval **answers the policy
@@ -627,7 +644,78 @@ applies in any market.** No scheme has been assumed anywhere in this specificati
 recommendation surface. The data model must carry a **scheme identifier alongside the
 rating value** so multiple schemes can coexist across territories — which is a Phase 4
 design consequence of this decision.
-**Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
+
+**Primary-source research status (2026-08-16): BLOCKED.** Primary-source legal research for
+PD-035 could not be completed from the current Claude environment because external HTTPS
+access to the required official sources was denied by the environment network policy. No
+bypass was attempted. The required sources — **Matsne** and the **Georgian Communications
+Commission / ComCom** — remain unread and require direct verification. **This is a source
+*accessibility* problem, not a statement that the sources do not exist or that the law is
+unknown.** Recorded in full at `docs/legal/DECISION_LOG.md` **L-012**.
+
+**Technical model consequence — PRODUCT / ARCHITECTURAL REQUIREMENT, NOT A LEGAL
+CONCLUSION.** The technical model can proceed **conceptually** without selecting a final
+legal authority, because the *shape* of the model is stable across whichever scheme is
+ultimately determined. The classification model must be **capable of representing**:
+classification scheme · rating value · territory · `effective_from` · `effective_until` ·
+authority/source reference · verification status · warnings/descriptors · parental-control
+policy. This states a **capability requirement only**. It selects no scheme, asserts no
+legal obligation, defines no schema, and does not resolve PD-035. Recorded as
+`PROJECT_STATE.md` §7 **D-025**.
+
+**Consequential new decisions.** Three questions arise from PD-035 and are **not** answered
+by it or by this record: **PD-096** (unrated assets), **PD-097** (governing scheme for a
+travelling subscriber), **PD-098** (warnings/descriptors as product policy).
+
+**Status:** **OPEN — LEGAL REVIEW REQUIRED** · Depends on PD-004 — **input now available:
+Georgia (APPROVED)** · primary-source verification outstanding (L-012).
+
+### PD-096 — Behaviour for an asset unrated in a territory's applicable scheme
+What happens to an asset that carries no rating in the classification scheme applicable to
+a given territory?
+**Why it matters.** Multi-territory operation (PD-004) makes this state reachable in normal
+use: a licensor supplies a rating under a different scheme, or supplies none. Every browse,
+search, recommendation, and playback-authorization surface needs a defined behaviour for
+it, and the two obvious behaviours have opposite failure modes — treating unrated as
+permitted **fails open**, which is a child-safety failure; treating unrated as blocked
+**fails closed**, which withholds licensed content the operator paid for.
+**[UNVERIFIED]** No claim is made about what any law requires for unrated content in any
+territory. Whether a legally mandated behaviour exists is among the questions blocked by
+L-012.
+**RECOMMENDATION — NONE OFFERED.** Depends on PD-035, which is unresolved.
+**Status:** **OPEN** · Arising from PD-035 · Blocking status and phase **not assigned** —
+see §12 note.
+
+### PD-097 — Governing classification scheme for a travelling subscriber's maturity limit
+Which classification scheme governs a profile's maturity limit when the subscriber is
+present in a territory other than the one in which the limit was set?
+**Why it matters.** PD-004 (multi-territory) and PD-095 (subscription follows the
+subscriber) together make this reachable in normal use: the limit is expressed in the
+scheme of one territory while the catalogue in the current territory is rated under
+another. Without a defined governing scheme — and, where schemes differ, a mapping between
+them — the system fails open or fails closed exactly as in PD-096. Any such mapping is a
+**legal and editorial artefact**, not an engineering lookup table someone fills in from
+intuition.
+**[UNVERIFIED]** No claim is made about whether any law permits, requires, or forbids
+applying one territory's scheme to a subscriber present in another.
+**RECOMMENDATION — NONE OFFERED.** Depends on PD-035 and on the mapping question above.
+**Status:** **OPEN** · Arising from PD-035, PD-004, PD-095 · Blocking status and phase
+**not assigned** — see §12 note.
+
+### PD-098 — Content warnings and descriptors as KMS TV product policy
+Are content warnings or descriptors required by **KMS TV product policy**, in addition to
+whatever the applicable legal requirements turn out to be?
+**Why it matters.** The legal position is unestablished (L-012), but this product question
+is separable and does not depend on it: an operator may choose to surface descriptors for
+editorial, trust, or parental-experience reasons whether or not law compels it. Deciding it
+separately is what keeps a product choice from being presented as a legal obligation, and a
+legal obligation from being mistaken for a product preference — the separation D-026
+requires.
+**[UNVERIFIED]** No claim is made about whether warnings or descriptors are legally
+mandatory in any territory.
+**RECOMMENDATION — NONE OFFERED.**
+**Status:** **OPEN** · Arising from PD-035 · Blocking status and phase **not assigned** —
+see §12 note.
 
 ### PD-036 — Maximum profiles per account
 **Status:** OPEN · Required by Phase 9.
@@ -1048,6 +1136,12 @@ practical output of this register.
 | **Phase 32** (Load/performance) | **PD-087**, PD-043 |
 | **Phase 34** (Disaster recovery) | **PD-089**, **PD-090** |
 
+**Not yet placed in this table: PD-096, PD-097, PD-098.** All three arise from PD-035 and
+none appears above, because the phase each one gates depends on how PD-035 is resolved.
+Placing them now would assert a dependency that has not been determined. They are listed
+here so they are not lost, and they must be assigned a phase — or explicitly recorded as
+non-blocking — at the same time PD-035 is decided.
+
 ---
 
 ## 13. Unresolved ambiguities in the brief itself
@@ -1069,6 +1163,17 @@ ambiguous or incomplete, recorded rather than resolved by assumption.
 | **A-10** | **"Do not assume a universal catch-up duration"** — instruction given, no default supplied. | Window specified as configurable per channel **and per rights agreement**; default recorded as PD-058. |
 | **A-11** | **Advertising described as an optional future model** while also listing FAST channels. | Recorded as PD-006, noting FAST requires channel-origination capability that does not otherwise exist. |
 | **A-12** | **Pre-existing repository scaffold** contradicts the stated product, stack, and backend. | Recorded as PD-001; scaffold left untouched; no code copied from it. |
+
+### 13.1 Non-blocking documentation observations
+
+Recorded 2026-08-16. Both are **NON-BLOCKING DOCUMENTATION OBSERVATION**s, deliberately
+**not fixed** in the turn that recorded them. Neither affects a decision, a requirement, a
+count, or a phase gate. They are logged so they are not rediscovered as if new.
+
+| # | Observation | Status |
+|---|---|---|
+| **DO-01** | **A-08 is not marked RESOLVED.** The A-08 row above ("no launch platform scope given") still reads as recorded-not-resolved, although **PD-092 was APPROVED on 2026-08-13**, which supplies the launch scope A-08 was raised about. A-02 was marked **RESOLVED** when PD-004 was approved; A-08 was not given the same treatment. | **NON-BLOCKING DOCUMENTATION OBSERVATION** — not fixed |
+| **DO-02** | **`DECISION_BRIEF.md` PD-008 supersession sentence omits §4 and §21.** The sentence marking the PD-008 Option-B recommendation as superseded enumerates §5–7 and §8–20, and does not name **§4** or **§21**. Whether those two sections are also superseded is therefore unstated. | **NON-BLOCKING DOCUMENTATION OBSERVATION** — not fixed |
 
 ---
 

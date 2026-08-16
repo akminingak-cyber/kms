@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.7
-**Date:** 2026-08-16 (PD-007 APPROVED — Option A, no PPV at launch)
+**Version:** 1.8
+**Date:** 2026-08-16 (PD-099 concurrency sub-decision APPROVED — account-level MAX)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -72,7 +72,8 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | 11. Platform and technical | 8 | 4 | 0 |
 | **Total (unique decisions)** | **99** | **22** | **24** |
 
-**Decided so far: 5 of 99 fully decided, plus the structural half of PD-049.**
+**Decided so far: 5 of 99 fully decided, plus the structural half of PD-049 and the
+concurrency dimension of PD-099.**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -88,6 +89,8 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 |---|---|---|
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+| **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
+| **PD-099** — remaining six dimensions | Quality · devices · content entitlement · territory eligibility · effective dates · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -99,6 +102,19 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.8 changes.** **PD-099 concurrency sub-decision APPROVED** (§2): KMS TV uses an
+**account-level concurrency pool**, and **effective commercial concurrency = MAX(applicable
+grant allowances)** — **allowances are NOT summed**. Independent constraints, including
+**rights-agreement concurrency limits**, remain authoritative, so a commercial allowance is
+never guaranteed usable concurrency for every asset. **PD-099 overall remains OPEN** — this
+is **one dimension of seven**, recorded as a **sub-decision under the existing PD-099
+identifier**; **no new decision ID was created**. Decision count **unchanged at 99**; open
+blocking **unchanged at 22**; open legal **unchanged at 24**; fully-approved count
+**unchanged at 5**. **Not decided:** whether concurrency is purchasable, concurrency values
+(PD-040), device limits, quality, territory, grant expiry, mid-stream expiry, interval
+semantics, policy versioning. **PD-049 Q1 and PD-042 are unchanged**, and **no new
+anti-fraud mechanism was introduced.**
 
 **Version 1.7 changes.** **PD-007 APPROVED** (§2): **Option A — no PPV at launch.** KMS TV
 will not sell individual titles or events separately at launch; pay-per-view, one-time
@@ -715,7 +731,7 @@ happens to execute first.
 | # | Dimension | Note |
 |---|---|---|
 | 1 | **Quality limits** | Package supplies a quality ceiling (§13.2); rights supply another *"where the contract specifies one"* (§15.2). Resolution across several grants is undefined. |
-| 2 | **Concurrency limits** | Already multi-source before this approval: §15.2 makes the rights cap *"independent of package"*, and check 8 evaluates an *"effective"* limit. |
+| 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
 | 3 | **Device limits** | Package carries a device allowance (§13.2). |
 | 4 | **Content entitlements** | Which assets the combined grant set reaches. |
 | 5 | **Territory eligibility** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). |
@@ -727,10 +743,68 @@ grant kind, or any other — is assumed, recommended, or implied anywhere in thi
 specification.
 **RECOMMENDATION — NONE OFFERED.** The approval that created this decision explicitly
 declines to choose these rules.
-**Constraint on Phase 4.** Phase 4 **must not encode any particular resolution rule.** The
-rules are behaviour, not structure; the ERD must permit them without presupposing them.
-**Status:** **OPEN** · Arising from PD-049 Q1 · Required before **Phase 14** (entitlement
-engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+**Constraint on Phase 4.** Phase 4 **must not encode any particular resolution rule** for
+the dimensions that remain open. The rules are behaviour, not structure; the ERD must
+permit them without presupposing them.
+
+**Status:** **OPEN — PARTIALLY DECIDED.** Dimension 2 (concurrency) is **APPROVED**; the
+other **six dimensions remain OPEN**. Arising from PD-049 Q1 · Required before **Phase 14**
+(entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Concurrency sub-decision — **APPROVED**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Concurrency** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **2 — Concurrency limits** |
+| **Status** | **APPROVED** |
+| **Scope** | **This dimension only.** PD-099 overall remains **OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of dimension 2 only |
+
+**The rule as approved.**
+
+> **KMS TV uses an ACCOUNT-LEVEL concurrency pool.**
+>
+> When several active commercial grants apply to the same account:
+>
+> **effective commercial concurrency = MAX(applicable grant concurrency allowances)**
+>
+> **Grant allowances are NOT summed.**
+
+**Worked example, as approved.** Grant A = 2 streams · Grant B = 1 stream · Grant C = 4
+streams → **effective commercial account concurrency = 4 streams. NOT 7.**
+
+**Independent constraints remain authoritative.** The effective commercial allowance
+**MUST NOT** override any independent constraint. The final playback decision remains
+subject to every applicable authorization check, including content entitlement · territory
+eligibility · content rights · **rights-agreement concurrency limits** · service
+availability · device-class restrictions · and the other already-approved server-side
+gates.
+
+> **commercial concurrency allowance ≠ guaranteed usable concurrency for every asset.**
+
+**The strictest applicable independent constraint remains authoritative** — consistent with
+`PRODUCT_SPEC.md` §6.7's *"the effective limit is the most restrictive applicable
+constraint"* and §15.2's rights cap being *"independent of package"*. This approval settles
+how the **commercial** side is derived across grants; it does not touch the
+**commercial-vs-rights** comparison, which is unchanged.
+
+**Anti-sharing model preserved.** Because allowances are **not** summed, holding additional
+grants does **not** automatically create additive or unlimited stream capacity. **No new
+anti-fraud mechanism is introduced**, and §6.8's signals and **PD-042** (response policy)
+are untouched.
+
+**What this approval explicitly does NOT decide:** whether concurrency can be purchased as
+an add-on · exact concurrency values (**PD-040**, still OPEN) · device limits · quality
+resolution · territory rules · grant expiry behaviour · mid-stream expiry · interval
+semantics · policy versioning · any other PD-099 dimension. **PD-049 Q1 is unchanged.**
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-032 · `PRODUCT_SPEC.md` §6.7, §12.1, §13.4 ·
+`REQUIREMENTS.md` FR-PKG-08 · `USER_FLOWS.md` UF-20B.
 
 ### PD-048 — Proration, upgrade and downgrade timing
 **RECOMMENDED:** upgrades immediate, downgrades at period end — a mid-period downgrade

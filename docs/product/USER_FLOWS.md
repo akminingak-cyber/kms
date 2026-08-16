@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.4
-**Date:** 2026-08-16 (rev. 1.4 — PD-049 Q1 approved: UF-15 note on multiple grants)
+**Version:** 1.5
+**Date:** 2026-08-16 (rev. 1.5 — PD-099 concurrency sub-decision approved: UF-20B updated)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -841,7 +841,9 @@ in browse, in search, in recommendations, in deep links, in caches, or at the ed
 8. The new device registers; the flow resumes.
 
 ### B. Concurrent stream limit
-1. Viewer requests playback while at the concurrency limit (PD-040 — package limit and any
+1. Viewer requests playback while at the concurrency limit (PD-040 — the **commercial
+   allowance**, which is the **MAXIMUM** applicable grant allowance and **not** the sum
+   (PD-099 concurrency sub-decision APPROVED, `PRODUCT_SPEC.md` §6.7), and any
    rights-agreement limit; **the most restrictive applies**).
 2. Authorization is denied with `CONCURRENCY_LIMIT_REACHED`.
 3. The viewer is shown that another session is active. **Whether the specific devices are

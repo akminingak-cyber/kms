@@ -20,7 +20,7 @@
 | **Legal research** | **PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE ENVIRONMENT** (B-009, L-012) |
 | **STEP 2** | **NOT STARTED** |
 | **Phase 0** | **COMPLETE** — final gate passed, human-confirmed 2026-08-13 |
-| **Last updated** | 2026-08-16 (PD-007 approved) |
+| **Last updated** | 2026-08-16 (PD-099 concurrency sub-decision approved) |
 | **Updated by** | Engineering agent (Claude Code) |
 | **Repository** | `akminingak-cyber/kms` |
 | **Working branch** | `claude/kms-tv-step-0-audit-peahvj` |
@@ -299,6 +299,17 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       rules that coexisting grants now require — quality limits, concurrency limits, device
       limits, content entitlements, territory eligibility, effective dates, and conflicting
       allowances. **No rule was chosen**, and Phase 4 must not encode one.
+- [x] **PD-099 concurrency sub-decision APPROVED** (2026-08-16): **KMS TV uses an
+      account-level concurrency pool**, and **effective commercial concurrency =
+      MAX(applicable grant allowances)** — **allowances are NOT summed** (2 + 1 + 4 → **4**,
+      not 7). **Independent constraints remain authoritative**, including rights-agreement
+      concurrency limits, so a commercial allowance is never guaranteed usable concurrency
+      for every asset. **PD-099 overall remains OPEN** — this is **one dimension of seven**,
+      recorded as a **sub-decision under the existing PD-099 identifier**; **no new decision
+      ID was created**. Recorded in `DECISIONS.md` §2, `PRODUCT_SPEC.md` §6.7/§12.1/§13.4,
+      `REQUIREMENTS.md` FR-PKG-08, `USER_FLOWS.md` UF-20B, and §7 **D-032** below.
+      **No concurrency value was set (PD-040 still OPEN), no anti-fraud mechanism was
+      introduced, and PD-042 and PD-049 Q1 are unchanged.**
 - [x] **PD-007 APPROVED and propagated** (2026-08-16): **Option A — no PPV at launch.**
       **KMS TV will not sell individual titles or events separately at launch.** Pay-per-view,
       one-time title purchase, one-time event purchase, transactional purchase flow and
@@ -452,6 +463,7 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-027 | 2026-08-16 | **PD-096, PD-097 and PD-098 recorded as OPEN, with no `[BLOCKING]` or `[LEGAL]` flag and no phase assignment.** | **Accepted — recording decision only** | All three arise from PD-035. Which phase each gates, and whether each needs legal verification in its own right, depends on how PD-035 resolves; assigning a flag now would be a determination, and none has been made. They are listed in `DECISIONS.md` §12 beneath the phase table so they are not lost, and must be assigned or explicitly marked non-blocking when PD-035 is decided. |
 | D-028 | 2026-08-16 | **PD-049 Q1 APPROVED · structural — a KMS TV account MAY hold more than one commercial grant simultaneously.** The model MUST NOT assume `1 account = exactly 1 commercial grant`. Conceptual shape: `1 account → 0..N commercial grants → effective entitlements → playback authorization`. **Structural only:** no add-on sale, tier name, price, package content, PPV, or promotion is approved. | **Accepted — product owner decision** | The structural half of PD-049 was the only part that gated Phase 4, and it is answerable with zero commercial input. Settling it now lets the Phase 4 ERD model the account→grant relation once, instead of restructuring checks 4 and 5 — the most heavily negative-tested path in the product — after the fact. The commercial half (Q2) remains open precisely because the specification contains no market input to decide it. |
 | D-029 | 2026-08-16 | **Playback authorization gains no twelfth check.** The eleven checks in `PRODUCT_SPEC.md` §12.1 are unchanged. Multiple grants change what checks 4 (package) and 5 (entitlement) evaluate **over** — a set rather than a single grant — not which checks run. | **Accepted — consequence of D-028** | Same reasoning as D-024 for PD-095: the approval is absorbed by existing machinery, and inflating the check count would imply new enforcement where only the input cardinality changed. It also preserves §3.1.5's rule that *"Tier must never alter which checks run — only their outcome."* |
+| D-032 | 2026-08-16 | **PD-099 concurrency sub-decision APPROVED — account-level concurrency pool; effective commercial concurrency = MAX(applicable grant allowances). Grant allowances are NOT summed** (2 + 1 + 4 → **4**, not 7). Independent constraints remain authoritative, including **rights-agreement concurrency limits**, so a commercial allowance is never guaranteed usable concurrency for every asset. **PD-099 overall remains OPEN** — one dimension of seven. | **Accepted — product owner decision** | Recorded as a **sub-decision under the existing PD-099 identifier**, not a new decision ID, so the register keeps one entry per question. MAX rather than SUM is what preserves the anti-sharing model: under a summing rule, stacking cheap grants would buy stream capacity and convert §6.8's abuse control into a commodity. It also settles the ambiguity this review found in §6.7 — *"the most restrictive applicable constraint"* was written when there was one package, and it now reads as governing the **commercial-vs-independent** comparison, with MAX deriving the commercial side across grants. **No concurrency value was set (PD-040 remains OPEN), no anti-fraud mechanism was introduced, and PD-042 is untouched.** |
 | D-031 | 2026-08-16 | **PD-007 APPROVED · Option A — no PPV at launch.** KMS TV will not sell individual titles or events separately at launch. **Launch scope only — not a permanent prohibition**; future PPV remains possible as a separately approved future commercial capability. **No PPV purchase flow, billing, entitlement logic, rental logic, UI, admin tooling, reporting, payment flow, or refund logic may be built — including as preparation.** | **Accepted — product owner decision** | Fifth fully-approved product decision. It costs nothing in future optionality because **PD-049 Q1 already satisfies the future-compatibility requirement**: a future PPV grant would be an asset-scoped, one-off commercial grant inside the approved `0..N` model, so preserving the capability requires **no work at all**. Recording that explicitly is what keeps "keep it possible" from being read as "build scaffolding for it", which `PD-008`'s architectural rules prohibit. Rights consequence recorded as `docs/legal/DECISION_LOG.md` L-013: launch rights agreements need not cover transactional distribution, and future PPV would need a **separate** rights grant per L-002. |
 | D-030 | 2026-08-16 | **Where several grants could each reach the same asset, the playback-authorization evidence must record which grant the decision rested on.** | **Accepted — consequence of D-028** | `CLAUDE.md` §12 requires authorization decisions to be logged "with enough detail to prove compliance to a rights holder". Under a single-grant model the grant was implicit; under `0..N` it is not. *"The account was entitled"* is not evidence a rights holder can audit. **No legal-log entry was created for this**: it makes no claim about law or about what any contract permits, and the rights-side rule it supports is already recorded as L-002. |
 
@@ -517,7 +529,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-007, PD-008, PD-092, PD-095 APPROVED**; **PD-049 Q1 APPROVED (structural)**; 22 blocking decisions open; **B-009 legal research blocked** |
+| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-007, PD-008, PD-092, PD-095 APPROVED**; **PD-049 Q1 APPROVED (structural)**; **PD-099 concurrency dimension APPROVED (6 of 7 dimensions still open)**; 22 blocking decisions open; **B-009 legal research blocked** |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

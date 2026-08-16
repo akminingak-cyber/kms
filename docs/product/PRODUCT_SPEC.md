@@ -828,8 +828,20 @@ Phase 19; TV platforms are the binding performance constraint (`CLAUDE.md` §19)
 
 ### 6.7 Concurrent playback rules
 - **Maximum concurrent streams per account: [OPEN — PD-040].** Not invented.
+- **Concurrency is an ACCOUNT-LEVEL pool** [CONFIRMED — PD-099 concurrency sub-decision
+  APPROVED]. Where several active commercial grants apply to the account (§13.4), the
+  **effective commercial concurrency is the MAXIMUM applicable grant allowance — allowances
+  are NOT summed.** *Example: grants of 2, 1 and 4 streams give **4**, not 7.*
+  Holding more grants therefore does **not** create additive stream capacity, which is what
+  preserves the anti-sharing model (§6.8). **This settles how the commercial side is derived
+  across grants; it decides nothing about whether concurrency may be purchased, and no
+  concurrency value is set — that remains [OPEN — PD-040].**
 - Concurrency may also be constrained **per rights agreement**, independently of the
-  package (§15). The effective limit is the **most restrictive** applicable constraint.
+  package (§15). The effective limit is the **most restrictive** applicable constraint —
+  applied **between** the commercial allowance above and every independent constraint.
+  **A commercial allowance is never guaranteed usable concurrency for every asset:** content
+  rights, rights-agreement caps, territory, service availability and device-class
+  restrictions all remain authoritative.
 - Enforcement is **server-side**, at playback authorization, with a defined behaviour at
   the limit (§12).
 - An abandoned session must release its slot within a bounded interval
@@ -1139,9 +1151,11 @@ commercial grants (§13.4) — changes what checks **4** (package) and **5** (en
 evaluate **over**: a set of grants rather than a single grant. It does not change which
 checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
 *"Tier must never alter which checks run — only their outcome."* The rules by which several
-grants resolve into one effective entitlement are **[OPEN — PD-099]**; until they are
-decided, no resolution behaviour may be assumed, and check 5 has no defined outcome for a
-multi-grant conflict. **Where several grants could each reach the same asset, the decision
+grants resolve into one effective entitlement are **[OPEN — PD-099]** — **except
+concurrency, which is decided**: the commercial allowance for check 8 is the **MAXIMUM**
+applicable grant allowance, not the sum, and the **most restrictive** independent constraint
+still governs (§6.7). For the six remaining dimensions no resolution behaviour may be
+assumed, and check 5 has no defined outcome for a multi-grant conflict. **Where several grants could each reach the same asset, the decision
 evidence must record which grant the authorization rested on** (§13.5, §26.3).
 
 ### 12.2 Core product rules
@@ -1229,7 +1243,9 @@ playback authorization
 ```
 
 Multiple grants may coexist, subject to the entitlement-resolution rules that are
-**[OPEN — PD-099]**.
+**[OPEN — PD-099]** — **except concurrency**, which is **APPROVED**: an **account-level
+pool** whose commercial value is the **MAXIMUM** applicable grant allowance, **not the sum**
+(§6.7). The other six dimensions remain open.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

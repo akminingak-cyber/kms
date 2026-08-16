@@ -426,7 +426,9 @@ hard product requirement, not a preference:
 Subscription is the baseline model. Structural options, all **[PROPOSED]**:
 
 - Tiered packages (e.g. entry / standard / premium) with increasing content access
-- Add-on packages layered onto a base (e.g. a sports or cinema add-on)
+- Add-on packages layered onto a base (e.g. a sports or cinema add-on) — **structurally
+  permitted by PD-049 Q1 (APPROVED, §13.4); whether any is actually sold at launch is
+  [OPEN — PD-049 Q2]**
 - Billing periods: monthly and/or annual **[OPEN — PD-010]**
 - Free trial period **[OPEN — PD-011]** — if offered, it is a distinct subscription state
 - Promotional pricing and discounts **[OPEN — PD-012]**
@@ -1132,6 +1134,16 @@ territory** checks 6, 9, and 11 evaluate: **the current one, determined server-s
 A subscription that follows the subscriber changes check 3's answer while travelling
 (it stays valid); it changes nothing about checks 6, 9, or 11.
 
+**PD-049 Q1 adds no twelfth check either.** Its approval — an account may hold `0..N`
+commercial grants (§13.4) — changes what checks **4** (package) and **5** (entitlement)
+evaluate **over**: a set of grants rather than a single grant. It does not change which
+checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
+*"Tier must never alter which checks run — only their outcome."* The rules by which several
+grants resolve into one effective entitlement are **[OPEN — PD-099]**; until they are
+decided, no resolution behaviour may be assumed, and check 5 has no defined outcome for a
+multi-grant conflict. **Where several grants could each reach the same asset, the decision
+evidence must record which grant the authorization rested on** (§13.5, §26.3).
+
 ### 12.2 Core product rules
 
 - **Possessing a URL is not permission.** A viewer holding a manifest URL must not be
@@ -1179,6 +1191,10 @@ decision, not a default.
 A **package** is a commercial bundle defining which content an entitled account may
 access. It is the bridge between commerce (§14) and rights (§15).
 
+**An account may hold more than one commercial grant at a time** — §13.4, PD-049 Q1
+**APPROVED**. Where this section and §13.2 speak of "the package" in the singular, they
+describe a single grant; they must not be read as asserting that only one may exist.
+
 ### 13.2 Behaviour
 
 | Aspect | Requirement | Status |
@@ -1197,9 +1213,78 @@ The names *Free, Basic, Standard, Premium, Sports, Movies* appear in the brief a
 **[OPEN — PD-013]** Define the package catalogue: names, contents, allowances, and
 eligibility. **[OPEN — PD-014]** Define pricing, currency, and billing periods.
 
-### 13.4 Add-ons
-**[OPEN — PD-049]** Whether packages stack as add-ons or are mutually exclusive tiers.
-This shapes the entitlement model materially and should be settled before Phase 4.
+### 13.4 Commercial grants [CONFIRMED — PD-049 Q1 APPROVED · structural]
+
+**A KMS TV account MAY hold more than one commercial grant at the same time.**
+The product model **MUST NOT** assume `1 account = exactly 1 commercial grant`.
+
+```
+1 account
+    ↓
+0..N commercial grants
+    ↓
+effective entitlements
+    ↓
+playback authorization
+```
+
+Multiple grants may coexist, subject to the entitlement-resolution rules that are
+**[OPEN — PD-099]**.
+
+**What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
+approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or
+package contents **[OPEN — PD-013]**, any prices **[OPEN — PD-014]**, transactional/PPV
+purchase **[OPEN — PD-007]**, or promotions **[OPEN — PD-012]**. A structure that *permits*
+several grants obliges no one to *sell* several, and **no add-on pricing, purchase flow,
+admin surface, or attach-rate analytics may be built** until PD-049 Q2 is answered.
+
+**No change to playback authorization.** The eleven checks in §12.1 are unchanged and **no
+twelfth check is added.** Several grants change what checks 4 and 5 evaluate **over** — a
+set rather than a single grant — not which checks run.
+
+**Singular phrasing elsewhere is deliberate.** `USER_FLOWS.md` UF-15 (*"selects **a**
+package"*), `REQUIREMENTS.md` FR-PKG-05/06 (*"their package"*), and EC-21 describe the
+**commercial shape**, which PD-049 Q2 has not decided. They do not contradict the model
+above, and they are **not** reworded now, because rewording them would imply add-ons are
+sold.
+
+### 13.5 Six concepts that are not interchangeable [CONFIRMED — PD-049 Q1]
+
+Establishing that grants may coexist makes the distinctions below load-bearing rather than
+academic. **These MUST NOT be treated as identical.**
+
+| Concept | What it is | Layer | Customer-facing? |
+|---|---|---|---|
+| **Account** | The identity that owns the commercial relationship and its profiles, devices, and sessions | Identity | Yes |
+| **Subscription** | The commercial relationship over time — the six states of §14.1, append-only history, billing period, renewal. Check **3** | Billing lifecycle | Yes |
+| **Commercial grant** | One thing the operator has agreed to give this account. `0..N` per account (PD-049 Q1) | Commercial | Yes, by its label |
+| **Tier** | A named, mutually exclusive position on a value ladder. **Not a separate entity** — §3.1.5 | Commercial | Yes |
+| **Add-on** | A grant held **in addition to** another. **Whether any is sold is [OPEN — PD-049 Q2]** | Commercial | Yes, if sold |
+| **Package** | *"A commercial bundle defining which content an entitled account may access"* (§13.1) — the carrier of content sets and feature allowances. Check **4** | Entitlement input | Name only |
+| **Entitlement** | The **derived decision** for one account/profile/asset/moment. Check **5**. Never stored as truth, never computed by a client | Computed, server-side | **No** — only its effect |
+| **Content right** | The contractual grant from a rights holder: holder, contract reference, territory, window, device classes, modes, concurrency cap. Check **6** | Rights / compliance | **No — never** |
+
+**The two collapses that must never happen.**
+
+1. **Package merged into subscription.** Under a single-grant assumption they look like one
+   thing. They are not: PD-048's scheduled downgrade and PD-049 Q1's coexisting grants both
+   require a subscription to persist while its grants change.
+2. **Commercial grant merged into content right.** Both answer *"may this be watched"*, but
+   a grant is **the operator's commercial promise** and a right is **the rights holder's
+   contractual permission**. Merging them makes it possible to sell access the operator does
+   not hold — the exact failure `CLAUDE.md` §2 exists to prevent, and the same collapse
+   L-009 rejected for service availability versus content rights.
+
+**Compliance consequence.** Where several grants could each reach the same asset, the
+playback-authorization evidence required by §12.2 and §26.3 must record **which** grant the
+decision rested on. *"The account was entitled"* is not evidence a rights holder can audit.
+
+**Compatibility.** PD-049 Q1 is compatible with **PD-004** (territory attaches to grant
+eligibility, not cardinality), **PD-008** (several grants are **not** several tenants — one
+operator, one subscription system, no `tenant_id`), **PD-092** (grants stay
+server-authoritative; the API returns a **resolved** decision, never a grant set for a
+client to reconcile), and **PD-095** (current territory, service availability, and content
+rights remain authoritative). **None of those decisions was modified.**
 
 ---
 

@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **4 APPROVED (PD-004, PD-008, PD-092, PD-095)**
-**Version:** 1.5
-**Date:** 2026-08-16 (PD-096, PD-097, PD-098 recorded as OPEN; PD-035 research blocker recorded)
+**Status:** OPEN — awaiting product owner decisions · **4 APPROVED (PD-004, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
+**Version:** 1.6
+**Date:** 2026-08-16 (PD-049 split — Q1 APPROVED, Q2 OPEN; PD-099 recorded as OPEN)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -41,9 +41,15 @@ from a primary source.
 
 Counts below are **derived by counting the decision headings in this document**, not
 estimated. Two decisions (PD-002, PD-085) appear twice as cross-reference pointers, so the
-document contains 100 headings for 98 unique decisions; the totals row counts unique
+document contains 101 headings for 99 unique decisions; the totals row counts unique
 decisions. A decision loses its `[BLOCKING]` and `[LEGAL]` heading flags when it is
 approved, so the blocking and legal columns count **open** decisions only.
+
+**PD-049 is one decision with two halves.** Its structural half (Q1) is **APPROVED**; its
+commercial half (Q2) is **OPEN**. It is counted **once**, as one decision, and is **not**
+listed among the four fully-approved decisions below, because it is not fully decided. The
+Q1/Q2 headings are `####` sub-entries under the single `### PD-049` heading, so no new
+decision ID was created for Q1 and no identifier was renumbered.
 
 **PD-096, PD-097 and PD-098 carry no `[BLOCKING]` or `[LEGAL]` heading flag.** This is
 deliberate, not an oversight: all three arise from PD-035, and which phase they gate — and
@@ -54,7 +60,7 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | Category | Decisions | Blocking (open) | Legal (open) |
 |---|---:|---:|---:|
 | 1. Product identity and market | 7 | 2 | 1 |
-| 2. Business model and commerce | 23 | 5 | 6 |
+| 2. Business model and commerce | 24 | 5 | 6 |
 | 3. Identity and account | 13 | 2 | 2 |
 | 4. Profiles and parental control | 8 | 1 | 2 |
 | 5. Devices and concurrency | 7 | 3 | 0 |
@@ -64,9 +70,9 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | 9. Admin and roles | 6 | 0 | 2 |
 | 10. Privacy and data | 8 | 1 | 8 |
 | 11. Platform and technical | 8 | 4 | 0 |
-| **Total (unique decisions)** | **98** | **22** | **24** |
+| **Total (unique decisions)** | **99** | **22** | **24** |
 
-**Decided so far: 4 of 98.**
+**Decided so far: 4 of 99 fully decided, plus the structural half of PD-049.**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -75,12 +81,35 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | **PD-092** | Launch platform scope — **Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-095** | Travelling-subscriber policy — **Option A. Subscription follows the subscriber; current territory, service availability, and content rights remain authoritative** | **APPROVED · FINAL** (2026-08-13) |
 
-**Phase 3 (System architecture) has no remaining blocking decisions.** Phase 4 still
-requires **PD-035** (classification scheme) and the structural part of PD-013/PD-049.
+**Partially decided — counted above as one open decision, not as a fifth approval:**
+
+| ID | Decision | Status |
+|---|---|---|
+| **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
+| **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+
+**Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
+structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
+is known to be `0..N` rather than `1`. Phase 4 still requires **PD-035** (classification
+scheme). **PD-013** and **PD-049 Q2** are catalogue and commercial questions for Phase 12
+and no longer gate Phase 4; **PD-099** (entitlement resolution rules) gates **Phase 14**,
+not Phase 4, and Phase 4 must not encode any particular resolution rule.
 
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.6 changes.** **PD-049 Q1 APPROVED** (§2): one account may hold more than one
+commercial grant simultaneously. The **identifier PD-049 is preserved**; the entry is split
+into `#### Q1` (structural, APPROVED) and `#### Q2` (commercial, OPEN) beneath the single
+existing `### PD-049` heading, so **no new decision ID was created for Q1** and nothing was
+renumbered. One consequential decision recorded rather than defaulted: **PD-099**
+(deterministic entitlement-resolution rules). Decision count 98 → 99; open blocking
+unchanged at 22, open legal unchanged at 24. The approval adds **no twelfth authorization
+check** and modifies **no** approved decision — PD-004, PD-008, PD-092 and PD-095 are
+byte-for-byte unchanged. Two P0 requirements added (FR-PKG-07, FR-PKG-08) with acceptance
+criteria. **Not approved by this change:** add-on sale at launch, tier names, prices,
+package contents, PPV, promotions, or any resolution rule.
 
 **Version 1.5 changes.** Documentation only — **no decision was made, approved, or
 resolved.** Three decisions arising from PD-035 recorded as **OPEN** in §4: **PD-096**
@@ -491,11 +520,135 @@ entitlement model cannot be finalized without them.
 Prices, currencies, and whether pricing varies by territory.
 **Status:** OPEN · Depends on PD-004 — **input now available: Georgia (APPROVED)**.
 
-### PD-049 — Add-ons versus exclusive tiers
-Whether packages stack (base + sports add-on) or are mutually exclusive tiers.
-**Why it matters.** Materially shapes the entitlement model. Should be settled before
-Phase 4 so the data model is built once.
-**Status:** OPEN · Required before Phase 4.
+### PD-049 — Add-ons versus exclusive tiers — **SPLIT: Q1 APPROVED · Q2 OPEN**
+
+**The original question.** *"Whether packages stack (base + sports add-on) or are mutually
+exclusive tiers."* This was one entry covering two questions with different owners and
+different deadlines. **The identifier is preserved and unchanged**; the entry is split
+below. No new decision ID was created for Q1.
+
+| Half | Question | Nature | Status |
+|---|---|---|---|
+| **Q1** | **May one account hold more than one commercial grant at the same time?** | **Structural** | **APPROVED — YES** (2026-08-16) |
+| **Q2** | **Does KMS TV actually sell add-ons at launch, and which?** | **Commercial** | **OPEN** — Phase 12 |
+
+---
+
+#### PD-049 Q1 — Multiple commercial grants — **APPROVED**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-049 Q1** (structural half of PD-049 — no new ID) |
+| **Decision** | **YES — a single KMS TV account MAY hold more than one commercial grant simultaneously** |
+| **Structural status** | **APPROVED** |
+| **Commercial shape** | **NOT DECIDED** |
+| **Add-on launch availability** | **NOT DECIDED** (that is Q2) |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of the structural half of this entry only |
+
+**The approved structural model.**
+
+```
+1 account
+    ↓
+0..N commercial grants
+    ↓
+effective entitlements
+    ↓
+playback authorization
+```
+
+**The product model MUST NOT assume `1 account = exactly 1 commercial grant`.** Multiple
+grants may coexist, subject to the entitlement-resolution rules that remain undecided
+(**PD-099**).
+
+**What this approval does NOT do.** It does **not** approve the commercial sale of add-ons
+at launch · **not** any tier names · **not** any prices · **not** any package contents ·
+**not** PPV (PD-007) · **not** promotions (PD-012). It is a **structural** decision about
+what the model must be able to represent, and nothing more.
+
+**Concepts that remain distinct and MUST NOT be treated as identical:** account ·
+subscription · commercial grant · tier · add-on · package · entitlement · content right.
+See `PRODUCT_SPEC.md` §13.5 for the definitions and which layer each belongs to. The
+approval establishes only that **multiple commercial grants may coexist on one account**.
+
+**No change to playback authorization.** The eleven checks in `PRODUCT_SPEC.md` §12.1 are
+**unchanged, and no twelfth check is added.** Multiple grants change what check 4 (package)
+and check 5 (entitlement) evaluate **over** — a set rather than a single grant — not which
+checks run. This mirrors §3.1.5's existing rule that *"Tier must never alter which checks
+run — only their outcome."* Recorded as `PROJECT_STATE.md` §7 **D-029**.
+
+**Compatibility with the four approved decisions — all PASS.**
+
+| Decision | Why multiple grants are compatible |
+|---|---|
+| **PD-004** — Georgia launch, multi-territory, configurable | Territory attaches to grant **eligibility**, not to grant **cardinality**. The three-concept separation is untouched, and no territory is named or assumed. |
+| **PD-008** — single-tenant, one operator | **Multiple grants are not multiple tenants.** They are several commercial products held by one subscriber, inside ONE SUBSCRIPTION SYSTEM operated by ONE OPERATOR. No `tenant_id`, no tenant abstraction, no multi-operator administration is introduced or implied. |
+| **PD-092** — Web + Android + Android TV at launch | Grants stay **server-authoritative** (D-022). The API returns a **resolved** entitlement decision, never a grant set for a client to reconcile. A TV client — the lowest device class — must never compute a union. |
+| **PD-095** — subscription follows the subscriber | PD-095 already separates *holding a commercial relationship* from *being allowed to watch here*. Multiple grants extend the first without touching the second: the **current** territory, service availability, and content rights remain authoritative. |
+
+**None of PD-004, PD-008, PD-092 or PD-095 was modified.**
+
+**Consequential decision recorded, not resolved:** **PD-099** — the deterministic
+entitlement-resolution rules that coexisting grants now require.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-028/D-029/D-030 · `PRODUCT_SPEC.md` §13.4, §13.5,
+§12.1 · `REQUIREMENTS.md` §A11 (FR-PKG-07, FR-PKG-08).
+
+---
+
+#### PD-049 Q2 — Add-on launch availability — **OPEN**
+
+Does KMS TV actually sell add-ons at launch, and if so which?
+**Why it is separate.** Q1 settles what the model must be able to represent. Q2 settles
+what the operator sells. A structure that permits several grants does not oblige anyone to
+sell several, and **no add-on pricing, purchase flow, admin surface, or attach-rate
+analytics may be built** until Q2 is answered — `PD-008`'s prohibition on speculative
+infrastructure applies by analogy.
+**RECOMMENDATION — NONE OFFERED.** This is a market judgement and the specification
+contains no commercial input: no content deal, no competitor position, no segment
+definition.
+**Status:** **OPEN** · Required by Phase 12 · Couples to PD-013 and PD-014.
+
+**Documentation consequence deliberately not applied.** `USER_FLOWS.md` UF-15 step 3
+(*"User selects **a** package"*), `REQUIREMENTS.md` FR-PKG-05/FR-PKG-06 (*"their
+package"*), and EC-21 (*"Package changed during playback"*) are written in the singular.
+That phrasing describes the **commercial shape**, which Q2 has not decided — it is **not**
+a contradiction of Q1, which governs the model. These will be revisited when Q2 is
+answered, and are **not** reworded now, because rewording them would imply add-ons are
+sold.
+
+### PD-099 — Entitlement resolution rules across coexisting grants
+When an account holds more than one commercial grant, by what deterministic rules is the
+**effective** entitlement resolved?
+**Why it matters.** PD-049 Q1 (APPROVED) permits several grants to coexist. Nothing in this
+specification yet says how they combine. Until it does, two grants that disagree have no
+defined outcome, and an undefined outcome in the entitlement path either **fails open** —
+serving more than the operator sold or the rights permit — or **fails closed**, denying a
+paying subscriber. Neither is acceptable, and neither may be settled by whichever code path
+happens to execute first.
+**The rules that must be defined, none of which is decided here:**
+
+| # | Dimension | Note |
+|---|---|---|
+| 1 | **Quality limits** | Package supplies a quality ceiling (§13.2); rights supply another *"where the contract specifies one"* (§15.2). Resolution across several grants is undefined. |
+| 2 | **Concurrency limits** | Already multi-source before this approval: §15.2 makes the rights cap *"independent of package"*, and check 8 evaluates an *"effective"* limit. |
+| 3 | **Device limits** | Package carries a device allowance (§13.2). |
+| 4 | **Content entitlements** | Which assets the combined grant set reaches. |
+| 5 | **Territory eligibility** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). |
+| 6 | **Effective dates** | Grants may start and end independently; PD-048's recommended *"downgrades at period end"* already implies coexisting current and scheduled states. |
+| 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
+
+**[UNVERIFIED]** No resolution rule — most-permissive, least-permissive, precedence by
+grant kind, or any other — is assumed, recommended, or implied anywhere in this
+specification.
+**RECOMMENDATION — NONE OFFERED.** The approval that created this decision explicitly
+declines to choose these rules.
+**Constraint on Phase 4.** Phase 4 **must not encode any particular resolution rule.** The
+rules are behaviour, not structure; the ERD must permit them without presupposing them.
+**Status:** **OPEN** · Arising from PD-049 Q1 · Required before **Phase 14** (entitlement
+engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
 
 ### PD-048 — Proration, upgrade and downgrade timing
 **RECOMMENDED:** upgrades immediate, downgrades at period end — a mid-period downgrade
@@ -1117,7 +1270,8 @@ practical output of this register.
 | **Phase 3** (Architecture) | ~~PD-004~~ **APPROVED** · ~~PD-008~~ **APPROVED** · ~~PD-092~~ **APPROVED — Option B, Web + Android + Android TV at launch** — ✅ **no blocking decisions remain for Phase 3** |
 | **Phase 4** (Database) — added | ~~PD-095~~ **APPROVED — subscription follows the subscriber; current territory authoritative at authorization** |
 | **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
-| **Phase 4** (Database) | PD-035 (rating scheme), PD-049 (add-ons vs tiers), PD-013 (package structure) |
+| **Phase 4** (Database) | PD-035 (rating scheme) · ~~PD-049 structural~~ **Q1 APPROVED — account→grant is `0..N`** · PD-013 and PD-049 Q2 are **catalogue/commercial, Phase 12** and no longer gate Phase 4 |
+| **Phase 14** (Entitlement engine) — added | **PD-099** (deterministic resolution rules across coexisting grants). **Phase 4 must not encode any particular rule** |
 | **Phase 6** (Security & threat model) | PD-081 (privacy regimes), PD-026 (revocation interval) |
 | **Phase 7** (Backend foundation) | D-007, D-008, D-010 |
 | **Phase 8** (Authentication) | PD-020, PD-025, PD-027, PD-028, PD-029 |

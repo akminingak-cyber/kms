@@ -16,11 +16,11 @@
 | **Current phase** | **STEP 1 — Product Decisions** |
 | **Status** | **WAITING FOR PRODUCT OWNER DECISIONS** |
 | **Phase 3 blockers** | **NONE REMAINING** |
-| **Phase 4 blockers** | **PD-035** (legal classification) · structural part of **PD-013 / PD-049** · **PD-096 / PD-097 / PD-098** recorded, phase not yet assigned |
+| **Phase 4 blockers** | **PD-035** (legal classification) · **PD-096 / PD-097 / PD-098** recorded, phase not yet assigned. ~~structural part of PD-013 / PD-049~~ **RESOLVED 2026-08-16 — PD-049 Q1 APPROVED** |
 | **Legal research** | **PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE ENVIRONMENT** (B-009, L-012) |
 | **STEP 2** | **NOT STARTED** |
 | **Phase 0** | **COMPLETE** — final gate passed, human-confirmed 2026-08-13 |
-| **Last updated** | 2026-08-16 |
+| **Last updated** | 2026-08-16 (PD-049 Q1 approved) |
 | **Updated by** | Engineering agent (Claude Code) |
 | **Repository** | `akminingak-cyber/kms` |
 | **Working branch** | `claude/kms-tv-step-0-audit-peahvj` |
@@ -215,20 +215,20 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
 - [x] Performance targets stated as PROPOSED — REQUIRES VALIDATION; scalability
       dimensions defined with no capacity claimed.
 - [x] Content and rights safety restated as binding product constraints.
-- [x] **341 requirements** written (212 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
-      281 functional and 60 non-functional; counts derived by counting rows, not estimated.
+- [x] **343 requirements** written (214 P0 · 101 P1 · 22 P2 · 6 P3) with priority reasoning —
+      283 functional and 60 non-functional; counts derived by counting rows, not estimated.
       Includes **FR-TER-\*** (PD-004), **FR-OPR-\*** (PD-008), **FR-PLT-\*** (PD-092), and
       **FR-TRV-\*** (PD-095).
-- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 218 criteria
-      covering all 212 P0 requirements; coverage verified programmatically, none missing.
+- [x] **Acceptance criteria in GIVEN/WHEN/THEN form for every P0 requirement** — 220 criteria
+      covering all 214 P0 requirements; coverage verified programmatically, none missing.
 - [x] **30 edge cases** defined across every critical domain.
 - [x] **26 user and operator flows** specified with happy, alternate, and failure paths —
       UF-26 (travelling subscriber) added when PD-095 was approved.
 - [x] Feature × platform × priority matrix produced for all six client platforms plus
       admin and backend.
-- [x] **98 product decisions recorded** — none silently chosen — of which **4 are APPROVED
-      (PD-004, PD-008, PD-092, PD-095)**, **22 remain blocking**, and **24 require legal
-      verification**
+- [x] **99 product decisions recorded** — none silently chosen — of which **4 are APPROVED
+      (PD-004, PD-008, PD-092, PD-095)**, **one is half-approved (PD-049 Q1)**, **22 remain
+      blocking**, and **24 require legal verification**
       (counts corrected 2026-08-13 from the estimates first published, and re-derived
       2026-08-16 after PD-096/097/098 were added; see `DECISIONS.md` register summary.
       Blocking and legal counts are unchanged because the three new decisions carry no
@@ -283,6 +283,22 @@ human confirmation received 2026-08-13. Phase 0 is **COMPLETE**.
       representable attributes, selecting no scheme and asserting no legal obligation — and
       the **verified-fact / product-requirement / legal-interpretation separation** recorded
       as a binding documentation rule (D-026).
+- [x] **PD-049 Q1 APPROVED and propagated** (2026-08-16): **a KMS TV account may hold more
+      than one commercial grant simultaneously.** The model must not assume
+      `1 account = 1 grant`; the conceptual shape is
+      `1 account → 0..N commercial grants → effective entitlements → playback authorization`.
+      **Structural only** — add-on sale at launch, tier names, prices, package contents, PPV,
+      and promotions are all **NOT decided**. The **identifier PD-049 was preserved** and
+      split into `Q1` (APPROVED) and `Q2` (OPEN) sub-entries; **no new decision ID was
+      created for Q1** and nothing was renumbered. Recorded in `DECISIONS.md` §2,
+      `PRODUCT_SPEC.md` §13.4/§13.5/§12.1/§2.7, `REQUIREMENTS.md` §A11 (FR-PKG-07,
+      FR-PKG-08), and §7 D-028/D-029/D-030 below. **Adds no twelfth authorization check.**
+      Compatibility with PD-004, PD-008, PD-092 and PD-095 verified — all **PASS**, and none
+      of the four was modified.
+- [x] **PD-099 recorded as OPEN** (2026-08-16): the deterministic entitlement-resolution
+      rules that coexisting grants now require — quality limits, concurrency limits, device
+      limits, content entitlements, territory eligibility, effective dates, and conflicting
+      allowances. **No rule was chosen**, and Phase 4 must not encode one.
 
 **Explicitly NOT done in Phase 1**, by instruction: no application code, no Laravel, no
 React/Next.js, no database migrations or schema, no API implementation, no IPTV, EPG,
@@ -309,8 +325,12 @@ PD-095 are APPROVED.** **Phase 3 has no remaining blocking decisions.**
 | Blocker | Nature |
 |---|---|
 | **PD-035** — legal classification scheme | OPEN — **LEGAL REVIEW REQUIRED**. Primary-source research is blocked (B-009 / L-012). |
-| **Structural part of PD-013 / PD-049** | OPEN — package structure and add-ons vs. tiers shape the entitlement schema. |
-| **PD-096 / PD-097 / PD-098** | OPEN — newly recorded, arising from PD-035. **Phase assignment deliberately not made**, because which phase they gate depends on how PD-035 resolves. |
+| ~~**Structural part of PD-013 / PD-049**~~ | ✅ **RESOLVED 2026-08-16 — PD-049 Q1 APPROVED.** The account→grant relation is `0..N`. **PD-013** and **PD-049 Q2** are catalogue and commercial questions for **Phase 12** and no longer gate Phase 4. |
+| **PD-096 / PD-097 / PD-098** | OPEN — arising from PD-035. **Phase assignment deliberately not made**, because which phase they gate depends on how PD-035 resolves. |
+
+**Not a Phase 4 blocker: PD-099** (entitlement resolution rules). It gates **Phase 14**
+(entitlement engine). Phase 4 may model coexisting grants but **must not encode any
+particular resolution rule** — the rules are behaviour, not structure.
 
 **Legal research blocker: PRIMARY-SOURCE ACCESS UNAVAILABLE FROM CURRENT CLAUDE
 ENVIRONMENT** — see B-009 and `docs/legal/DECISION_LOG.md` L-012.
@@ -418,9 +438,12 @@ The Phase 0 environment blockers below are unchanged and still apply.
 | D-025 | 2026-08-16 | **The classification model must be *capable of representing*:** classification scheme · rating value · territory · `effective_from` · `effective_until` · authority/source reference · verification status · warnings/descriptors · parental-control policy. **This is a PRODUCT / ARCHITECTURAL capability requirement, not a legal conclusion.** It selects no classification scheme, asserts no legal obligation, defines no database schema, and does not resolve PD-035. | **Accepted — engineering design decision** | The *shape* of the model is stable across whichever scheme is ultimately determined, so Phase 4 structural work is not blocked on the legal answer — only its data is. Two elements are forced by decisions already approved rather than by any law: **territory** and **classification scheme** by PD-004 (multi-territory, configurable), and **verification status** by `CLAUDE.md` §1 and §24, which forbid treating unverified data as fact — the project's own classification knowledge is currently unverified, so a model that cannot represent that distinction would violate the constitution in its own structure. |
 | D-026 | 2026-08-16 | **"Verified legal facts, product requirements, and legal interpretations must remain explicitly separated."** An unverified legal assumption MUST NOT be converted into a product requirement. Where a product requirement exists for product reasons, it is recorded as such and not attributed to law. **Search-index results and search-engine summaries are not verified legal evidence** and may be used only to identify candidate official documents to retrieve. | **Accepted — binding documentation rule** | Restates `CLAUDE.md` §1 and §24 for the specific failure mode this project is exposed to: a plausible-sounding legal statement acquires the authority of a requirement simply by being written in a requirements document. Mirrored in `docs/legal/DECISION_LOG.md` L-012. |
 | D-027 | 2026-08-16 | **PD-096, PD-097 and PD-098 recorded as OPEN, with no `[BLOCKING]` or `[LEGAL]` flag and no phase assignment.** | **Accepted — recording decision only** | All three arise from PD-035. Which phase each gates, and whether each needs legal verification in its own right, depends on how PD-035 resolves; assigning a flag now would be a determination, and none has been made. They are listed in `DECISIONS.md` §12 beneath the phase table so they are not lost, and must be assigned or explicitly marked non-blocking when PD-035 is decided. |
+| D-028 | 2026-08-16 | **PD-049 Q1 APPROVED · structural — a KMS TV account MAY hold more than one commercial grant simultaneously.** The model MUST NOT assume `1 account = exactly 1 commercial grant`. Conceptual shape: `1 account → 0..N commercial grants → effective entitlements → playback authorization`. **Structural only:** no add-on sale, tier name, price, package content, PPV, or promotion is approved. | **Accepted — product owner decision** | The structural half of PD-049 was the only part that gated Phase 4, and it is answerable with zero commercial input. Settling it now lets the Phase 4 ERD model the account→grant relation once, instead of restructuring checks 4 and 5 — the most heavily negative-tested path in the product — after the fact. The commercial half (Q2) remains open precisely because the specification contains no market input to decide it. |
+| D-029 | 2026-08-16 | **Playback authorization gains no twelfth check.** The eleven checks in `PRODUCT_SPEC.md` §12.1 are unchanged. Multiple grants change what checks 4 (package) and 5 (entitlement) evaluate **over** — a set rather than a single grant — not which checks run. | **Accepted — consequence of D-028** | Same reasoning as D-024 for PD-095: the approval is absorbed by existing machinery, and inflating the check count would imply new enforcement where only the input cardinality changed. It also preserves §3.1.5's rule that *"Tier must never alter which checks run — only their outcome."* |
+| D-030 | 2026-08-16 | **Where several grants could each reach the same asset, the playback-authorization evidence must record which grant the decision rested on.** | **Accepted — consequence of D-028** | `CLAUDE.md` §12 requires authorization decisions to be logged "with enough detail to prove compliance to a rights holder". Under a single-grant model the grant was implicit; under `0..N` it is not. *"The account was entitled"* is not evidence a rights holder can audit. **No legal-log entry was created for this**: it makes no claim about law or about what any contract permits, and the rights-side rule it supports is already recorded as L-002. |
 
 **Cross-register note.** D-006 ≡ PD-001, D-009 relates to PD-092, and D-011 ≡ PD-090.
-The 98 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
+The 99 product decisions surfaced in Phase 1 live in `docs/product/DECISIONS.md`; only
 those with engineering consequence are duplicated here when accepted.
 
 ---
@@ -430,8 +453,8 @@ those with engineering consequence are duplicated here when accepted.
 **STOP.** **STEP 2: NOT STARTED.** Status: **WAITING FOR PRODUCT OWNER DECISIONS.**
 
 The immediate next action is **product owner decisions**, not corrections. The
-specification is deliberately incomplete in exactly **94** places (98 decisions, 4
-approved), and each is a question only the product owner can answer.
+specification is deliberately incomplete in exactly **95** places (99 decisions, 4 fully
+approved, PD-049 half-approved), and each is a question only the product owner can answer.
 
 **Do not begin Phase 2 (Requirements and acceptance criteria) until Phase 1 is explicitly
 confirmed COMPLETE.**
@@ -457,11 +480,18 @@ Then, in order:
 
 1. **PD-035** — classification scheme. **OPEN — LEGAL REVIEW REQUIRED.** Gates Phase 4 and
    the three decisions below.
-2. **PD-013 / PD-049** — the structural part. Gates the Phase 4 entitlement schema.
+2. ~~**PD-013 / PD-049** — the structural part.~~ ✅ **RESOLVED — PD-049 Q1 APPROVED
+   2026-08-16.** PD-035 is now the **only** remaining Phase 4 blocker.
 3. **PD-096 / PD-097 / PD-098** — resolvable only after PD-035, and each must be assigned a
    phase or explicitly marked non-blocking at that time.
 4. **PD-001 / D-006** — the pre-existing scaffold, settled before any code lands beside it
    in Phase 7.
+
+**Now scheduled rather than blocking:** **PD-013**, **PD-014** and **PD-049 Q2** move to
+**Phase 12** (packages and subscriptions); **PD-099** moves to **Phase 14** (entitlement
+engine). None of them gates Phase 4. **PD-007** (transactional / PPV) remains OPEN and is
+worth answering alongside PD-049 Q2, since PD-049 Q1 has now made the model able to carry
+it whichever way it goes.
 
 ---
 
@@ -473,7 +503,7 @@ A phase moves to `COMPLETE` only when all eight gate conditions in `CLAUDE.md` �
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Environment and project foundation | **COMPLETE** (2026-08-13) |
-| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; 22 blocking decisions open; **B-009 legal research blocked** |
+| 1 | Product specification | **IN PROGRESS — WAITING FOR PRODUCT OWNER DECISIONS.** Deliverables written; **PD-004, PD-008, PD-092, PD-095 APPROVED**; **PD-049 Q1 APPROVED (structural)**; 22 blocking decisions open; **B-009 legal research blocked** |
 | 2 | Requirements and acceptance criteria | NOT STARTED |
 | 3 | System architecture | NOT STARTED |
 | 4 | Database and ERD | NOT STARTED |

@@ -1,9 +1,9 @@
 # REQUIREMENTS.md — KMS TV Requirements and Acceptance Criteria
 
 **Phase:** 1 — Product specification
-**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092, PD-095 APPROVED**
-**Version:** 1.4
-**Date:** 2026-08-13 (rev. 1.4 — PD-095 approved: travelling-subscriber domain added)
+**Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092, PD-095 APPROVED** · **PD-049 Q1 APPROVED (structural)**
+**Version:** 1.5
+**Date:** 2026-08-16 (rev. 1.5 — PD-049 Q1 approved: multiple concurrent commercial grants)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -39,7 +39,7 @@ with no recommendations engine is merely plainer.
 `PRODUCT_SPEC.md` §0.1.
 
 ### 0.4 Coverage rule
-**Acceptance criteria are provided for every P0 requirement**, per the brief — all 212 of
+**Acceptance criteria are provided for every P0 requirement**, per the brief — all 214 of
 them. They appear in two places:
 
 - **In the domain sections (Parts A and B)** for the P0 requirements whose criteria
@@ -70,7 +70,7 @@ estimated.
 | EPG (EPG) | 7 | 3 | 1 | 0 | 11 |
 | Player (PLY) | 8 | 3 | 2 | 0 | 13 |
 | Playback authorization (AUT) | 11 | 1 | 0 | 0 | 12 |
-| Packages (PKG) | 4 | 2 | 0 | 0 | 6 |
+| Packages (PKG) — *2 added rev. 1.5* | 6 | 2 | 0 | 0 | 8 |
 | Subscriptions (SUB) | 7 | 2 | 0 | 1 | 10 |
 | Rights (RGT) | 9 | 2 | 0 | 0 | 11 |
 | VOD (VOD) | 6 | 5 | 1 | 0 | 12 |
@@ -91,7 +91,7 @@ estimated.
 | **Operator model (OPR)** — *added rev. 1.2* | **6** | **0** | **0** | **0** | **6** |
 | **Platform scope (PLT)** — *added rev. 1.3* | **9** | **0** | **0** | **0** | **9** |
 | **Travelling subscribers (TRV)** — *added rev. 1.4* | **7** | **0** | **0** | **0** | **7** |
-| **Functional total** | **165** | **89** | **21** | **6** | **281** |
+| **Functional total** | **167** | **89** | **21** | **6** | **283** |
 | Security (NFR-SEC) | 14 | 2 | 0 | 0 | 16 |
 | Privacy (NFR-PRV) | 8 | 2 | 1 | 0 | 11 |
 | Performance (NFR-PER) | 9 | 3 | 0 | 0 | 12 |
@@ -99,11 +99,11 @@ estimated.
 | Observability (NFR-OBS) | 7 | 2 | 0 | 0 | 9 |
 | Availability (NFR-AVL) | 3 | 1 | 0 | 0 | 4 |
 | **Non-functional total** | **47** | **12** | **1** | **0** | **60** |
-| **GRAND TOTAL** | **212** | **101** | **22** | **6** | **341** |
+| **GRAND TOTAL** | **214** | **101** | **22** | **6** | **343** |
 
 **Where the P0 weight sits.** Playback authorization (11), Rights (9), Security (14),
 Admin (12), Account (11), Privacy (8), and Territories (8) together account for 73 of the
-212 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
+214 P0 requirements — well over a third — while Catch-up, Restart, and Favorites contribute
 none. That distribution is the specification's central claim about this product: the
 launch-critical work is authorization, rights, and accountability, not features.
 
@@ -601,6 +601,13 @@ AND a new session can be authorized in its place.
 | FR-PKG-04 | Package contents are evaluated by the entitlement engine, never by a client. | **P0** |
 | FR-PKG-05 | A viewer can upgrade their package, effective immediately. | P1 |
 | FR-PKG-06 | A viewer can downgrade their package per the defined timing rule (PD-048). | P1 |
+| FR-PKG-07 | **An account may hold zero or more concurrent commercial grants. No component assumes exactly one.** *(PD-049 Q1 APPROVED — structural)* | **P0** |
+| FR-PKG-08 | **Where several grants coexist, entitlement resolution is deterministic and server-side.** The resolution rules themselves are **[OPEN — PD-099]**. | **P0** |
+
+**Note on FR-PKG-05 and FR-PKG-06.** These are written in the singular because they
+describe the **commercial shape**, which **[OPEN — PD-049 Q2]** has not decided. They do
+not contradict FR-PKG-07, which governs the model, and they are not reworded until Q2 is
+answered.
 
 **Acceptance criteria**
 
@@ -615,6 +622,19 @@ GIVEN an account whose package expires while content is being browsed
 WHEN playback authorization is requested for content in the expired package
 THEN authorization is denied
 AND cached entitlement does not permit access.
+
+`AC-FR-PKG-07-1`
+GIVEN an account holding two or more concurrent commercial grants
+WHEN the account's grants are inspected and playback authorization is requested
+THEN every grant is represented independently with its own effective dates
+AND no component rejects, overwrites, or silently discards a grant because another exists.
+
+`AC-FR-PKG-08-1`
+GIVEN an account holding two or more concurrent commercial grants
+WHEN entitlement is resolved twice for identical inputs
+THEN the same decision is returned both times
+AND the resolution occurred server-side in the entitlement engine
+AND no client-supplied grant claim was consulted.
 
 ---
 

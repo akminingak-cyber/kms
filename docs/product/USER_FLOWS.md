@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.3
-**Date:** 2026-08-13 (rev. 1.3 — PD-095 approved: UF-26 travelling subscriber added)
+**Version:** 1.4
+**Date:** 2026-08-16 (rev. 1.4 — PD-049 Q1 approved: UF-15 note on multiple grants)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -613,6 +613,13 @@ that will not play because of the guide is broken.
    promotion). *(Names, contents, and prices are [OPEN — PD-013, PD-014].)*
 3. User selects a package and confirms.
 4. System creates a subscription in `pending`.
+
+> **Note on the singular.** This flow is written for **one** selection because whether
+> add-ons are sold at launch is **[OPEN — PD-049 Q2]**. It describes the **commercial
+> shape**, not the model: **PD-049 Q1 is APPROVED**, so an account **may** hold `0..N`
+> concurrent commercial grants (`PRODUCT_SPEC.md` §13.4). This flow is deliberately not
+> rewritten in the plural, because doing so would imply add-ons are sold. It will be
+> revisited when Q2 is decided.
 5. System hands off to a **provider-hosted or tokenized payment flow**.
    **Card data never touches KMS TV systems.**
 6. Provider processes payment and returns.

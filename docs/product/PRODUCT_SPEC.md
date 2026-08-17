@@ -1152,10 +1152,14 @@ evaluate **over**: a set of grants rather than a single grant. It does not chang
 checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
 *"Tier must never alter which checks run — only their outcome."* The rules by which several
 grants resolve into one effective entitlement are **[OPEN — PD-099]** — **except
-concurrency, which is decided**: the commercial allowance for check 8 is the **MAXIMUM**
-applicable grant allowance, not the sum, and the **most restrictive** independent constraint
-still governs (§6.7). For the six remaining dimensions no resolution behaviour may be
-assumed, and check 5 has no defined outcome for a multi-grant conflict. **Where several grants could each reach the same asset, the decision
+concurrency and quality, both decided**. For **check 8**, the commercial allowance is the
+**MAXIMUM** applicable grant allowance, not the sum, and the **most restrictive**
+independent constraint still governs (§6.7). For **quality** — evaluated per asset through
+**check 10** — the commercial ceiling is the **MAXIMUM among grants that reach the requested
+asset**, and **only those grants participate** (§13.4); the independent constraints of
+checks 6 and 10 remain authoritative on top, so **commercial entitlement never creates or
+expands a content right**. For the **five remaining dimensions** no resolution behaviour may
+be assumed, and check 5 has no defined outcome for a multi-grant conflict. **Where several grants could each reach the same asset, the decision
 evidence must record which grant the authorization rested on** (§13.5, §26.3).
 
 ### 12.2 Core product rules
@@ -1259,9 +1263,27 @@ playback authorization
 ```
 
 Multiple grants may coexist, subject to the entitlement-resolution rules that are
-**[OPEN — PD-099]** — **except concurrency**, which is **APPROVED**: an **account-level
-pool** whose commercial value is the **MAXIMUM** applicable grant allowance, **not the sum**
-(§6.7). The other six dimensions remain open.
+**[OPEN — PD-099]** — **except concurrency and quality**, both **APPROVED**.
+
+- **Concurrency** — an **account-level pool** whose commercial value is the **MAXIMUM**
+  applicable grant allowance, **not the sum** (§6.7).
+- **Quality** — evaluated **per asset**. The commercial ceiling is the **MAXIMUM among the
+  grants that reach the requested asset**, and **only those grants participate**: a grant
+  that does not include the asset **MUST NOT** constrain its quality. *Grants of Movies at
+  1080p and Sports at 4K give **4K** for a Sports asset and **1080p** for a Movie.* The two
+  halves are an **inseparable pair** — the maximum alone would let one product's ceiling
+  raise unrelated content. **§6.7 is not the basis for this rule**; it is concurrency-scoped.
+  The rule rests on positive grant semantics (§13.1), §12.1 **check 10**'s per-asset quality
+  permissions, and PD-049 Q1. **Second-stage constraints remain authoritative and
+  conjunctive** — content rights, the §15.2 rights-agreement ceiling, the §9 asset/channel
+  playback policy, service availability, device capability when established, and
+  encoding/stream availability. *Commercial 4K + rights maximum 1080p → **1080p**.*
+  **Commercial entitlement MUST NEVER create or expand a content right.** **Which grants
+  count as active and applicable** remains governed by the still-open territory and
+  effective-date dimensions **[OPEN — PD-099]**. **No quality value is set**
+  **[OPEN — PD-013, PD-017]**.
+
+The other **five** dimensions remain open.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

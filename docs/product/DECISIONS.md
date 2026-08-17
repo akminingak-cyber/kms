@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.9
-**Date:** 2026-08-16 (PD-099 Territory Case B no-workaround UX discipline APPROVED)
+**Version:** 1.10
+**Date:** 2026-08-16 (PD-099 Quality sub-decision APPROVED — Q1 MAX + Q2 asset-reaching)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -89,9 +89,10 @@ concurrency dimension of PD-099.**
 |---|---|---|
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+| **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
-| **PD-099** — remaining six dimensions | Quality · devices · content entitlement · **territory eligibility** · effective dates · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099** — remaining five dimensions | Devices · content entitlement · **territory eligibility** · effective dates · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -103,6 +104,22 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.10 changes.** **PD-099 Quality sub-decision APPROVED** (§2) as an **inseparable
+pair**: **Q1** — the effective commercial quality ceiling is the **MAXIMUM** among grants that
+reach the requested asset; **Q2** — **only active grants that actually entitle that asset
+participate**, so a grant that does not include it may not constrain its quality. Q1 without
+Q2 would permit **entitlement leakage across products**, which is why the two are recorded
+together. **§6.7 is expressly NOT the basis** — it is concurrency-scoped and never mentions
+quality; the rule rests on positive grant semantics (§13.1), asset-scoped quality
+permissions, **§12.1 check 10**, and **PD-049 Q1**. Second-stage constraints remain
+authoritative and conjunctive, and **commercial entitlement may never create or expand a
+content right**. **No twelfth check; the eleven-check structure is unmodified.** **No quality
+value is set.** Dimensions approved: **1 and 2 of 7**; **five remain OPEN**. Decision count
+**unchanged at 99**; blocking **22**; legal **24**; fully approved **5**; **no new decision ID**.
+An authorization-output/evidence gap is **recorded, not solved** (K-010); **D-030 unchanged**.
+**PD-013, PD-017, PD-049 Q2, PD-099 Territory, PD-099 Effective Dates, PD-099 Devices and
+PD-099 Conflicting Allowances are all unchanged.**
 
 **Version 1.9 changes.** **PD-099 Territory — Case B no-workaround UX discipline APPROVED**
 (§2), recorded as a **constraint under dimension 5**, not as a resolution of it. **Dimension 5
@@ -745,7 +762,7 @@ happens to execute first.
 
 | # | Dimension | Note |
 |---|---|---|
-| 1 | **Quality limits** | Package supplies a quality ceiling (§13.2); rights supply another *"where the contract specifies one"* (§15.2). Resolution across several grants is undefined. |
+| 1 | ~~**Quality limits**~~ | ✅ **APPROVED 2026-08-16 — Q1 MAXIMUM across participating grants, Q2 asset-reaching grants only. An inseparable pair.** See the sub-decision below. |
 | 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
 | 3 | **Device limits** | Package carries a device allowance (§13.2). |
 | 4 | **Content entitlements** | Which assets the combined grant set reaches. |
@@ -762,11 +779,105 @@ declines to choose these rules.
 the dimensions that remain open. The rules are behaviour, not structure; the ERD must
 permit them without presupposing them.
 
-**Status:** **OPEN — PARTIALLY DECIDED.** Dimension 2 (concurrency) is **APPROVED**; the
-other **six dimensions remain OPEN**, though dimension 5 (territory eligibility) now carries
-one **approved UX constraint** — the Case B no-workaround discipline — which binds the
-presentation layer without deciding the dimension. Arising from PD-049 Q1 · Required before **Phase 14**
+**Status:** **OPEN — PARTIALLY DECIDED.** Dimension **1 (quality)** and dimension
+**2 (concurrency)** are **APPROVED**; the other **five dimensions remain OPEN**, though
+dimension 5 (territory eligibility) carries one **approved UX constraint** — the Case B
+no-workaround discipline — which binds the presentation layer without deciding the
+dimension. Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Quality sub-decision — **APPROVED** (Q1 + Q2, an inseparable pair)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Quality** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **1 — Quality limits** |
+| **Status** | **APPROVED** |
+| **Scope** | **This dimension only.** PD-099 overall remains **OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of dimension 1 only |
+
+**The rule as approved — two halves that MUST NOT be separated.**
+
+> **Q1 — commercial quality function.** When several applicable commercial grants reach the
+> requested asset, the **effective commercial quality ceiling is the MAXIMUM** among the
+> participating grants.
+>
+> **Q2 — participating grants.** **Only active grants that actually entitle the requested
+> asset participate.** A grant that does not include the requested asset **MUST NOT**
+> constrain that asset's quality.
+
+**Why they are inseparable.** Q1 without Q2 permits **entitlement leakage across products**:
+a 4K sports grant would raise a **movie** to 4K although it grants no movie entitlement at
+all. **Q2 is what makes Q1 safe, and neither may be applied without the other.**
+
+**Worked example, as approved.**
+
+| Grant | Domain | Ceiling |
+|---|---|---|
+| A | Movies | 1080p |
+| B | Sports | 4K |
+
+Requested asset **Sports** → participating grants: **B only** → commercial effective quality
+**4K**. **Grant A MUST NOT reduce Sports quality to 1080p.** Requested asset **Movies** →
+participating grants: **A only** → **1080p**. Where **both** grants reach the same asset,
+MAX gives **4K**.
+
+**Basis for the rule — and what is explicitly *not* the basis.**
+
+> **§6.7 does NOT constitute authority for MAX quality. §6.7 is concurrency-scoped**, and
+> the word *quality* does not appear in it. **It must not be described as already approving
+> MAX quality anywhere in this specification.**
+
+The rule rests on:
+
+1. **Positive grant semantics** — §13.1, a package defines what an account *"may access"*; a
+   grant that grants nothing for an asset cannot restrict it.
+2. **Asset-scoped quality permissions** — quality is already evaluated per asset.
+3. **§12.1 check 10** — *"restrict/catch-up/**quality** permissions **for this asset**"*.
+4. **The approved multi-grant model, PD-049 Q1** — `0..N` grants, with §12.1's addendum
+   already evaluating checks 4 and 5 over a **set**.
+
+**Second stage — independent constraints remain authoritative and conjunctive.** The
+commercial ceiling is **not** a guarantee of final playback quality. After commercial
+resolution, all of the following still apply: **content rights** · **rights-agreement
+quality ceiling** (§15.2, *"maximum permitted… where the contract specifies one"*) ·
+**asset/channel playback policy** (§9, a **Required** field; check 10) · **service
+availability** · **device capability when established** · **encoding/stream availability**.
+
+*Worked example: commercial **4K** + rights agreement **maximum 1080p** → final permitted
+playback **1080p**.*
+
+> **Commercial entitlement MUST NEVER create or expand a content right.**
+
+**Domain condition.** The quality rule is approved **independently** of the unresolved
+territory and effective-date dimensions. **Which grants qualify as ACTIVE and APPLICABLE at
+a particular request remains governed by those dimensions — PD-099 Territory and PD-099
+Effective Dates, both OPEN.** No rule for either is invented here.
+
+**Authorization unchanged.** **No twelfth check**; the eleven-check structure is unmodified;
+no rights check is weakened; commercial entitlement is **not** merged with rights; clients
+are **not** made responsible for quality authorization. **Only the value evaluated through
+the existing model changes.**
+
+**Identified gap — recorded, not solved.** The specification does not yet define an
+authorization output or evidence representation for: **(1)** participating grants ·
+**(2)** commercial effective quality · **(3)** the binding independent quality constraint ·
+**(4)** final effective playback quality. **A prior gap underlies it:** `PRODUCT_SPEC.md`
+§12.4 does not list effective quality among playback-session properties, so **no quality
+output is specified at all**. **Not solved here; D-030 is not modified; no new decision ID
+was created.** Tracked as `PROJECT_STATE.md` **K-010**.
+
+**No quality value is set anywhere.** This approval does **not** decide exact quality values,
+**PD-017** (4K/HDR), whether 4K/HDR is sold, **PD-013**, **PD-049 Q2**, device-capability
+values, the encoding ladder, territory eligibility, or effective-date semantics — **all
+remain OPEN and unchanged**, as do **PD-099 Devices** and **PD-099 Conflicting Allowances**.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-034 and §6 K-010 · `PRODUCT_SPEC.md` §12.1, §13.4 ·
+`REQUIREMENTS.md` FR-PKG-08.
 
 ---
 

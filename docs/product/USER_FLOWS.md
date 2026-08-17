@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.5
-**Date:** 2026-08-16 (rev. 1.5 — PD-099 concurrency sub-decision approved: UF-20B updated)
+**Version:** 1.6
+**Date:** 2026-08-16 (rev. 1.6 — PD-099 Territory Case B UX discipline approved)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -327,7 +327,7 @@ no re-authentication, and can never elevate a session.
 Every failure below returns a **stable reason code** and a **localized, non-technical
 message**. See UF-18 for full handling.
 - **F1** `SUBSCRIPTION_EXPIRED` — renewal path offered
-- **F2** `NOT_IN_PACKAGE` — upgrade path offered
+- **F2** `NOT_IN_PACKAGE` — commercial action offered **only where a qualifying product exists in the current territory**; territory-caused denials follow the Case B no-workaround discipline (`PRODUCT_SPEC.md` §12.3)
 - **F3** `RIGHTS_EXPIRED` — neutral message, alternatives offered
 - **F4** `TERRITORY_RESTRICTED` — neutral message, **no workaround offered or hinted**
 - **F5** `DEVICE_CLASS_NOT_PERMITTED` — states which device types can play it
@@ -558,7 +558,7 @@ that will not play because of the guide is broken.
 
 ### Failure paths
 - **F1** `RIGHTS_EXPIRED` — title absent from browse; direct request denied neutrally
-- **F2** `NOT_IN_PACKAGE` — upgrade path offered
+- **F2** `NOT_IN_PACKAGE` — commercial action offered **only where a qualifying product exists in the current territory**; territory-caused denials follow the Case B no-workaround discipline (`PRODUCT_SPEC.md` §12.3)
 - **F3** Maturity limit exceeded — denied; title absent from that profile's browse entirely
 - **F4** `CONCURRENCY_LIMIT_REACHED` — → UF-20
 - **F5** Source error — technical framing with retry
@@ -750,7 +750,7 @@ audited.
 | Reason code | Message intent | Recovery action |
 |---|---|---|
 | `SUBSCRIPTION_EXPIRED` | Subscription has ended | Direct renewal path |
-| `NOT_IN_PACKAGE` | Included in a different package | Direct upgrade path |
+| `NOT_IN_PACKAGE` | Included in a different package — **or, in the current territory, in none available there** | Commercial action **only where a qualifying product exists in the current territory**; otherwise an informational availability message, under the Case B no-workaround discipline (`PRODUCT_SPEC.md` §12.3) |
 | `RIGHTS_EXPIRED` | **Neutral** — no longer available | Suggest alternatives |
 | `TERRITORY_RESTRICTED` | **Neutral** — this title is not available in your location | Suggest available alternatives. **No workaround is offered, suggested, or hinted at.** |
 | `SERVICE_NOT_AVAILABLE` | **Neutral** — KMS TV is not available in your location yet. Distinct from an unlicensed title (PD-004) | Offer notification if approved (PD-065). **No workaround offered or hinted.** |
@@ -1130,7 +1130,12 @@ follows the subscriber; it is never a universal content license.
   hinted at** — this holds with particular force here, because a travelling subscriber is
   exactly the viewer most likely to go looking for one.
 - **F3 — Package does not include the asset in this territory.** Denied with
-  `NOT_IN_PACKAGE`.
+  `NOT_IN_PACKAGE` — the code is unchanged. **Case B no-workaround discipline applies**
+  [PD-099 Territory UX constraint APPROVED]: never suggest returning home, changing
+  location, circumvention or a VPN, and never imply the subscription expired, the account
+  was cancelled, or the grant was deleted. A commercial action appears **only where a
+  qualifying product exists in the current territory**; its shape is **[OPEN — PD-049 Q2,
+  PD-013]**.
 - **F4 — Platform or device policy excludes it.** Denied with
   `DEVICE_CLASS_NOT_PERMITTED`.
 - **F5 — Subscription lapses while travelling.** Ordinary subscription handling applies

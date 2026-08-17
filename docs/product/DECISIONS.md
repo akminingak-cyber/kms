@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.8
-**Date:** 2026-08-16 (PD-099 concurrency sub-decision APPROVED — account-level MAX)
+**Version:** 1.9
+**Date:** 2026-08-16 (PD-099 Territory Case B no-workaround UX discipline APPROVED)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -90,7 +90,8 @@ concurrency dimension of PD-099.**
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
-| **PD-099** — remaining six dimensions | Quality · devices · content entitlement · territory eligibility · effective dates · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
+| **PD-099** — remaining six dimensions | Quality · devices · content entitlement · **territory eligibility** · effective dates · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -102,6 +103,20 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.9 changes.** **PD-099 Territory — Case B no-workaround UX discipline APPROVED**
+(§2), recorded as a **constraint under dimension 5**, not as a resolution of it. **Dimension 5
+(territory eligibility) remains OPEN**, and **PD-099 overall remains OPEN**. The discipline
+forbids the user-facing experience from suggesting a return home, a location change,
+circumvention or a VPN, and from implying that the subscription expired, the account was
+cancelled, or the grant was deleted; it permits stating that the content is not included in
+the package **in the current territory**, and permits a commercial action **only where a
+qualifying product actually exists there**. **The reason code remains `NOT_IN_PACKAGE`** —
+**no new reason code and no new authorization check.** The commercial action's shape is
+**UNDECIDED**, depending on **PD-049 Q2** and **PD-013**, both OPEN. **No new decision ID was
+created.** Decision count **unchanged at 99**; blocking **22**; legal **24**; fully approved
+**5**. **PD-004, PD-095, PD-099 Concurrency, PD-049 Q2, PD-013 and PD-007 are all unchanged**,
+and **no add-on decision is implied.**
 
 **Version 1.8 changes.** **PD-099 concurrency sub-decision APPROVED** (§2): KMS TV uses an
 **account-level concurrency pool**, and **effective commercial concurrency = MAX(applicable
@@ -734,7 +749,7 @@ happens to execute first.
 | 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
 | 3 | **Device limits** | Package carries a device allowance (§13.2). |
 | 4 | **Content entitlements** | Which assets the combined grant set reaches. |
-| 5 | **Territory eligibility** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). |
+| 5 | **Territory eligibility** — **OPEN** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). **The dimension itself is undecided**, but one **APPROVED UX constraint** now binds whatever shape it takes — see the Case B no-workaround discipline below. |
 | 6 | **Effective dates** | Grants may start and end independently; PD-048's recommended *"downgrades at period end"* already implies coexisting current and scheduled states. |
 | 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
 
@@ -748,7 +763,9 @@ the dimensions that remain open. The rules are behaviour, not structure; the ERD
 permit them without presupposing them.
 
 **Status:** **OPEN — PARTIALLY DECIDED.** Dimension 2 (concurrency) is **APPROVED**; the
-other **six dimensions remain OPEN**. Arising from PD-049 Q1 · Required before **Phase 14**
+other **six dimensions remain OPEN**, though dimension 5 (territory eligibility) now carries
+one **approved UX constraint** — the Case B no-workaround discipline — which binds the
+presentation layer without deciding the dimension. Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
 
 ---
@@ -805,6 +822,76 @@ semantics · policy versioning · any other PD-099 dimension. **PD-049 Q1 is unc
 
 **Recorded in:** `PROJECT_STATE.md` §7 D-032 · `PRODUCT_SPEC.md` §6.7, §12.1, §13.4 ·
 `REQUIREMENTS.md` FR-PKG-08 · `USER_FLOWS.md` UF-20B.
+
+---
+
+#### PD-099 · Territory — Case B no-workaround discipline — **APPROVED CONSTRAINT**
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Territory** (constraint recorded under dimension 5 — **no new decision ID**) |
+| **Dimension** | **5 — Territory eligibility** |
+| **What is approved** | **A UX discipline only** — the no-workaround rules below |
+| **What is NOT approved** | **The territory-eligibility rule itself. Dimension 5 remains OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+
+**Scope.** This approves **how the denial is presented**, not **when it occurs**. Dimension 5
+— whether a territorially ineligible grant ceases to participate or merely contributes a
+territory-scoped content set — is **still undecided**, and this constraint decides nothing
+about it.
+
+**It is not contingent on that answer.** The Case B situation — a `NOT_IN_PACKAGE` denial in
+the current territory with no qualifying product available there — is reachable under
+**both** candidate readings of dimension 5, so the discipline binds either way.
+
+**The discipline as approved.** When a held commercial grant does not participate because
+the subscriber is currently in a territory that grant does not cover, the user-facing
+experience **MUST NOT**:
+
+- suggest returning to the home territory
+- suggest changing physical location
+- suggest circumventing territory restrictions
+- suggest VPN or similar technical workarounds
+- imply that the subscription has expired
+- imply that the account has been cancelled
+- imply that the grant has been deleted
+
+**The message MAY** state that *"the content is not included in your package in the current
+territory"*, and **MAY** provide an informational availability explanation.
+
+**A commercial action MAY be shown only if a qualifying product actually exists in the
+current territory.** **The exact commercial action is UNDECIDED** and depends on
+**PD-049 Q2** and **PD-013**, both OPEN. Whether it is an upgrade, an additional grant
+purchase, an add-on, or another product **is not decided here**.
+
+**Why this needed stating rather than assuming.** The no-workaround discipline already
+attaches to `TERRITORY_RESTRICTED` and `SERVICE_NOT_AVAILABLE` (§12.3, `AC-FR-TER-13-1`,
+UF-26 F2), because both are non-commercial denials. **`NOT_IN_PACKAGE` is a commercial code
+that normally *does* offer a path** — §12.3 prescribes *"explain which package includes it,
+offer upgrade"* — so the discipline does **not** attach to it by default. This approval
+attaches it for the territory case.
+
+**Reason code unchanged.** The authorization reason remains **`NOT_IN_PACKAGE`** when the
+denial is caused by the commercial grant not participating in the current territory.
+**No new reason code, and no new authorization check.** The eleven checks in
+`PRODUCT_SPEC.md` §12.1 are unchanged, and `NOT_IN_PACKAGE`, `TERRITORY_RESTRICTED` and
+`SERVICE_NOT_AVAILABLE` remain distinct causes — commercial, contractual, and operator
+respectively.
+
+**Structured response, not prose.** §12.2 requires that *"clients never parse
+human-readable text"*, so a client must not infer this state from the message. If the
+existing API model supports it, a future API **may** expose a structured
+remedy/availability indicator. **No API, schema, or code is designed or implemented here.**
+
+**Unchanged by this approval:** PD-004 · PD-095 · PD-099 Concurrency · PD-049 Q2 · PD-013 ·
+PD-007. **No add-on decision is implied.**
+
+**Status:** **Dimension 5 remains OPEN.** This constraint is approved and binding on the
+presentation layer; the territory rule itself awaits explicit approval.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-033 · `PRODUCT_SPEC.md` §12.3 ·
+`USER_FLOWS.md` UF-07 F2, UF-13 F2, UF-18, UF-26 F3.
 
 ### PD-048 — Proration, upgrade and downgrade timing
 **RECOMMENDED:** upgrades immediate, downgrades at period end — a mid-period downgrade

@@ -1175,7 +1175,7 @@ evidence must record which grant the authorization rested on** (§13.5, §26.3).
 |---|---|---|
 | **Valid playback** | Authorized session issued; playback starts | `AUTHORIZED` |
 | **Expired subscription** | Denied. Explain state, offer renewal path directly from the error | `SUBSCRIPTION_EXPIRED` |
-| **Unauthorized channel** (not in package) | Denied. Explain which package includes it, offer upgrade | `NOT_IN_PACKAGE` |
+| **Unauthorized channel** (not in package) | Denied. Explain which package includes it, and offer a commercial action **only where a qualifying product exists in the current territory** — see the territory note below | `NOT_IN_PACKAGE` |
 | **Expired content rights** | Denied. **Neutral message** — "not currently available" — never blame the viewer | `RIGHTS_EXPIRED` |
 | **Outside licensed territory** (service available, this asset not licensed here) | Denied. Neutral message. **No workaround is offered, suggested, or hinted at** (`CLAUDE.md` §1) | `TERRITORY_RESTRICTED` |
 | **Service not available in this territory** (PD-004) | Denied. **Distinct from the above** — the service does not operate here at all, rather than this asset being unlicensed. Neutral, forward-looking message; no workaround offered or hinted | `SERVICE_NOT_AVAILABLE` |
@@ -1185,6 +1185,22 @@ evidence must record which grant the authorization rested on** (§13.5, §26.3).
 | **Revoked device** | Denied; session terminated; user prompted to re-authenticate | `DEVICE_REVOKED` |
 | **Expired playback session** mid-stream | One silent re-authorization attempt; on failure a recoverable error | `SESSION_EXPIRED` |
 | **Account suspended** | Denied; direct the viewer to support | `ACCOUNT_SUSPENDED` |
+
+**Territory-caused `NOT_IN_PACKAGE` — the Case B no-workaround discipline**
+[CONFIRMED — PD-099 Territory UX constraint APPROVED; the territory *rule* remains OPEN].
+Where the denial arises because a held commercial grant does not cover the subscriber's
+**current** territory, the reason code is still **`NOT_IN_PACKAGE`** — no new code, no new
+check — but the experience **MUST NOT** suggest returning to the home territory, changing
+physical location, circumventing territory restrictions, or using a VPN or similar
+workaround, and **MUST NOT** imply that the subscription expired, the account was
+cancelled, or the grant was deleted. It **MAY** state that the content is not included in
+the viewer's package **in the current territory**, and **MAY** give an informational
+availability explanation. **A commercial action MAY be shown only if a qualifying product
+actually exists in the current territory**; its exact shape is **[OPEN — PD-049 Q2,
+PD-013]**. This discipline is stated because it does **not** attach to `NOT_IN_PACKAGE` by
+default — unlike `TERRITORY_RESTRICTED` and `SERVICE_NOT_AVAILABLE`, it is a **commercial**
+denial that normally does offer a path. Per §12.2 the client must learn this from
+**structured** response data, never by parsing the message.
 
 **PD-047** matters more than it looks: showing *which* devices are streaming is
 genuinely useful, and is also a privacy disclosure across a household. It needs a

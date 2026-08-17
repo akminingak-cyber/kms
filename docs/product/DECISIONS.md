@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.10
-**Date:** 2026-08-16 (PD-099 Quality sub-decision APPROVED — Q1 MAX + Q2 asset-reaching)
+**Version:** 1.11
+**Date:** 2026-08-16 (PD-099 Effective Dates sub-decision APPROVED — half-open interval)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -89,10 +89,11 @@ concurrency dimension of PD-099.**
 |---|---|---|
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+| **PD-099 · Effective Dates** | Entitlement resolution, **effective-dates dimension only** — **half-open `[start, end)`** (`effective_from` inclusive, `effective_until` exclusive) · **future grants do not participate before start** · **dual boundary enforcement** (scheduled processing **and** authoritative per-authorization re-evaluation). One inseparable block. Supplies the temporal membership predicate the approved Quality and Concurrency rules presuppose | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
-| **PD-099** — remaining five dimensions | Devices · content entitlement · **territory eligibility** · effective dates · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099** — remaining four dimensions | Devices · content entitlement · **territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -104,6 +105,26 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.11 changes.** **PD-099 Effective Dates sub-decision APPROVED** (§2) as **one
+inseparable block of three rules**: **(1)** commercial grants use a **half-open** effective
+interval **`[start, end)`** — `effective_from` **inclusive**, `effective_until` **exclusive**,
+so adjacent grants never overlap at a shared instant; **(2)** a grant whose `effective_from`
+is in the future **does not participate** in entitlement, quality or concurrency before that
+instant; **(3)** boundaries are enforced by **both** scheduled processing **and**
+authoritative **per-authorization re-evaluation**, closing the gap where `FR-PKG-03` (P0)
+demanded *"immediately"* with no mechanism while the rights analogue mandates two
+(`FR-RGT-06`, L-003). Rules 1 and 2 **supply the temporal membership predicate** — the
+meaning of *active* and the temporal half of *applicable* — that the **already-approved**
+Quality and Concurrency rules presuppose; **neither of those rules is changed.** UTC and
+server-time authority are unchanged; **no local-device time semantics** are introduced.
+**Mid-session grant expiry is expressly NOT decided and must not be inferred from
+"immediately"; PD-056 remains OPEN.** **No twelfth check**; effective-date filtering is
+**grant-set construction before** the existing checks. Dimensions approved: **1, 2 and 6 of
+7**; **four remain OPEN**. Decision count **unchanged at 99**; blocking **22**; legal **24**;
+fully approved **5**; **no new decision ID**. Audit requirements **recorded, not solved**
+(K-011); **D-030 unchanged**. **PD-099 Territory, Devices, Content Entitlement and
+Conflicting Allowances, plus PD-056, PD-048, PD-013 and PD-049 Q2, are all unchanged.**
 
 **Version 1.10 changes.** **PD-099 Quality sub-decision APPROVED** (§2) as an **inseparable
 pair**: **Q1** — the effective commercial quality ceiling is the **MAXIMUM** among grants that
@@ -767,7 +788,7 @@ happens to execute first.
 | 3 | **Device limits** | Package carries a device allowance (§13.2). |
 | 4 | **Content entitlements** | Which assets the combined grant set reaches. |
 | 5 | **Territory eligibility** — **OPEN** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). **The dimension itself is undecided**, but one **APPROVED UX constraint** now binds whatever shape it takes — see the Case B no-workaround discipline below. |
-| 6 | **Effective dates** | Grants may start and end independently; PD-048's recommended *"downgrades at period end"* already implies coexisting current and scheduled states. |
+| 6 | ~~**Effective dates**~~ | ✅ **APPROVED 2026-08-16 — half-open `[start, end)`, future-grant exclusion, and dual boundary enforcement. One inseparable block.** See the sub-decision below. |
 | 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
 
 **[UNVERIFIED]** No resolution rule — most-permissive, least-permissive, precedence by
@@ -779,12 +800,107 @@ declines to choose these rules.
 the dimensions that remain open. The rules are behaviour, not structure; the ERD must
 permit them without presupposing them.
 
-**Status:** **OPEN — PARTIALLY DECIDED.** Dimension **1 (quality)** and dimension
-**2 (concurrency)** are **APPROVED**; the other **five dimensions remain OPEN**, though
+**Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)** and
+**6 (effective dates)** are **APPROVED**; the other **four dimensions remain OPEN**, though
 dimension 5 (territory eligibility) carries one **approved UX constraint** — the Case B
 no-workaround discipline — which binds the presentation layer without deciding the
 dimension. Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Effective Dates sub-decision — **APPROVED** (Rules 1–3, one inseparable block)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Effective Dates** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **6 — Effective dates** |
+| **Status** | **APPROVED** |
+| **Scope** | **This dimension only.** PD-099 overall remains **OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of dimension 6 only |
+
+**RULE 1 — half-open effective interval.**
+
+> Commercial grants use a **HALF-OPEN** effective interval — **`[start, end)`**.
+> **`effective_from` is INCLUSIVE; `effective_until` is EXCLUSIVE.**
+
+*Worked example, as approved:* Grant A `[10:00, 12:00)` and Grant B `[12:00, 15:00)`. **At
+exactly 12:00, Grant A is NOT active and Grant B IS active.** **Adjacent grant intervals
+therefore do not overlap merely because one ends at the exact instant another begins.**
+
+All timestamps remain **UTC** (`CLAUDE.md` §4.1, §9). **Server time remains authoritative**
+(EC-23). **No local-device time semantics are introduced**, and client time is never trusted.
+
+**RULE 2 — future grants do not participate.** A grant whose `effective_from` is in the
+future **MUST NOT** participate in entitlement resolution before `effective_from`. Before
+its start it contributes **no content entitlement**, **no commercial quality**, and **no
+commercial concurrency**, and it **is not an active/applicable grant**. At `effective_from`
+it becomes eligible to participate according to the other applicable rules.
+
+**This decides nothing commercial.** Whether future grants are sellable, displayed to
+customers, or billed before activation remains dependent on **PD-013**, **PD-049 Q2** and
+**PD-048** — all unchanged.
+
+**RULE 3 — dual boundary enforcement.** Grant effective-date boundaries **MUST** be enforced
+through **both**:
+
+1. **scheduled / event-driven boundary processing** — providing timely state and cache
+   propagation; **and**
+2. **per-authorization server-side re-evaluation** — which **remains authoritative** and
+   prevents a stale cache or a missed scheduled execution from treating an inactive grant
+   as active.
+
+**The client MUST NOT determine whether a grant is active.** Server time is authoritative.
+
+*This closes a gap the prior review identified:* `FR-PKG-03` (**P0**) required grant
+expiration to take effect *"immediately"* while specifying **no mechanism**, whereas the
+rights analogue mandates two (`FR-RGT-06`, **L-003** — *"a single mechanism can fail
+silently"*). Grants now carry the same two-mechanism discipline. **This is a structural
+parallel, not an extension of L-003 itself**, which remains a rights-compliance entry.
+
+**Temporal membership predicate — what this supplies to the already-approved rules.**
+Rules 1 and 2 define the **temporal membership predicate** that the approved resolution
+functions presuppose:
+
+| Approved rule | Unchanged text | What this sub-decision supplies |
+|---|---|---|
+| **Quality** | MAX among **active** grants that reach the requested asset | the meaning of **active** |
+| **Concurrency** | MAX among **applicable** grant allowances | the temporal component of **applicable** |
+
+**A future or expired grant cannot participate in either calculation.** **The Quality and
+Concurrency rules themselves are NOT changed.**
+
+**Independence of the other windows — unchanged.** Grant effective dates remain independent
+of the **subscription window**, the **content-rights window**, **service availability**,
+**territory eligibility**, and **asset availability**. **A grant becoming active MUST NOT
+create a content right, a territory right, or service availability. A grant expiring MUST
+NOT be interpreted as cancellation of the subscription itself** (`FR-SUB-01`, PD-095).
+
+**Authorization unchanged.** **No twelfth check.** The eleven checks in `PRODUCT_SPEC.md`
+§12.1 are unmodified. **Effective-date filtering is grant-set construction, performed before
+the existing checks**, consistent with §12.1's rule that multiple grants change what checks
+4 and 5 evaluate **over**. The conjunctive model is untouched.
+
+**SCOPE LIMIT — what this does NOT decide.** **Mid-session playback when a grant expires**
+is **NOT decided**: not whether playback stops immediately, nor segment-boundary behaviour,
+nor token-boundary behaviour, nor continuation until playback ends. **These MUST NOT be
+inferred from the word "immediately."** **PD-056 remains OPEN and unchanged.**
+
+**Identified audit requirements — recorded, not solved.** (1) The **evaluation timestamp**
+must be reproducible. (2) The **effective interval** must be auditable. (3) The **grant
+state/transition history** must support reconstructing why a grant was active or inactive at
+a given time — note that `FR-SUB-04` (**P0**) makes **subscription** history append-only
+while **no equivalent exists for grants**. **D-030 is not modified and no new decision ID was
+created.** Tracked as `PROJECT_STATE.md` **K-011**.
+
+**Not approved by this decision:** **PD-099 Territory** · **PD-099 Devices** · **PD-099
+Content Entitlement** · **PD-099 Conflicting Allowances** · **PD-056** · **PD-048** ·
+**PD-013** · **PD-049 Q2** — all unchanged. **PD-099 remains OPEN overall.**
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-035 and §6 K-011 · `PRODUCT_SPEC.md` §12.1, §13.4 ·
+`REQUIREMENTS.md` FR-PKG-03, FR-PKG-08.
 
 ---
 

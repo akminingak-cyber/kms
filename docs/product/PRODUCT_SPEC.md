@@ -1152,7 +1152,11 @@ evaluate **over**: a set of grants rather than a single grant. It does not chang
 checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
 *"Tier must never alter which checks run — only their outcome."* The rules by which several
 grants resolve into one effective entitlement are **[OPEN — PD-099]** — **except
-concurrency and quality, both decided**. For **check 8**, the commercial allowance is the
+concurrency, quality and effective dates, all three decided**. **Effective dates come first**:
+grants use a **half-open** interval **`[start, end)`**, so a grant is in the evaluated set only
+while `effective_from ≤ now < effective_until` — **future and expired grants never
+participate** (§13.4). This is **grant-set construction, performed before these checks**, not a
+check of its own. For **check 8**, the commercial allowance is the
 **MAXIMUM** applicable grant allowance, not the sum, and the **most restrictive**
 independent constraint still governs (§6.7). For **quality** — evaluated per asset through
 **check 10** — the commercial ceiling is the **MAXIMUM among grants that reach the requested
@@ -1283,7 +1287,21 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
   effective-date dimensions **[OPEN — PD-099]**. **No quality value is set**
   **[OPEN — PD-013, PD-017]**.
 
-The other **five** dimensions remain open.
+- **Effective dates** — grants use a **half-open** effective interval **`[start, end)`**:
+  `effective_from` is **inclusive**, `effective_until` is **exclusive**. *Grants `[10:00,
+  12:00)` and `[12:00, 15:00)` do not overlap: at exactly 12:00 the first is inactive and the
+  second is active.* A grant whose start is in the future **does not participate** in
+  entitlement, quality or concurrency before that instant. Boundaries are enforced by **both**
+  scheduled processing **and** an authoritative **per-authorization re-evaluation**, so a stale
+  cache or a missed job can never make an inactive grant appear active. **The client never
+  determines whether a grant is active**; server time is authoritative (EC-23) and all
+  timestamps are UTC. These rules supply the **temporal membership predicate** — the meaning
+  of *active* and the temporal half of *applicable* — that the concurrency and quality rules
+  above presuppose. **Mid-session behaviour when a grant expires is NOT decided by this and
+  must not be inferred from "immediately" [OPEN — PD-056].** Whether future grants are
+  sellable, shown, or billed before activation is **[OPEN — PD-013, PD-049 Q2, PD-048]**.
+
+The other **four** dimensions remain open.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

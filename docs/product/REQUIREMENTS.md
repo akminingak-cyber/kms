@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092, PD-095 APPROVED** · **PD-049 Q1 APPROVED (structural)**
-**Version:** 1.7
-**Date:** 2026-08-16 (rev. 1.7 — PD-099 quality sub-decision approved: FR-PKG-08 updated)
+**Version:** 1.8
+**Date:** 2026-08-16 (rev. 1.8 — PD-099 effective-dates sub-decision approved: FR-PKG-03/08 updated)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -597,12 +597,12 @@ AND a new session can be authorized in its place.
 |---|---|---|
 | FR-PKG-01 | A package defines the content and feature allowances an entitled account receives. | **P0** |
 | FR-PKG-02 | Package activation makes entitlement effective immediately. | **P0** |
-| FR-PKG-03 | Package expiration makes entitlement ineffective immediately. | **P0** |
+| FR-PKG-03 | Package expiration makes entitlement ineffective immediately, enforced by **both** scheduled boundary processing **and** an authoritative per-authorization re-evaluation *(PD-099 effective-dates sub-decision APPROVED)*. **This governs the entitlement effect only; behaviour for an in-progress session is [OPEN — PD-056].** | **P0** |
 | FR-PKG-04 | Package contents are evaluated by the entitlement engine, never by a client. | **P0** |
 | FR-PKG-05 | A viewer can upgrade their package, effective immediately. | P1 |
 | FR-PKG-06 | A viewer can downgrade their package per the defined timing rule (PD-048). | P1 |
 | FR-PKG-07 | **An account may hold zero or more concurrent commercial grants. No component assumes exactly one.** *(PD-049 Q1 APPROVED — structural)* | **P0** |
-| FR-PKG-08 | **Where several grants coexist, entitlement resolution is deterministic and server-side.** **Concurrency is resolved as an account-level pool: the effective commercial allowance is the MAXIMUM applicable grant allowance, not the sum** *(PD-099 concurrency sub-decision APPROVED)*, and independent constraints — including rights-agreement concurrency limits — remain authoritative. **Quality is resolved per asset: the effective commercial ceiling is the MAXIMUM among grants that reach the requested asset, and only those grants participate** *(PD-099 quality sub-decision APPROVED — Q1 and Q2 are an inseparable pair)*, with independent constraints — content rights, the rights-agreement ceiling and the asset playback policy — remaining authoritative. The **remaining** resolution rules are **[OPEN — PD-099]**. | **P0** |
+| FR-PKG-08 | **Where several grants coexist, entitlement resolution is deterministic and server-side.** **Concurrency is resolved as an account-level pool: the effective commercial allowance is the MAXIMUM applicable grant allowance, not the sum** *(PD-099 concurrency sub-decision APPROVED)*, and independent constraints — including rights-agreement concurrency limits — remain authoritative. **Quality is resolved per asset: the effective commercial ceiling is the MAXIMUM among grants that reach the requested asset, and only those grants participate** *(PD-099 quality sub-decision APPROVED — Q1 and Q2 are an inseparable pair)*, with independent constraints — content rights, the rights-agreement ceiling and the asset playback policy — remaining authoritative. **Grants participate only while `effective_from ≤ now < effective_until` — a half-open interval evaluated against authoritative server time** *(PD-099 effective-dates sub-decision APPROVED)*, applied as grant-set construction before the authorization checks. The **remaining** resolution rules are **[OPEN — PD-099]**. | **P0** |
 
 **Note on FR-PKG-05 and FR-PKG-06.** These are written in the singular because they
 describe the **commercial shape**, which **[OPEN — PD-049 Q2]** has not decided. They do

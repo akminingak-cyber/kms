@@ -1168,12 +1168,16 @@ commercial grants (§13.4) — changes what checks **4** (package) and **5** (en
 evaluate **over**: a set of grants rather than a single grant. It does not change which
 checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
 *"Tier must never alter which checks run — only their outcome."* The rules by which several
-grants resolve into one effective entitlement are **[OPEN — PD-099]** — **except
-concurrency, quality and effective dates, all three decided**. **Effective dates come first**:
-grants use a **half-open** interval **`[start, end)`**, so a grant is in the evaluated set only
-while `effective_from ≤ now < effective_until` — **future and expired grants never
-participate** (§13.4). This is **grant-set construction, performed before these checks**, not a
-check of its own. For **check 8**, the commercial allowance is the
+grants resolve into one effective entitlement are **[OPEN — PD-099]** for **one** dimension
+only — conflicting allowances; **the other six are decided**. **Grant-set construction comes
+first**, and it now has **two** membership predicates. **Temporally**, grants use a
+**half-open** interval **`[start, end)`**, so a grant is in the evaluated set only while
+`effective_from ≤ now < effective_until` — **future and expired grants never participate**
+(§13.4). **Territorially**, only grants **eligible for the subscriber's current territory**
+are in the set; an ineligible grant contributes **no content, no quality, no concurrency and
+no device allowance**, while **remaining held** — it is not cancelled, and it participates
+again on return to a covered territory. Both are **grant-set construction, performed before
+these checks**, not checks of their own. For **check 8**, the commercial allowance is the
 **MAXIMUM** applicable grant allowance, not the sum, and the **most restrictive**
 independent constraint still governs (§6.7). For **quality** — evaluated per asset through
 **check 10** — the commercial ceiling is the **MAXIMUM among grants that reach the requested
@@ -1183,8 +1187,8 @@ expands a content right**. For **content reach** — **check 4** — the effecti
 entitlement is the **UNION** of the content included by the participating grants, so
 check 4 asks whether **some** participating grant includes the requested asset and **a
 second grant can never reduce the catalogue**; the independent constraints of checks 6, 9,
-10 and 11 remain authoritative on top. For the **two remaining dimensions** — territory
-eligibility and conflicting allowances — no resolution behaviour may be assumed. **Where several grants could each reach the same asset, the decision
+10 and 11 remain authoritative on top. For the **one remaining dimension** — conflicting
+allowances — no resolution behaviour may be assumed. **Where several grants could each reach the same asset, the decision
 evidence must record which grant the authorization rested on** (§13.5, §26.3).
 
 ### 12.2 Core product rules
@@ -1216,10 +1220,11 @@ evidence must record which grant the authorization rested on** (§13.5, §26.3).
 | **Account suspended** | Denied; direct the viewer to support | `ACCOUNT_SUSPENDED` |
 
 **Territory-caused `NOT_IN_PACKAGE` — the Case B no-workaround discipline**
-[CONFIRMED — PD-099 Territory UX constraint APPROVED; the territory *rule* remains OPEN].
+[CONFIRMED — PD-099 Territory APPROVED, both the UX constraint and the rule].
 Where the denial arises because a held commercial grant does not cover the subscriber's
-**current** territory, the reason code is still **`NOT_IN_PACKAGE`** — no new code, no new
-check — but the experience **MUST NOT** suggest returning to the home territory, changing
+**current** territory — and so does not participate, per §13.4 — the reason code is still
+**`NOT_IN_PACKAGE`** — no new code, no new check — but the experience **MUST NOT** suggest
+returning to the home territory, changing
 physical location, circumventing territory restrictions, or using a VPN or similar
 workaround, and **MUST NOT** imply that the subscription expired, the account was
 cancelled, or the grant was deleted. It **MAY** state that the content is not included in
@@ -1287,8 +1292,10 @@ effective entitlements
 playback authorization
 ```
 
-Multiple grants may coexist, subject to the entitlement-resolution rules that are
-**[OPEN — PD-099]** — **except concurrency and quality**, both **APPROVED**.
+Multiple grants may coexist, subject to the entitlement-resolution rules of PD-099. **Six of
+the seven dimensions are APPROVED** — concurrency, quality, effective dates, device
+allowance, content entitlement and territory eligibility. **One remains
+[OPEN — PD-099]: conflicting allowances.**
 
 - **Concurrency** — an **account-level pool** whose commercial value is the **MAXIMUM**
   applicable grant allowance, **not the sum** (§6.7).
@@ -1304,9 +1311,9 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
   playback policy, service availability, device capability when established, and
   encoding/stream availability. *Commercial 4K + rights maximum 1080p → **1080p**.*
   **Commercial entitlement MUST NEVER create or expand a content right.** **Which grants
-  count as active and applicable** remains governed by the still-open territory and
-  effective-date dimensions **[OPEN — PD-099]**. **No quality value is set**
-  **[OPEN — PD-013, PD-017]**.
+  count as active and applicable** is now fully settled: the **temporal** half by the
+  effective-dates rule below, the **territorial** half by the territory rule below. **No
+  quality value is set** **[OPEN — PD-013, PD-017]**.
 
 - **Effective dates** — grants use a **half-open** effective interval **`[start, end)`**:
   `effective_from` is **inclusive**, `effective_until` is **exclusive**. *Grants `[10:00,
@@ -1338,11 +1345,27 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
   service availability, distribution-mode rights or asset/channel policy, and **commercial
   entitlement never creates or expands a content right**. **Modes remain a rights matter**
   (§15.3, `FR-CUP-03`, `FR-RST-02`) — **no mode-scoped commercial grant is introduced**.
-  Which grants participate is set at stage 1 and, for territory, remains
-  **[OPEN — PD-099 Territory]**.
+  Which grants participate is set at stage 1, temporally by the effective-dates rule and
+  territorially by the territory rule below.
 
-The other **two** dimensions remain open — **territory eligibility** and **conflicting
-allowances**.
+- **Territory eligibility** — when a subscriber is physically in a **served** territory,
+  **only grants that are territorially eligible for the subscriber's CURRENT territory
+  participate** in entitlement resolution. An ineligible grant participates in **none** of
+  the four: content UNION, quality MAX, concurrency MAX, device MAX. Evaluation happens in
+  **grant-set construction**, alongside temporal filtering and **before** the eleven checks
+  — it is **not a check** and **no twelfth check is added**. **The grant is not cancelled,
+  the subscription is not terminated, and the grant remains held**; on return to a covered
+  territory it participates again, **subject to its effective dates**. *Grant A covers
+  Georgia + X, Grant B covers Georgia only: in Georgia both participate; in X only A does,
+  and B remains held but temporarily non-participating.* **The same predicate answers the
+  allowance question — there is no separate allowance rule.** **Service availability is
+  evaluated independently at check 11** regardless of what stage 1 produced, and **content
+  rights remain independently authoritative** at checks 6 and 9. **Current territory only**;
+  the home territory is never substituted (`FR-TRV-04`). **No roaming limit, travel
+  duration, percentage-of-time rule or country list is created** — the eligible set is the
+  grant's own commercial definition, held as data.
+
+The remaining **one** dimension is open — **conflicting allowances**.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

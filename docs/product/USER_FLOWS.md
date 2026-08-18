@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.7
-**Date:** 2026-08-16 (rev. 1.7 — PD-099 devices sub-decision approved: UF-20A updated)
+**Version:** 1.8
+**Date:** 2026-08-18 (rev. 1.8 — PD-099 territory sub-decision approved: UF-26 A3/F3 updated)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -1131,6 +1131,11 @@ follows the subscriber; it is never a universal content license.
   authorization-input change.
 - **A3 — Package differs by territory.** Package eligibility is territory-scoped (FR-TER-08);
   what is offered may differ from the home territory even where service is available.
+  **Held grants are also territory-scoped in participation** [PD-099 Territory APPROVED]:
+  only grants eligible for the **current** territory participate in entitlement resolution,
+  so a grant that does not cover this territory contributes no content, no quality, no
+  concurrency and no device allowance here. **It is not cancelled and remains held**, and it
+  participates again on return (A1), subject to its effective dates.
 
 ### Failure paths
 - **F1 — Service not available in the current territory.** Denied with
@@ -1142,7 +1147,7 @@ follows the subscriber; it is never a universal content license.
   exactly the viewer most likely to go looking for one.
 - **F3 — Package does not include the asset in this territory.** Denied with
   `NOT_IN_PACKAGE` — the code is unchanged. **Case B no-workaround discipline applies**
-  [PD-099 Territory UX constraint APPROVED]: never suggest returning home, changing
+  [PD-099 Territory APPROVED — rule and UX constraint]: never suggest returning home, changing
   location, circumvention or a VPN, and never imply the subscription expired, the account
   was cancelled, or the grant was deleted. A commercial action appears **only where a
   qualifying product exists in the current territory**; its shape is **[OPEN — PD-049 Q2,

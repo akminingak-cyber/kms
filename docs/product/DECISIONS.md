@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.13
-**Date:** 2026-08-16 (PD-099 Content Entitlement sub-decision APPROVED — union)
+**Version:** 1.14
+**Date:** 2026-08-18 (PD-099 Territory sub-decision APPROVED — current-territory grant participation)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -94,8 +94,8 @@ concurrency dimension of PD-099.**
 | **PD-099 · Effective Dates** | Entitlement resolution, **effective-dates dimension only** — **half-open `[start, end)`** (`effective_from` inclusive, `effective_until` exclusive) · **future grants do not participate before start** · **dual boundary enforcement** (scheduled processing **and** authoritative per-authorization re-evaluation). One inseparable block. Supplies the temporal membership predicate the approved Quality and Concurrency rules presuppose | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
-| **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
-| **PD-099** — remaining two dimensions | **Territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099 · Territory** | Entitlement resolution, **territory dimension — now fully decided, rule and UX**. **Rule:** in a served territory, **only grants territorially eligible for the CURRENT territory participate**; an ineligible grant contributes to **none** of content UNION, quality MAX, concurrency MAX or device MAX. **The grant is not cancelled, the subscription is not terminated, the grant remains held**, and it participates again on return, subject to its effective dates. **UX:** the Case B no-workaround discipline, approved earlier, governs how the denial is presented | **APPROVED — one dimension of seven** (rule 2026-08-18; UX constraint 2026-08-16) |
+| **PD-099** — remaining one dimension | Conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -107,6 +107,25 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.14 changes.** **PD-099 Territory sub-decision APPROVED — the rule, not only the
+UX constraint** (§2). When a subscriber is physically in a **served** territory, **only
+grants territorially eligible for the subscriber's CURRENT territory participate** in
+entitlement resolution. An ineligible grant participates in **none** of the four approved
+arithmetics — content UNION, quality MAX, concurrency MAX, device MAX — and **Q-T2 is
+resolved by that same predicate: no separate allowance rule is created**. **The grant is not
+cancelled, the subscription is not terminated, the grant remains held**, and it participates
+again on return to a covered territory, **subject to its effective dates**. Evaluation is
+**grant-set construction**, alongside temporal filtering and **before** the eleven checks —
+**no twelfth check**. **Current territory only**; the home territory is never substituted
+(`FR-TRV-04`, P0). **No roaming limit, travel duration, percentage-of-time rule or country
+list is created.** **Content rights (checks 6, 9) and service availability (check 11) remain
+independently authoritative**, `NOT_IN_PACKAGE` remains the commercial reason code, and the
+**Case B no-workaround discipline is unchanged** — its trigger now fires exactly as written.
+Dimensions approved: **1, 2, 3, 4, 5 and 6 of 7**; **one remains OPEN — conflicting
+allowances**. Decision count **unchanged at 99**; blocking **22**; legal **24**; fully
+approved **5**; **no new decision ID**. **PD-099 Conflicting Allowances, PD-056, PD-049 Q2,
+PD-013 and PD-057 are all unchanged.**
 
 **Version 1.13 changes.** **PD-099 Content Entitlement sub-decision APPROVED** (§2): the
 effective **commercial** content entitlement is the **UNION** of the content included by the
@@ -832,7 +851,7 @@ happens to execute first.
 | 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
 | 3 | ~~**Device limits**~~ | ✅ **APPROVED 2026-08-16 — D-1 MAX across applicable grants; D-2 existing devices grandfathered on a reduction.** See the sub-decision below. |
 | 4 | ~~**Content entitlements**~~ | ✅ **APPROVED 2026-08-16 — UNION of the content included by the participating grants.** A second grant can never reduce the catalogue. See the sub-decision below. |
-| 5 | **Territory eligibility** — **OPEN** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). **The dimension itself is undecided**, but one **APPROVED UX constraint** now binds whatever shape it takes — see the Case B no-workaround discipline below. |
+| 5 | ~~**Territory eligibility**~~ | ✅ **APPROVED 2026-08-18 — in a served territory, only grants territorially eligible for the CURRENT territory participate.** An ineligible grant contributes to none of the four arithmetics; the grant is not cancelled and participates again on return. See the sub-decision below, and the Case B UX discipline approved 2026-08-16. |
 | 6 | ~~**Effective dates**~~ | ✅ **APPROVED 2026-08-16 — half-open `[start, end)`, future-grant exclusion, and dual boundary enforcement. One inseparable block.** See the sub-decision below. |
 | 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
 
@@ -846,12 +865,119 @@ the dimensions that remain open. The rules are behaviour, not structure; the ERD
 permit them without presupposing them.
 
 **Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)**,
-**3 (device limits)**, **4 (content entitlement)** and **6 (effective dates)** are
-**APPROVED**; **two dimensions remain OPEN** — **5 (territory eligibility)** and
-**7 (conflicting allowances)**. Dimension 5 carries one **approved UX constraint** — the
-Case B no-workaround discipline — which binds the presentation layer without deciding the
-dimension. Arising from PD-049 Q1 · Required before **Phase 14**
+**3 (device limits)**, **4 (content entitlement)**, **5 (territory eligibility)** and
+**6 (effective dates)** are **APPROVED**; **one dimension remains OPEN** —
+**7 (conflicting allowances)**. Dimension 5 is settled in two parts: the **rule**
+(2026-08-18) and the **Case B no-workaround UX discipline** (2026-08-16), both below.
+Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Territory Eligibility sub-decision — **APPROVED** (current-territory participation)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Territory** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **5 — Territory eligibility** |
+| **Status** | **APPROVED — the rule.** The Case B UX discipline was approved separately on 2026-08-16 and is unchanged |
+| **Scope** | **Grant participation only.** PD-099 overall remains **OPEN** — dimension 7 |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-18 |
+| **Supersedes** | The OPEN status of dimension 5 only |
+
+**The rule as approved.**
+
+> When a subscriber is physically in a **served** territory, **only commercial grants that
+> are territorially eligible for the subscriber's CURRENT territory participate** in
+> effective entitlement resolution.
+>
+> A grant that is **not** territorially eligible in the current territory:
+> **does not participate in content entitlement UNION** · **does not participate in
+> quality MAX** · **does not participate in concurrency MAX** · **does not participate in
+> device MAX**.
+>
+> **The grant is NOT cancelled. The subscription is NOT terminated. The grant remains held
+> by the account.** When the subscriber returns to a territory the grant covers, **the grant
+> participates again, subject to its effective dates.**
+
+*Worked example, as approved:* Grant A = Georgia + Territory X · Grant B = Georgia only.
+**In Georgia** the participating set is **A + B**. **In Territory X** it is **A**.
+**Grant B remains held but is temporarily non-participating.**
+
+**Q-T2 is resolved by the same participation predicate.** An ineligible grant contributes
+**no** commercial concurrency allowance and **no** device allowance while outside its
+eligible territory. **No separate allowance rule is created**, and none is needed: the
+approved Concurrency and Devices rules read `MAX(**applicable** …)`, and this decision
+supplies the **territorial half of *applicable*** — the half the Devices sub-decision
+expressly recorded as governed by this dimension.
+
+**Where it is evaluated.** In **grant-set construction**, alongside temporal filtering, and
+**before** the eleven authorization checks. §12.1 already characterises grant-set
+construction as *"performed before these checks, not a check of its own."*
+
+> **No twelfth authorization check. The eleven are unmodified.**
+
+**The three-stage pipeline, now with both membership predicates:**
+
+1. **Construct the participating grant set** — **temporally** by `[start, end)`,
+   **territorially** by eligibility for the current territory.
+2. **Evaluate commercial content inclusion over that set** — check **4**, by UNION.
+3. **Independently evaluate rights, service and other authoritative constraints** —
+   checks **6**, **9**, **10**, **11**, conjunctive and never derived from stage 2.
+
+**What remains independently authoritative.** **Content rights** (checks 6, 9) and
+**service availability** (check 11) are evaluated independently of this rule and of each
+other. A grant being territorially eligible **MUST NOT** create a content right, and valid
+content rights **MUST NOT** rescue a commercial denial. `NOT_IN_PACKAGE`,
+`TERRITORY_RESTRICTED` and `SERVICE_NOT_AVAILABLE` remain three distinct causes —
+commercial, contractual, and operator respectively.
+
+**Relationship to the other approved dimensions — all four arithmetics are unchanged.**
+
+| Approved rule | Interaction |
+|---|---|
+| **PD-099 Content Entitlement** | **Unchanged.** The union rule is scoped to *"participating"* grants; an ineligible grant is not one. *"A second participating grant MUST NOT reduce the catalogue"* constrains the effect of **adding a participating grant at one moment** — it says nothing about the catalogue changing when an **input** changes, so a smaller catalogue in a territory the grant does not cover is not a breach |
+| **PD-099 Quality** | **Unchanged, and its predicate needs no reinterpretation.** Q2 admits *"only **active** grants that actually entitle the requested asset"*; an ineligible grant never enters the set, so it never reaches Q2's test |
+| **PD-099 Concurrency** | **Unchanged.** Supplies the territorial half of *applicable*. §6.7's *"most restrictive applicable independent constraint"* still governs on top |
+| **PD-099 Devices** | **Unchanged, and D-2 absorbs a territorial reduction with no amendment.** D-2's own worked example is already a reduction caused by a grant leaving the set. It is **inherently reversible**, because the over-limit condition is **emergent, not stored** — it simply ceases when the subscriber returns. D-1's independence list names *"territory **rights**"* — content-rights territory — which the Devices sub-decision expressly distinguishes from grant territory eligibility |
+| **PD-099 Effective Dates** | **Parallel, not competing.** Both are stage-1 membership predicates. A grant that expired while the subscriber was away does **not** return |
+
+**Compatibility with PD-095, on all eight tests.** Current territory remains authoritative ·
+the home territory is **never** substituted (`FR-TRV-04`, **P0**) · the subscription remains
+active (`FR-TRV-01`, **P0**; §13.5 collapse #1 forbids reading grant non-participation as a
+subscription change) · **no** automatic cancellation · **no** roaming restriction · **no**
+country list inferred from travel · the rule is a **property of the grant**, not a
+travel-triggered punishment · and the grant is regained on return, as UF-26 A1 already
+provides. **PD-095 is not reopened.** It settled the territory input for checks **6, 9 and
+11** while listing *"Package entitlement"* among the six travelling conditions without
+saying which territory it reads; **this decision fills that gap and contradicts nothing
+PD-095 decided.**
+
+**Basis.** PD-004's binding consequence that *"**Packages** … **MAY differ by territory** —
+so each must be modelled as territory-scoped, not global"* · §13.5's *"territory attaches to
+grant eligibility"* · §13.2's `[PROPOSED]` package eligibility · and the approved Case B
+discipline, whose trigger — *"a held commercial grant does not cover the subscriber's
+current territory"* — presupposes exactly this state.
+
+**Case B UX discipline unchanged.** The reason code remains **`NOT_IN_PACKAGE`**; no new
+code, no new check; the experience must not suggest returning home, changing location,
+circumvention or a VPN, and must not imply the subscription expired, the account was
+cancelled, or the grant was deleted; a commercial action appears **only where a qualifying
+product exists in the current territory**.
+
+**Not invented by this decision:** roaming duration · travel allowance · country lists ·
+percentage-of-time rules · re-authentication intervals · VPN or IP rules · travel-specific
+device restrictions · geolocation technology, method, accuracy or provider (still
+**[UNVERIFIED]**) · any package name, content set or eligibility set **[OPEN — PD-013]**.
+
+**Not modified:** **PD-099 Conflicting Allowances** · **PD-056** · **PD-049 Q2** ·
+**PD-013** · **PD-057** · PD-004 · PD-007 · PD-008 · PD-095 · PD-049 Q1 · and the five
+previously approved PD-099 dimensions. **PD-099 remains OPEN overall**, with dimension
+**7 (conflicting allowances)** outstanding.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-038 · `PRODUCT_SPEC.md` §12.1, §12.3, §13.4 ·
+`REQUIREMENTS.md` FR-PKG-08 · `USER_FLOWS.md` UF-26.
 
 ---
 

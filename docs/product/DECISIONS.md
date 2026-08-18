@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.12
-**Date:** 2026-08-16 (PD-099 Devices sub-decision APPROVED — MAX derivation + grandfathering)
+**Version:** 1.13
+**Date:** 2026-08-16 (PD-099 Content Entitlement sub-decision APPROVED — union)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -89,12 +89,13 @@ concurrency dimension of PD-099.**
 |---|---|---|
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+| **PD-099 · Content Entitlement** | Entitlement resolution, **content-reach dimension only** — the effective **commercial** entitlement is the **UNION** of the content included by the participating grants; **a second grant can never reduce the catalogue**. Commercial reach only — rights, territory, service availability and mode rights remain independently authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Devices** | Entitlement resolution, **device dimension only** — **D-1: effective device allowance = `MAX(applicable grant allowances)`, NOT the sum. D-2: a reduction grandfathers existing registrations** — no automatic de-registration; new registration denied while `registered_count >= effective_device_limit` | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Effective Dates** | Entitlement resolution, **effective-dates dimension only** — **half-open `[start, end)`** (`effective_from` inclusive, `effective_until` exclusive) · **future grants do not participate before start** · **dual boundary enforcement** (scheduled processing **and** authoritative per-authorization re-evaluation). One inseparable block. Supplies the temporal membership predicate the approved Quality and Concurrency rules presuppose | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
-| **PD-099** — remaining three dimensions | Content entitlement · **territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099** — remaining two dimensions | **Territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -106,6 +107,29 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.13 changes.** **PD-099 Content Entitlement sub-decision APPROVED** (§2): the
+effective **commercial** content entitlement is the **UNION** of the content included by the
+participating grants, and **a second participating grant can never reduce the catalogue**.
+This is **commercial reach only** — it **may not override or weaken** content rights,
+territory rights, service availability, distribution-mode rights, asset/channel policy, or
+any of the eleven checks, and **commercial entitlement may never create or expand a content
+right**. The three-stage pipeline is unchanged — set construction, then content inclusion
+over that set (check 4), then the independent rights and service checks — and **no twelfth
+check is added**. Union rather than intersection or priority because **grants are positive**
+(§13.1 *"may access"*, check 4 *"includes"*, **no grant-level denial mechanism exists**),
+because intersection would defeat PD-049 Q1 and visibly shrink the entitlement-filtered
+surfaces required by `FR-HOME-01`/`FR-VOD-02`/`FR-SCH-01` (P0), and because priority would
+need a total order the specification does not supply. It **complements** the approved
+Quality rule by supplying the *reach* predicate that rule already presupposed, **without
+changing it**. **Modes stay a rights matter** (`FR-CUP-03`, `FR-RST-02`, `FR-RGT-03`, L-002)
+and **no mode-scoped commercial grant is introduced**. The audit consequence is approved
+with it: evidence **must be capable of identifying the contributing grant set** rather than a
+single winning grant — **D-030 amended**, **K-010** updated. Dimensions approved: **1, 2, 3,
+4 and 6 of 7**; **two remain OPEN — territory and conflicting allowances**. Decision count
+**unchanged at 99**; blocking **22**; legal **24**; fully approved **5**; **no new decision
+ID**. **PD-099 Territory, PD-099 Conflicting Allowances, PD-049 Q2, PD-013, PD-057, PD-056
+and PD-007 are all unchanged.**
 
 **Version 1.12 changes.** **PD-099 Devices sub-decision APPROVED** (§2). **D-1** — the
 effective device allowance is **`MAX(applicable grant device allowances)`**; **allowances are
@@ -807,7 +831,7 @@ happens to execute first.
 | 1 | ~~**Quality limits**~~ | ✅ **APPROVED 2026-08-16 — Q1 MAXIMUM across participating grants, Q2 asset-reaching grants only. An inseparable pair.** See the sub-decision below. |
 | 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
 | 3 | ~~**Device limits**~~ | ✅ **APPROVED 2026-08-16 — D-1 MAX across applicable grants; D-2 existing devices grandfathered on a reduction.** See the sub-decision below. |
-| 4 | **Content entitlements** | Which assets the combined grant set reaches. |
+| 4 | ~~**Content entitlements**~~ | ✅ **APPROVED 2026-08-16 — UNION of the content included by the participating grants.** A second grant can never reduce the catalogue. See the sub-decision below. |
 | 5 | **Territory eligibility** — **OPEN** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). **The dimension itself is undecided**, but one **APPROVED UX constraint** now binds whatever shape it takes — see the Case B no-workaround discipline below. |
 | 6 | ~~**Effective dates**~~ | ✅ **APPROVED 2026-08-16 — half-open `[start, end)`, future-grant exclusion, and dual boundary enforcement. One inseparable block.** See the sub-decision below. |
 | 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
@@ -822,12 +846,98 @@ the dimensions that remain open. The rules are behaviour, not structure; the ERD
 permit them without presupposing them.
 
 **Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)**,
-**3 (device limits)** and **6 (effective dates)** are **APPROVED**; the other **three
-dimensions remain OPEN**, though
-dimension 5 (territory eligibility) carries one **approved UX constraint** — the Case B
-no-workaround discipline — which binds the presentation layer without deciding the
+**3 (device limits)**, **4 (content entitlement)** and **6 (effective dates)** are
+**APPROVED**; **two dimensions remain OPEN** — **5 (territory eligibility)** and
+**7 (conflicting allowances)**. Dimension 5 carries one **approved UX constraint** — the
+Case B no-workaround discipline — which binds the presentation layer without deciding the
 dimension. Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Content Entitlement sub-decision — **APPROVED** (union)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Content Entitlement** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **4 — Content entitlements** |
+| **Status** | **APPROVED** |
+| **Scope** | **Commercial content reach only.** PD-099 overall remains **OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of dimension 4 only |
+
+**The rule as approved.**
+
+> When an account holds several **participating** commercial grants, the effective
+> **commercial** content entitlement is the **UNION** of the content included by those
+> grants.
+>
+> **A second participating grant MUST NOT reduce the account's commercial content
+> catalogue.**
+
+*Worked example, as approved:* Grant A → Movies A, B, C · Grant B → Sports X, Y · Grant C →
+Kids K. Effective commercial content reach: **Movies A, B, C + Sports X, Y + Kids K.**
+
+**Scope limit — commercial reach only.** This approval **MUST NOT** override or weaken
+**content rights** · **territory rights** · **service availability** · **distribution-mode
+rights** · **asset/channel policy** · **any of the eleven authorization checks**.
+
+> **Commercial entitlement MUST NOT create or expand a content right.**
+
+**The authorization pipeline is unchanged** — three stages, already established:
+
+1. **Construct the participating grant set** — temporal membership by the approved
+   half-open interval; territorial membership **[OPEN — PD-099 Territory]**. §12.1 already
+   records this as *"grant-set construction, performed before these checks, not a check of
+   its own."*
+2. **Evaluate commercial content inclusion over that set** — check **4** asks whether
+   **some** participating grant includes the requested asset. This is what the union rule
+   defines, and §12.1's addendum already had checks 4 and 5 evaluating *"over a set of
+   grants"*.
+3. **Independently evaluate rights, service and other authoritative constraints** —
+   checks **6**, **9**, **10**, **11**, conjunctive and never derived from stage 2.
+
+**No twelfth authorization check.** The eleven are unmodified.
+
+**Why union rather than the alternatives.** Grants are **positive** — §13.1 defines a
+package as what an account *"may access"*, check 4 tests **inclusion**, and **no
+grant-level denial mechanism exists anywhere in this specification**. Intersection would
+make a second grant **shrink** the catalogue, defeating PD-049 Q1 and visibly altering the
+entitlement-filtered surfaces required by `FR-HOME-01`, `FR-VOD-02` and `FR-SCH-01` (all
+P0). Priority would require a **total order that the specification does not supply**.
+
+**Relationship to the other approved dimensions.**
+
+| Approved rule | Interaction |
+|---|---|
+| **PD-049 Q1** | Union fulfils its purpose — `0..N` grants that add rather than displace |
+| **PD-099 Quality** | **Complementary, and unchanged.** Quality resolves MAX among *"grants that **reach** the requested asset"* — union is what defines *reach*. This supplies a predicate quality already presupposed; it does not alter quality's rule |
+| **PD-099 Concurrency** · **PD-099 Devices** | **Orthogonal** — both are account-level allowances; reach is asset-level |
+| **PD-099 Effective Dates** | **Sequential** — set construction (stage 1) precedes reach (stage 2). Future and expired grants never participate, so they contribute no reach |
+| **PD-099 Territory** | **Untouched and OPEN.** Territory filters **set membership at stage 1**, not the reach arithmetic at stage 2 |
+
+**Modes remain a rights matter.** `FR-CUP-03` and `FR-RST-02` require **catch-up** and
+**restart** distribution rights specifically; `FR-RGT-03` (P0), §15.3 and **L-002** keep the
+six modes independently granted and enforced. **This approval introduces no mode-scoped
+commercial grant** and changes nothing on the rights side.
+
+**Not invented by this decision:** grant priority · grant denial semantics · territory
+behaviour · mode-scoped commercial grants · add-ons · PPV · package names · prices · new
+content types.
+
+**Not modified:** **PD-099 Territory** · **PD-099 Conflicting Allowances** · **PD-049 Q2** ·
+**PD-013** · **PD-057** · **PD-056** · **PD-007**. **PD-099 remains OPEN overall**, with
+dimensions **5 (territory)** and **7 (conflicting allowances)** outstanding.
+
+**Audit consequence — approved with this decision.** Where several grants contribute to the
+effective entitlement, authorization evidence **MUST be capable of identifying the
+CONTRIBUTING GRANT SET**, rather than requiring a single *"winning grant"*. **D-030 is
+amended accordingly** (`PROJECT_STATE.md` §7), and **K-010** is updated to record that the
+*requirement* is now settled while its *representation* remains an open gap.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-037 and amended D-030, §6 K-010 ·
+`PRODUCT_SPEC.md` §12.1, §13.4 · `REQUIREMENTS.md` FR-PKG-08.
 
 ---
 

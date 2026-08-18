@@ -1179,8 +1179,12 @@ independent constraint still governs (§6.7). For **quality** — evaluated per 
 **check 10** — the commercial ceiling is the **MAXIMUM among grants that reach the requested
 asset**, and **only those grants participate** (§13.4); the independent constraints of
 checks 6 and 10 remain authoritative on top, so **commercial entitlement never creates or
-expands a content right**. For the **five remaining dimensions** no resolution behaviour may
-be assumed, and check 5 has no defined outcome for a multi-grant conflict. **Where several grants could each reach the same asset, the decision
+expands a content right**. For **content reach** — **check 4** — the effective **commercial**
+entitlement is the **UNION** of the content included by the participating grants, so
+check 4 asks whether **some** participating grant includes the requested asset and **a
+second grant can never reduce the catalogue**; the independent constraints of checks 6, 9,
+10 and 11 remain authoritative on top. For the **two remaining dimensions** — territory
+eligibility and conflicting allowances — no resolution behaviour may be assumed. **Where several grants could each reach the same asset, the decision
 evidence must record which grant the authorization rested on** (§13.5, §26.3).
 
 ### 12.2 Core product rules
@@ -1325,7 +1329,20 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
   device is a **persistent** account resource, which is why the reduction case needed its
   own rule. **No device value is set [OPEN — PD-038].**
 
-The other **three** dimensions remain open.
+- **Content entitlement** — the effective **commercial** reach is the **UNION** of the
+  content included by the participating grants. *Grants of Movies A/B/C, Sports X/Y and
+  Kids K reach all six.* **A second participating grant can never reduce the catalogue.**
+  Union is the arithmetic the model already implies: grants are **positive** (§13.1
+  *"may access"*; check 4 *"includes"*), and **no grant-level denial mechanism exists**.
+  **This is commercial reach only.** It never overrides content rights, territory rights,
+  service availability, distribution-mode rights or asset/channel policy, and **commercial
+  entitlement never creates or expands a content right**. **Modes remain a rights matter**
+  (§15.3, `FR-CUP-03`, `FR-RST-02`) — **no mode-scoped commercial grant is introduced**.
+  Which grants participate is set at stage 1 and, for territory, remains
+  **[OPEN — PD-099 Territory]**.
+
+The other **two** dimensions remain open — **territory eligibility** and **conflicting
+allowances**.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

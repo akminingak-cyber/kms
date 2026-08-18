@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.11
-**Date:** 2026-08-16 (PD-099 Effective Dates sub-decision APPROVED — half-open interval)
+**Version:** 1.12
+**Date:** 2026-08-16 (PD-099 Devices sub-decision APPROVED — MAX derivation + grandfathering)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -89,11 +89,12 @@ concurrency dimension of PD-099.**
 |---|---|---|
 | **PD-049 Q1** | Multiple commercial grants — **YES. One account may hold more than one commercial grant simultaneously.** Structural only: no add-on sale, tier name, price, package content, PPV, or promotion is approved | **APPROVED — structural half** (2026-08-16) |
 | **PD-049 Q2** | Whether add-ons are actually sold at launch | **OPEN** — Phase 12 |
+| **PD-099 · Devices** | Entitlement resolution, **device dimension only** — **D-1: effective device allowance = `MAX(applicable grant allowances)`, NOT the sum. D-2: a reduction grandfathers existing registrations** — no automatic de-registration; new registration denied while `registered_count >= effective_device_limit` | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Effective Dates** | Entitlement resolution, **effective-dates dimension only** — **half-open `[start, end)`** (`effective_from` inclusive, `effective_until` exclusive) · **future grants do not participate before start** · **dual boundary enforcement** (scheduled processing **and** authoritative per-authorization re-evaluation). One inseparable block. Supplies the temporal membership predicate the approved Quality and Concurrency rules presuppose | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Territory** | Entitlement resolution, **dimension 5 — a UX constraint only**: the **Case B no-workaround discipline**. Governs how a territory-caused `NOT_IN_PACKAGE` denial is presented, **not when it occurs** | **APPROVED — constraint only; the dimension remains OPEN** (2026-08-16) |
-| **PD-099** — remaining four dimensions | Devices · content entitlement · **territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099** — remaining three dimensions | Content entitlement · **territory eligibility** · conflicting allowances | **OPEN** — Phase 14 |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
@@ -105,6 +106,26 @@ not Phase 4, and Phase 4 must not encode any particular resolution rule.
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.12 changes.** **PD-099 Devices sub-decision APPROVED** (§2). **D-1** — the
+effective device allowance is **`MAX(applicable grant device allowances)`**; **allowances are
+NOT summed** (2, 5 and 3 give **5**, not 10 and not 2). The allowance remains a **grant-level
+commercial input enforced at account level**, server-side, independent of device class,
+content rights, concurrency, territory rights and device capability. **D-2** — when the
+allowance falls below the number already registered, **existing devices are grandfathered**:
+no automatic de-registration, no automatic selection policy, no playback-blocking rule, and
+**new registration is denied while `registered_count >= effective_device_limit`**.
+**D-2 required no change to the authorization model**: `FR-DEV-04` never located enforcement
+in time, §6.4 and UF-20A place it at **registration**, and **check 7** is a per-device status
+test that never consults the count — so an over-limit device still passes it, which is
+exactly the grandfathering D-2 requires. **The eleven checks are unchanged; no twelfth.**
+**No device value is inferred — PD-038 remains OPEN.** Dimensions approved: **1, 2, 3 and 6
+of 7**; **three remain OPEN**. Decision count **unchanged at 99**; blocking **22**; legal
+**24**; fully approved **5**; **no new decision ID**. **Unresolved dependency recorded, not
+resolved:** whether *"applicable"* also carries **grant territorial** applicability remains
+governed by **PD-099 Territory** (OPEN) — distinct from the *content-rights* territory named
+in D-1's independence list. **PD-038, PD-039, PD-042, PD-099 Territory / Content Entitlement
+/ Conflicting Allowances, PD-049 Q2, PD-013, PD-017 and PD-056 are all unchanged.**
 
 **Version 1.11 changes.** **PD-099 Effective Dates sub-decision APPROVED** (§2) as **one
 inseparable block of three rules**: **(1)** commercial grants use a **half-open** effective
@@ -785,7 +806,7 @@ happens to execute first.
 |---|---|---|
 | 1 | ~~**Quality limits**~~ | ✅ **APPROVED 2026-08-16 — Q1 MAXIMUM across participating grants, Q2 asset-reaching grants only. An inseparable pair.** See the sub-decision below. |
 | 2 | ~~**Concurrency limits**~~ | ✅ **APPROVED 2026-08-16 — account-level pool; effective commercial concurrency is the MAXIMUM applicable grant allowance, not the sum.** See the sub-decision below. |
-| 3 | **Device limits** | Package carries a device allowance (§13.2). |
+| 3 | ~~**Device limits**~~ | ✅ **APPROVED 2026-08-16 — D-1 MAX across applicable grants; D-2 existing devices grandfathered on a reduction.** See the sub-decision below. |
 | 4 | **Content entitlements** | Which assets the combined grant set reaches. |
 | 5 | **Territory eligibility** — **OPEN** | Grants may carry different eligibility (§13.2, `[PROPOSED]`), against the **current** territory (PD-095). **The dimension itself is undecided**, but one **APPROVED UX constraint** now binds whatever shape it takes — see the Case B no-workaround discipline below. |
 | 6 | ~~**Effective dates**~~ | ✅ **APPROVED 2026-08-16 — half-open `[start, end)`, future-grant exclusion, and dual boundary enforcement. One inseparable block.** See the sub-decision below. |
@@ -800,12 +821,103 @@ declines to choose these rules.
 the dimensions that remain open. The rules are behaviour, not structure; the ERD must
 permit them without presupposing them.
 
-**Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)** and
-**6 (effective dates)** are **APPROVED**; the other **four dimensions remain OPEN**, though
+**Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)**,
+**3 (device limits)** and **6 (effective dates)** are **APPROVED**; the other **three
+dimensions remain OPEN**, though
 dimension 5 (territory eligibility) carries one **approved UX constraint** — the Case B
 no-workaround discipline — which binds the presentation layer without deciding the
 dimension. Arising from PD-049 Q1 · Required before **Phase 14**
 (entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+
+---
+
+#### PD-099 · Devices sub-decision — **APPROVED** (D-1 + D-2)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Devices** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **3 — Device limits** |
+| **Status** | **APPROVED** |
+| **Scope** | **This dimension only.** PD-099 overall remains **OPEN** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-16 |
+| **Supersedes** | The OPEN status of dimension 3 only |
+
+**D-1 — derivation is MAX.**
+
+> When an account holds several **active and applicable** commercial grants, the effective
+> device allowance is **`MAX(all applicable grant device allowances)`**. **Grant allowances
+> are NOT summed.**
+
+*Worked example, as approved:* grants of **2**, **5** and **3** devices give an effective
+account device limit of **5** — **not 10 and not 2**.
+
+The device allowance remains **a grant-level commercial input**, **enforced at account
+level**, **evaluated server-side**, and **independent of device class, content rights,
+concurrency, territory rights, and device capability**.
+
+**No numerical device limit is inferred. PD-038 remains OPEN and unchanged.**
+
+**D-2 — a reduction grandfathers existing devices.**
+
+> If the effective device allowance falls **below** the number of devices already
+> registered: **existing registered devices remain registered**, the account enters an
+> **over-limit registered-device state**, and **new device registration is denied while
+> `registered_count >= effective_device_limit`**. The user may **voluntarily** remove
+> devices.
+
+**Explicitly not introduced:** automatic de-registration · any automatic
+device-selection or removal policy · any rule blocking playback solely because
+`registered_count` exceeds a reduced allowance · a new authorization check · any change to
+the eleven checks.
+
+*Worked example, as approved:* previous limit 5, registered 5; a grant expires and the new
+effective limit is 2. **Five devices remain registered**, new registration is denied, **no
+automatic de-registration occurs**, and **playback behaviour must not be inferred from this
+decision alone.**
+
+**Why D-2 requires no change to the authorization model.** `FR-DEV-04` (**P0**) never
+locates enforcement in time; §6.4's `[PROPOSED]` limit behaviour and `USER_FLOWS.md` UF-20A
+both place it **at registration**, and **check 7** tests *"registered, not removed, not
+revoked"* — a **per-device status** test that **never consults the count**. Enforcement has
+therefore always been **prospective, at registration**, and D-2 matches that point exactly.
+An over-limit device continues to pass check 7, which is precisely the grandfathering D-2
+requires. **The eleven checks are unchanged and no twelfth is added.**
+
+**Relationship to the other approved dimensions.**
+
+| Approved rule | Interaction |
+|---|---|
+| **PD-099 Effective Dates** | Supplies the temporal half of *"applicable"* — a future or expired grant contributes no device allowance |
+| **PD-099 Concurrency** | Same **MAX** direction, but a **different kind of resource**: a concurrent stream is a **runtime** slot released on stop or heartbeat lapse, while a registered device is a **persistent** account resource. That difference is exactly why D-2 was needed and concurrency needed no equivalent |
+| **PD-099 Quality** | Untouched. Quality is asset-scoped; the device allowance is account-scoped |
+| **PD-095** | **Consistent.** PD-095 holds that a subscription is *"not suspended, cancelled, or invalidated"* by travel; D-2 likewise never strips registered devices when an allowance falls |
+
+**Unresolved dependency — recorded, not resolved.** D-1 reads *"active and **applicable**"*.
+The **temporal** half of *applicable* is settled by PD-099 Effective Dates. **Whether
+*applicable* also carries grant territorial applicability remains governed by PD-099
+Territory, which is OPEN.** D-1's own independence list names *"territory **rights**"* —
+that is **content-rights territory** (checks 6 and 9), a different concept from **grant
+territory eligibility**. **This decision resolves neither, and no answer may be inferred.**
+
+**Consequence to be aware of, not a defect.** Because registration is denied while
+`registered_count >= effective_device_limit`, an account holding five devices under a new
+limit of two must remove **four** before registering another. This follows mechanically from
+D-2 as approved and is recorded so it is a known consequence rather than a later discovery.
+
+**No new decision ID was required.** The over-limit condition is **emergent**
+(`registered_count > effective_device_limit`), not a stored state, and §6.4's existing
+`[PROPOSED]` limit behaviour — *"registration is refused with a distinct reason code, and
+the user is offered the device-management screen to remove one"* — already covers the
+surface D-2 needs.
+
+**Not approved by this decision:** **PD-038** (device-limit value, `[BLOCKING — Phase 9]`) ·
+**PD-039** (cooling-off) · **PD-042** (suspicious-device response) · **PD-099 Territory** ·
+**PD-099 Content Entitlement** · **PD-099 Conflicting Allowances** · **PD-049 Q2** ·
+**PD-013** · **PD-017** · **PD-056** — all unchanged. **PD-099 remains OPEN overall.**
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-036 · `PRODUCT_SPEC.md` §6.4, §13.4 ·
+`REQUIREMENTS.md` FR-DEV-04, FR-PKG-08 · `USER_FLOWS.md` UF-20A.
 
 ---
 

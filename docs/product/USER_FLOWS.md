@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval
-**Version:** 1.6
-**Date:** 2026-08-16 (rev. 1.6 — PD-099 Territory Case B UX discipline approved)
+**Version:** 1.7
+**Date:** 2026-08-16 (rev. 1.7 — PD-099 devices sub-decision approved: UF-20A updated)
 **Source specification:** `PRODUCT_SPEC.md` · **Requirements:** `REQUIREMENTS.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -839,6 +839,17 @@ in browse, in search, in recommendations, in deep links, in caches, or at the ed
 6. The removed device's sessions are invalidated and its playback stops.
 7. The slot frees — subject to a cooling-off period if PD-039 is approved.
 8. The new device registers; the flow resumes.
+
+> **Limit reduced below the registered count** [PD-099 devices sub-decision APPROVED].
+> Where the effective allowance falls below the number of devices already registered — a
+> grant expiring, for instance — **existing devices are grandfathered**: they remain
+> registered and **are never de-registered automatically**. Only **new** registration is
+> denied, while `registered_count >= effective_device_limit`, with the same
+> `DEVICE_LIMIT_REACHED` code and the same device-management surface as above. **Playback
+> is not blocked solely because the count exceeds the reduced allowance**, and no
+> authorization check is added or changed. **Note the practical consequence:** an account
+> holding five devices under a new limit of two must remove **four** before it can register
+> another.
 
 ### B. Concurrent stream limit
 1. Viewer requests playback while at the concurrency limit (PD-040 — the **commercial

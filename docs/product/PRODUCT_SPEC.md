@@ -809,6 +809,23 @@ Phase 19; TV platforms are the binding performance constraint (`CLAUDE.md` §19)
 - **Maximum registered devices per account: [OPEN — PD-038].** Deliberately not chosen —
   the brief explicitly instructs that device limits must not be invented.
 - Limits may vary by package (PD-038).
+- **Derivation across grants** [CONFIRMED — PD-099 devices sub-decision APPROVED]. Where
+  several **active and applicable** commercial grants apply (§13.4), the effective device
+  allowance is the **MAXIMUM applicable grant allowance — allowances are NOT summed.**
+  *Example: grants of 2, 5 and 3 devices give **5**, not 10 and not 2.* The allowance is a
+  **grant-level commercial input enforced at account level**, evaluated server-side, and
+  **independent of device class, content rights, concurrency, territory rights, and device
+  capability**. **No device value is set — that remains [OPEN — PD-038].**
+- **Reduction below the registered count — existing devices are grandfathered**
+  [CONFIRMED — PD-099 devices sub-decision APPROVED]. If the effective allowance falls
+  below the number of devices already registered, **existing registrations remain**, the
+  account enters an **over-limit registered-device state**, and **new registration is denied
+  while `registered_count >= effective_device_limit`**. The user may **voluntarily** remove
+  devices. **There is no automatic de-registration, no automatic device-selection policy,
+  and no rule blocking playback solely because the count exceeds a reduced allowance.**
+  Enforcement is **prospective, at registration** — which is where it has always sat: check
+  7 tests *"registered, not removed, not revoked"* and never consults the count, so an
+  over-limit device continues to pass it. **The eleven checks are unchanged.**
 - Behaviour at the limit **[PROPOSED]**: registration is refused with a distinct reason
   code, and the user is offered the device-management screen to remove one.
 - **[OPEN — PD-039]** Cooling-off period on device removal (a common anti-sharing control:
@@ -1301,7 +1318,14 @@ Multiple grants may coexist, subject to the entitlement-resolution rules that ar
   must not be inferred from "immediately" [OPEN — PD-056].** Whether future grants are
   sellable, shown, or billed before activation is **[OPEN — PD-013, PD-049 Q2, PD-048]**.
 
-The other **four** dimensions remain open.
+- **Device allowance** — a **grant-level** input **enforced at account level**. The effective
+  allowance is the **MAXIMUM** applicable grant allowance, **not the sum** (§6.4). A
+  reduction below the registered count **grandfathers existing devices** and denies only
+  **new** registrations. Unlike concurrency — a **runtime** slot that churns — a registered
+  device is a **persistent** account resource, which is why the reduction case needed its
+  own rule. **No device value is set [OPEN — PD-038].**
+
+The other **three** dimensions remain open.
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or

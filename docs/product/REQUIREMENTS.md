@@ -2,8 +2,8 @@
 
 **Phase:** 1 — Product specification
 **Status:** DRAFT — awaiting product approval · **PD-004, PD-008, PD-092, PD-095 APPROVED** · **PD-049 Q1 APPROVED (structural)**
-**Version:** 1.8
-**Date:** 2026-08-16 (rev. 1.8 — PD-099 effective-dates sub-decision approved: FR-PKG-03/08 updated)
+**Version:** 1.9
+**Date:** 2026-08-16 (rev. 1.9 — PD-099 devices sub-decision approved: FR-DEV-04/FR-PKG-08 updated)
 **Source specification:** `PRODUCT_SPEC.md`
 **Governing document:** `CLAUDE.md` (binding)
 
@@ -265,7 +265,7 @@ AND the title is excluded from that profile's browse, search, and recommendation
 | FR-DEV-01 | A device is registered to an account on first authenticated use, recording class, identifier, name, platform, and version. | **P0** |
 | FR-DEV-02 | Device registration is idempotent for the same physical device where the platform permits stable identification. | **P0** |
 | FR-DEV-03 | Device class is recorded and used as a rights-relevant attribute in authorization. | **P0** |
-| FR-DEV-04 | A maximum registered device count per account is enforced server-side. **[value OPEN — PD-038]** | **P0** |
+| FR-DEV-04 | A maximum registered device count per account is enforced server-side, **prospectively at registration**. Where several applicable grants carry device allowances the effective limit is the **MAXIMUM**, not the sum; a reduction below the registered count **grandfathers existing devices** and denies only new registration while `registered_count >= effective_device_limit` *(PD-099 devices sub-decision APPROVED)*. **[value OPEN — PD-038]** | **P0** |
 | FR-DEV-05 | A user can view and remove registered devices. | **P0** |
 | FR-DEV-06 | Removing a device invalidates its sessions and stops its playback within the revocation interval. | **P0** |
 | FR-DEV-07 | A client-supplied device identifier is never accepted as proof of identity. | **P0** |
@@ -602,7 +602,7 @@ AND a new session can be authorized in its place.
 | FR-PKG-05 | A viewer can upgrade their package, effective immediately. | P1 |
 | FR-PKG-06 | A viewer can downgrade their package per the defined timing rule (PD-048). | P1 |
 | FR-PKG-07 | **An account may hold zero or more concurrent commercial grants. No component assumes exactly one.** *(PD-049 Q1 APPROVED — structural)* | **P0** |
-| FR-PKG-08 | **Where several grants coexist, entitlement resolution is deterministic and server-side.** **Concurrency is resolved as an account-level pool: the effective commercial allowance is the MAXIMUM applicable grant allowance, not the sum** *(PD-099 concurrency sub-decision APPROVED)*, and independent constraints — including rights-agreement concurrency limits — remain authoritative. **Quality is resolved per asset: the effective commercial ceiling is the MAXIMUM among grants that reach the requested asset, and only those grants participate** *(PD-099 quality sub-decision APPROVED — Q1 and Q2 are an inseparable pair)*, with independent constraints — content rights, the rights-agreement ceiling and the asset playback policy — remaining authoritative. **Grants participate only while `effective_from ≤ now < effective_until` — a half-open interval evaluated against authoritative server time** *(PD-099 effective-dates sub-decision APPROVED)*, applied as grant-set construction before the authorization checks. The **remaining** resolution rules are **[OPEN — PD-099]**. | **P0** |
+| FR-PKG-08 | **Where several grants coexist, entitlement resolution is deterministic and server-side.** **Concurrency is resolved as an account-level pool: the effective commercial allowance is the MAXIMUM applicable grant allowance, not the sum** *(PD-099 concurrency sub-decision APPROVED)*, and independent constraints — including rights-agreement concurrency limits — remain authoritative. **Quality is resolved per asset: the effective commercial ceiling is the MAXIMUM among grants that reach the requested asset, and only those grants participate** *(PD-099 quality sub-decision APPROVED — Q1 and Q2 are an inseparable pair)*, with independent constraints — content rights, the rights-agreement ceiling and the asset playback policy — remaining authoritative. **Grants participate only while `effective_from ≤ now < effective_until` — a half-open interval evaluated against authoritative server time** *(PD-099 effective-dates sub-decision APPROVED)*, applied as grant-set construction before the authorization checks. **Device allowance is resolved as the MAXIMUM applicable grant allowance, not the sum, enforced at account level** *(PD-099 devices sub-decision APPROVED)*. The **remaining** resolution rules are **[OPEN — PD-099]**. | **P0** |
 
 **Note on FR-PKG-05 and FR-PKG-06.** These are written in the singular because they
 describe the **commercial shape**, which **[OPEN — PD-049 Q2]** has not decided. They do

@@ -1168,8 +1168,8 @@ commercial grants (§13.4) — changes what checks **4** (package) and **5** (en
 evaluate **over**: a set of grants rather than a single grant. It does not change which
 checks run, and it does not weaken any of them. This follows §3.1.5's existing rule that
 *"Tier must never alter which checks run — only their outcome."* The rules by which several
-grants resolve into one effective entitlement are **[OPEN — PD-099]** for **one** dimension
-only — conflicting allowances; **the other six are decided**. **Grant-set construction comes
+grants resolve into one effective entitlement are **fully decided — PD-099 is APPROVED and
+CLOSED, all seven dimensions.** **Grant-set construction comes
 first**, and it now has **two** membership predicates. **Temporally**, grants use a
 **half-open** interval **`[start, end)`**, so a grant is in the evaluated set only while
 `effective_from ≤ now < effective_until` — **future and expired grants never participate**
@@ -1187,8 +1187,10 @@ expands a content right**. For **content reach** — **check 4** — the effecti
 entitlement is the **UNION** of the content included by the participating grants, so
 check 4 asks whether **some** participating grant includes the requested asset and **a
 second grant can never reduce the catalogue**; the independent constraints of checks 6, 9,
-10 and 11 remain authoritative on top. For the **one remaining dimension** — conflicting
-allowances — no resolution behaviour may be assumed. **Where several grants could each reach the same asset, the decision
+10 and 11 remain authoritative on top. **Conflicting allowances need no further rule:** each
+of the three confirmed grant-carried allowances already resolves by **MAX**, and §6.7's
+**most restrictive** rule governs the comparison **between** the commercial value and every
+independent constraint. **No universal MIN, SUM, priority or winner rule exists.** **Where several grants could each reach the same asset, the decision
 evidence must record which grant the authorization rested on** (§13.5, §26.3).
 
 ### 12.2 Core product rules
@@ -1292,10 +1294,9 @@ effective entitlements
 playback authorization
 ```
 
-Multiple grants may coexist, subject to the entitlement-resolution rules of PD-099. **Six of
-the seven dimensions are APPROVED** — concurrency, quality, effective dates, device
-allowance, content entitlement and territory eligibility. **One remains
-[OPEN — PD-099]: conflicting allowances.**
+Multiple grants may coexist, subject to the entitlement-resolution rules of PD-099, which is
+**APPROVED and CLOSED — all seven dimensions**: concurrency, quality, effective dates, device
+allowance, content entitlement, territory eligibility, and conflicting allowances.
 
 - **Concurrency** — an **account-level pool** whose commercial value is the **MAXIMUM**
   applicable grant allowance, **not the sum** (§6.7).
@@ -1365,7 +1366,18 @@ allowance, content entitlement and territory eligibility. **One remains
   duration, percentage-of-time rule or country list is created** — the eligible set is the
   grant's own commercial definition, held as data.
 
-The remaining **one** dimension is open — **conflicting allowances**.
+- **Conflicting allowances** — **resolved by the rules above; no further rule exists.** The
+  three grant-carried allowance types this specification confirms — **quality ceiling,
+  concurrency, device allowance** (§13.2, *"[CONFIRMED, values OPEN]"*) — each resolve by
+  **MAX**; content resolves by **UNION**, which is a set rule rather than an allowance rule;
+  and territory and effective dates decide **which grants participate** before any of them is
+  evaluated. Restriction happens **between** layers, never **within** the commercial layer:
+  §6.7's **most restrictive** rule governs the commercial value against every independent
+  constraint, and rights, contractual limits, asset/channel policy and service availability
+  remain authoritative under the eleven checks. **No universal MIN, SUM, priority, winner or
+  most-restrictive-across-grants rule is introduced.** **No fourth grant-carried allowance
+  type exists.** Should one ever be approved, **it must carry its own explicit resolution
+  rule — it does not inherit MAX.**
 
 **What PD-049 Q1 does not decide.** It is a **structural** approval only. It does **not**
 approve the commercial sale of add-ons at launch **[OPEN — PD-049 Q2]**, any tier names or
@@ -1456,8 +1468,8 @@ product and appears in no launch feature set.**
 
 **This table says nothing about add-ons.** Whether add-ons are sold at launch is
 **[OPEN — PD-049 Q2]**, neither approved nor rejected by PD-007. Package names, contents,
-allowances and eligibility remain **[OPEN — PD-013]**; grant resolution rules remain
-**[OPEN — PD-099]**; additional VOD content types remain **[OPEN — PD-057]** — **no event
+allowances and eligibility remain **[OPEN — PD-013]**; grant resolution rules are
+**APPROVED — PD-099 CLOSED**; additional VOD content types remain **[OPEN — PD-057]** — **no event
 content model is inferred** merely because PPV was considered and declined.
 
 ---

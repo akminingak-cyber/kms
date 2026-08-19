@@ -1,9 +1,9 @@
 # DECISIONS.md — KMS TV Product Decision Register
 
 **Phase:** 1 — Product specification
-**Status:** OPEN — awaiting product owner decisions · **5 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095)** · **PD-049 Q1 APPROVED (structural half only)**
-**Version:** 1.14
-**Date:** 2026-08-18 (PD-099 Territory sub-decision APPROVED — current-territory grant participation)
+**Status:** OPEN — awaiting product owner decisions · **6 APPROVED (PD-004, PD-007, PD-008, PD-092, PD-095, PD-099)** · **PD-049 Q1 APPROVED (structural half only)**
+**Version:** 1.15
+**Date:** 2026-08-18 (PD-099 CLOSED — Dimension 7 resolved by existing rules; 7/7 dimensions approved)
 **Governing document:** `CLAUDE.md` (binding — §1 prohibits inventing facts)
 **Related registers:** `PROJECT_STATE.md` §7 (engineering decisions, `D-nnn`) ·
 `docs/legal/DECISION_LOG.md` (legal decisions, `L-nnn`)
@@ -47,7 +47,7 @@ approved, so the blocking and legal columns count **open** decisions only.
 
 **PD-049 is one decision with two halves.** Its structural half (Q1) is **APPROVED**; its
 commercial half (Q2) is **OPEN**. It is counted **once**, as one decision, and is **not**
-listed among the four fully-approved decisions below, because it is not fully decided. The
+listed among the six fully-approved decisions below, because it is not fully decided. The
 Q1/Q2 headings are `####` sub-entries under the single `### PD-049` heading, so no new
 decision ID was created for Q1 and no identifier was renumbered.
 
@@ -72,8 +72,7 @@ been made. The blocking and legal columns are therefore **unchanged at 22 and 24
 | 11. Platform and technical | 8 | 4 | 0 |
 | **Total (unique decisions)** | **99** | **22** | **24** |
 
-**Decided so far: 5 of 99 fully decided, plus the structural half of PD-049 and the
-concurrency dimension of PD-099.**
+**Decided so far: 6 of 99 fully decided, plus the structural half of PD-049.**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -82,8 +81,9 @@ concurrency dimension of PD-099.**
 | **PD-092** | Launch platform scope — **Option B. v1.0 ships Web + Android + Android TV; iOS/iPadOS, Samsung Tizen, LG webOS follow in v1.x** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-095** | Travelling-subscriber policy — **Option A. Subscription follows the subscriber; current territory, service availability, and content rights remain authoritative** | **APPROVED · FINAL** (2026-08-13) |
 | **PD-007** | Transactional / pay-per-view — **Option A. KMS TV will not sell individual titles or events separately at launch.** **Launch scope, not a permanent prohibition** — future PPV remains possible as a separately approved future commercial capability | **APPROVED** (2026-08-16) |
+| **PD-099** | Entitlement resolution across coexisting grants — **all seven dimensions decided.** Quality **MAX** · concurrency **MAX** · devices **MAX** · content **UNION** · territory **current-territory participation** · effective dates **`[start, end)`** · conflicting allowances **resolved by those rules, with no new universal rule created** | **APPROVED** (dimensions 2026-08-16/18; closed 2026-08-18) |
 
-**Partially decided — counted above as one open decision, not as a fifth approval:**
+**Partially decided — counted above as one open decision, not as a further approval:**
 
 | ID | Decision | Status |
 |---|---|---|
@@ -95,18 +95,43 @@ concurrency dimension of PD-099.**
 | **PD-099 · Quality** | Entitlement resolution, **quality dimension only** — **Q1: MAXIMUM ceiling across participating grants; Q2: only active grants that reach the requested asset participate. An inseparable pair.** Independent constraints — content rights, rights-agreement ceiling, asset policy — remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Concurrency** | Entitlement resolution, **concurrency dimension only** — **account-level pool; effective commercial concurrency = MAX(applicable grant allowances), NOT the sum.** Independent rights/service constraints remain authoritative | **APPROVED — one dimension of seven** (2026-08-16) |
 | **PD-099 · Territory** | Entitlement resolution, **territory dimension — now fully decided, rule and UX**. **Rule:** in a served territory, **only grants territorially eligible for the CURRENT territory participate**; an ineligible grant contributes to **none** of content UNION, quality MAX, concurrency MAX or device MAX. **The grant is not cancelled, the subscription is not terminated, the grant remains held**, and it participates again on return, subject to its effective dates. **UX:** the Case B no-workaround discipline, approved earlier, governs how the denial is presented | **APPROVED — one dimension of seven** (rule 2026-08-18; UX constraint 2026-08-16) |
-| **PD-099** — remaining one dimension | Conflicting allowances | **OPEN** — Phase 14 |
+| **PD-099 · Conflicting Allowances** | Entitlement resolution, **dimension 7 — RESOLVED BY EXISTING RULES.** The three grant-carried allowance types the specification confirms — quality, concurrency, devices — each already carry **MAX**; content remains **UNION**; territory and effective dates decide participation first; independent constraints stay authoritative. **No universal MIN, SUM, priority, winner, or most-restrictive-across-grants rule is introduced.** A **future** grant-carried allowance, should one ever be approved, **must carry its own explicit resolution rule** — it does not inherit MAX | **APPROVED — dimension 7 of seven; PD-099 CLOSED** (2026-08-18) |
 
 **Phase 3 (System architecture) has no remaining blocking decisions.** For **Phase 4**, the
 structural question is now **settled**: PD-049 Q1 is APPROVED, so the account→grant relation
 is known to be `0..N` rather than `1`. Phase 4 still requires **PD-035** (classification
 scheme). **PD-013** and **PD-049 Q2** are catalogue and commercial questions for Phase 12
-and no longer gate Phase 4; **PD-099** (entitlement resolution rules) gates **Phase 14**,
-not Phase 4, and Phase 4 must not encode any particular resolution rule.
+and no longer gate Phase 4; **PD-099** (entitlement resolution rules) is **APPROVED and
+CLOSED** — it gated **Phase 14**, never Phase 4, and Phase 14's resolution arithmetic is now
+fully specified. **Phase 14 still requires values** — PD-013, PD-038, PD-040 and PD-017 —
+which is a different dependency from a resolution rule.
 
 **TENANCY ≠ TERRITORY.** PD-008 (single-tenant) and PD-004 (multi-territory) are
 compatible and independent: one operator serving many territories is the approved model.
 See PD-008 for the comparison table.
+
+**Version 1.15 changes. PD-099 IS CLOSED — all seven dimensions approved.** **Dimension 7
+(conflicting allowances) is APPROVED as RESOLVED BY EXISTING RULES** (§2). For the **three**
+grant-carried allowance types the specification confirms — **quality, concurrency, devices**
+(§13.2, *"[CONFIRMED, values OPEN]"*) — the general rule the dimension asked for **already
+exists and is MAX**, decided separately by dimensions 1, 2 and 3. **Content entitlement
+remains UNION and is not an allowance-resolution rule.** **Territory and effective dates
+decide which grants participate before any dimension-specific rule is evaluated.**
+**Independent rights, contractual constraints, asset/channel policy and service availability
+remain authoritative**, evaluated independently under the existing eleven checks, with §6.7's
+already-decided cross-layer rule — *"the effective limit is the most restrictive applicable
+constraint — applied **between** the commercial allowance above and every independent
+constraint"* — governing the commercial-versus-independent comparison. **No new universal
+MIN, SUM, priority, winner or most-restrictive-across-commercial-grants rule is introduced**,
+and **no approved dimension is reopened or modified**. **FUTURE ALLOWANCE SCOPE — a
+completeness constraint, not a resolution rule:** **no fourth grant-carried allowance type
+exists in this specification, and none is created here.** *If* PD-013 or a later approved
+decision ever introduces one, **that allowance must carry its own explicit resolution rule
+before implementation — it does not inherit MAX.** Dimensions approved: **7 of 7**; **PD-099
+is APPROVED and CLOSED**. Fully-approved decisions **5 → 6**; decision count **unchanged at
+99**; blocking **unchanged at 22** and legal **unchanged at 24** (PD-099 carried neither
+flag); **no new decision ID**. **PD-013, PD-049 Q2, PD-056, PD-057, PD-038 and PD-040 are all
+unchanged and remain OPEN.**
 
 **Version 1.14 changes.** **PD-099 Territory sub-decision APPROVED — the rule, not only the
 UX constraint** (§2). When a subscriber is physically in a **served** territory, **only
@@ -853,7 +878,7 @@ happens to execute first.
 | 4 | ~~**Content entitlements**~~ | ✅ **APPROVED 2026-08-16 — UNION of the content included by the participating grants.** A second grant can never reduce the catalogue. See the sub-decision below. |
 | 5 | ~~**Territory eligibility**~~ | ✅ **APPROVED 2026-08-18 — in a served territory, only grants territorially eligible for the CURRENT territory participate.** An ineligible grant contributes to none of the four arithmetics; the grant is not cancelled and participates again on return. See the sub-decision below, and the Case B UX discipline approved 2026-08-16. |
 | 6 | ~~**Effective dates**~~ | ✅ **APPROVED 2026-08-16 — half-open `[start, end)`, future-grant exclusion, and dual boundary enforcement. One inseparable block.** See the sub-decision below. |
-| 7 | **Conflicting allowances** | The general rule when two grants supply different values for the same allowance. |
+| 7 | ~~**Conflicting allowances**~~ | ✅ **APPROVED 2026-08-18 — RESOLVED BY EXISTING RULES.** Each of the three confirmed grant-carried allowance types already carries **MAX** (dimensions 1–3); content remains **UNION**; territory and effective dates decide participation first; independent constraints stay authoritative. **No universal MIN, SUM, priority or winner rule is introduced.** See the sub-decision below. |
 
 **[UNVERIFIED]** No resolution rule — most-permissive, least-permissive, precedence by
 grant kind, or any other — is assumed, recommended, or implied anywhere in this
@@ -864,13 +889,124 @@ declines to choose these rules.
 the dimensions that remain open. The rules are behaviour, not structure; the ERD must
 permit them without presupposing them.
 
-**Status:** **OPEN — PARTIALLY DECIDED.** Dimensions **1 (quality)**, **2 (concurrency)**,
-**3 (device limits)**, **4 (content entitlement)**, **5 (territory eligibility)** and
-**6 (effective dates)** are **APPROVED**; **one dimension remains OPEN** —
-**7 (conflicting allowances)**. Dimension 5 is settled in two parts: the **rule**
-(2026-08-18) and the **Case B no-workaround UX discipline** (2026-08-16), both below.
-Arising from PD-049 Q1 · Required before **Phase 14**
-(entitlement engine) · Recorded as a requirement in `REQUIREMENTS.md` FR-PKG-08.
+**Status:** ✅ **APPROVED — CLOSED. All seven dimensions decided.** **1 (quality)**,
+**2 (concurrency)**, **3 (device limits)**, **4 (content entitlement)**,
+**5 (territory eligibility)**, **6 (effective dates)** and **7 (conflicting allowances)**.
+Dimension 5 is settled in two parts: the **rule** (2026-08-18) and the **Case B
+no-workaround UX discipline** (2026-08-16). Dimension 7 is **resolved by the other six plus
+the already-decided cross-layer rule**, creating no new commercial rule.
+Arising from PD-049 Q1 · Gated **Phase 14** (entitlement engine) · Recorded as a requirement
+in `REQUIREMENTS.md` FR-PKG-08. **Phase 14 still requires values — PD-013, PD-038, PD-040,
+PD-017 — which is a different dependency from a resolution rule.**
+
+---
+
+#### PD-099 · Conflicting Allowances sub-decision — **APPROVED** (resolved by existing rules)
+
+| Field | Value |
+|---|---|
+| **Decision ID** | **PD-099 · Conflicting Allowances** (sub-decision of PD-099 — **no new decision ID**) |
+| **Dimension** | **7 — Conflicting allowances** — the last |
+| **Status** | **APPROVED — RESOLVED BY EXISTING RULES.** **PD-099 is CLOSED** |
+| **Scope** | Records that no further rule is required. **Creates no new commercial resolution rule** |
+| **Approved by** | Product owner |
+| **Approved on** | 2026-08-18 |
+| **Supersedes** | The OPEN status of dimension 7, and with it the OPEN status of PD-099 |
+
+**The decision as approved.**
+
+> **Dimension 7 is resolved by the already-approved dimension-specific resolution rules.**
+>
+> For the **three** grant-carried allowance types the specification currently confirms:
+> **quality = MAX** · **concurrency = MAX** · **devices = MAX**.
+>
+> **Content entitlement remains UNION and is not an allowance-resolution rule.**
+>
+> **Territory** and **effective dates** determine **which grants participate**, before the
+> applicable dimension-specific rule is evaluated.
+>
+> **Independent rights, contractual constraints, asset/channel policy and service
+> availability remain authoritative** and are evaluated independently under the existing
+> **eleven-check** authorization model.
+>
+> **No new universal MIN, SUM, priority, winner or "most restrictive across commercial
+> grants" rule is introduced.**
+
+**Why no further rule was required.** Dimension 7 was written as the **catch-all** for a set
+of dimensions of which, at the time, *"none … is decided here"*. The specific rules now cover
+the space exhaustively, and there is no fourth kind of disagreement left for a general rule
+to settle:
+
+| Kind of disagreement between grants | Resolved by |
+|---|---|
+| Different **values** for the three confirmed allowances | Dimensions **1, 2, 3** — MAX |
+| Different **content sets** | Dimension **4** — UNION |
+| Whether a grant counts at all — **territorially** | Dimension **5** |
+| Whether a grant counts at all — **temporally** | Dimension **6** |
+| Commercial value versus **rights / service / technical** limits | §6.7 + §13.4 + the eleven checks |
+
+**The allowance inventory is closed at three.** `PRODUCT_SPEC.md` §13.2 enumerates package
+contents as *"Channels, VOD collections, and feature entitlements (**quality ceiling,
+concurrency, device allowance**)"* — **`[CONFIRMED, values OPEN]`**. The list is confirmed;
+only the values are open. Profile limits are **per account** (§5.3), catch-up windows are
+*"per channel and per rights agreement"* (§17), maturity limits are a **profile** attribute,
+and distribution modes are a **rights** matter (§15.3, L-002) — **none is a grant-carried
+allowance**, so none can conflict between grants.
+
+**The cross-layer rule was already decided and is unchanged.** §6.7: *"The effective limit is
+the **most restrictive** applicable constraint — applied **between** the commercial allowance
+above and every independent constraint."* Restriction happens **between** layers, never
+**within** the commercial layer. This is why a most-restrictive-across-grants rule would have
+been a regression rather than an addition: it would contradict dimensions 1, 2 and 3 —
+allowances of 2, 1 and 4 would yield **1** instead of the approved **4** — and defeat
+PD-049 Q1.
+
+**Why not priority or a winner rule.** It would require a **total order over grants that the
+specification does not supply** — the same ground on which priority was rejected for content
+reach. §13.5 distinguishes tier, add-on and package without ranking them.
+
+> **FUTURE ALLOWANCE SCOPE — a completeness constraint, not a resolution rule.**
+>
+> **No fourth grant-carried allowance type exists in this specification, and this decision
+> creates none.**
+>
+> **Do NOT assume that a future fourth grant-carried allowance automatically inherits MAX.**
+> *If* PD-013 or a later approved product decision ever introduces another grant-carried
+> allowance type, **that allowance MUST carry its own explicit resolution rule before
+> implementation.**
+
+MAX is the approved function for the three confirmed allowances, each of which is
+**positive and totally ordered**. It is not self-evidently correct for an allowance that is
+boolean, unordered, or one where more is not better. Declaring *"MAX for all allowances,
+forever"* would assert a rule for allowance types that do not exist — the fabrication
+`CLAUDE.md` §1 prohibits, and the same discipline that made *"no resolution rule … is
+assumed"* the right posture when PD-099 was opened.
+
+**Rights safety.** This decision adds no rule, so nothing new can breach anything. The
+existing resolution **cannot** create a content right, expand a rights agreement, bypass
+territory rights, bypass service availability, bypass asset/channel policy, bypass
+distribution-mode rights, or weaken any of the eleven checks. **Commercial entitlement MUST
+NEVER create or expand a content right**, and **no twelfth check** is added.
+
+**Audit.** **D-030 as amended** already requires evidence *"capable of identifying the
+contributing grant set"*, which covers the MAX case directly — for `MAX(X, Y)` the
+contributing set is what must be reconstructible. **K-010** and **K-011** remain the recorded
+**non-blocking** audit gaps and are **unchanged**. **Observed, not fixed, and no decision ID
+created:** K-010's four enumerated values are **quality-scoped**, so the concurrency and
+device equivalents of *"which grant supplied the binding value"* are not separately
+enumerated. Item (1), participating grants, covers the grant set for all three, so the gap is
+narrow; it arises from the approved MAX rules rather than from this decision.
+
+**Not invented by this decision:** any fourth allowance · any allowance **value**
+(**[OPEN — PD-013, PD-038, PD-040, PD-017]**) · any grant ranking · any package name ·
+any mode-scoped commercial grant.
+
+**Not modified:** **PD-013** · **PD-049 Q2** · **PD-056** · **PD-057** · **PD-038** ·
+**PD-040** · PD-004 · PD-007 · PD-008 · PD-092 · PD-095 · PD-049 Q1 · and **all six
+previously approved PD-099 dimensions**, which are unchanged byte-for-byte.
+
+**Recorded in:** `PROJECT_STATE.md` §7 D-039 · `PRODUCT_SPEC.md` §12.1, §13.4 ·
+`REQUIREMENTS.md` FR-PKG-08.
 
 ---
 
@@ -2089,7 +2225,7 @@ practical output of this register.
 | **Phase 4** (Database) — added | ~~PD-095~~ **APPROVED — subscription follows the subscriber; current territory authoritative at authorization** |
 | **Phase 19** (Web TV) — added | **PD-094** (app distribution scope) |
 | **Phase 4** (Database) | PD-035 (rating scheme) · ~~PD-049 structural~~ **Q1 APPROVED — account→grant is `0..N`** · PD-013 and PD-049 Q2 are **catalogue/commercial, Phase 12** and no longer gate Phase 4 |
-| **Phase 14** (Entitlement engine) — added | **PD-099** (deterministic resolution rules across coexisting grants). **Phase 4 must not encode any particular rule** |
+| **Phase 14** (Entitlement engine) — added | ~~**PD-099**~~ **APPROVED and CLOSED 2026-08-18 — all seven dimensions decided.** The resolution arithmetic is fully specified. **Phase 14 still requires values: PD-013, PD-038, PD-040, PD-017** |
 | **Phase 6** (Security & threat model) | PD-081 (privacy regimes), PD-026 (revocation interval) |
 | **Phase 7** (Backend foundation) | D-007, D-008, D-010 |
 | **Phase 8** (Authentication) | PD-020, PD-025, PD-027, PD-028, PD-029 |
